@@ -13,5 +13,7 @@ enum BlockType {
 public class Block {
     BlockType blockType;
 
-    public
+    public Block(BlockType b) {
+        blockType = b;
+    }
 }
