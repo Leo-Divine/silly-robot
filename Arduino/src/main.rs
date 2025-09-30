@@ -1,19 +1,13 @@
 #![no_std]
 #![no_main]
 
-extern crate alloc;
+//extern crate alloc;
 
 use arduino_hal:: {Peripherals, Pins};
 use panic_halt as _;
 //use crate::block::{Command, Action, Block, BlockType};
-#[cfg(not(target_env = "msvc"))]
-use tikv_jemallocator::Jemalloc;
 
-#[cfg(not(target_env = "msvc"))]
-#[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
-
-mod block;
+//mod block;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -56,7 +50,7 @@ fn main() -> ! {
         }
         */
 
-        light.toggle();
+        light.set_high();
         arduino_hal::delay_ms(1000);
     }
 }

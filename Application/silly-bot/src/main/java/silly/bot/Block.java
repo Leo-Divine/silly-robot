@@ -1,30 +1,38 @@
 package silly.bot;
 
+import javafx.scene.image.Image;
+import java.net.URL;
+
 enum BlockType {
     Wait(""),
-    SetSpeed(""),
+    SetSpeed("/temp.png"),
     Move(""),
     RotateLeft(""),
     RotateRight(""),
     SetLeftColor(""),
     SetRightColor("");
 
-    public final String image;
+    public final String imagePath;
 
-    private BlockType(String image) {
-        this.image = image;
+    private BlockType(String imagePath) {
+        this.imagePath = imagePath;
     }
 }
 
 public class Block {
     private int id;
-    private BlockType blockType;
-    private int aboveBlock;
-    private int belowBlock;
-    private double xPos = 0.0;
-    private double yPos = 0.0;
+    BlockType blockType;
+    int aboveBlock;
+    int belowBlock;
+    double xPos = 0.0;
+    double yPos = 0.0;
     
-    public Block(BlockType b) {
+    public Block(int id, BlockType b) {
+        this.id = id;
         blockType = b;
+    }
+
+    public int getId() {
+        return id;
     }
 }
