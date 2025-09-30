@@ -18,11 +18,3 @@
 008 - Wait(Seconds);
 009 - Loop(CodeLineCount, LoopTimes);
 
-## Color Documentation:
-0 - Red
-1 - Orange
-2 - Yellow
-3 - Green
-4 - Blue
-5 - Purple
-6 - White
