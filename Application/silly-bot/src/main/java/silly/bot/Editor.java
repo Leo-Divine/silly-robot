@@ -19,7 +19,7 @@ public class Editor extends Canvas {
         ));
     }
 
-    public void drawBackground() {
+    public void drawBackground(GraphicsContext gc, double height, double width) {
         /*
          * Everything drawn on the canvas is done with gc. To draw there is fill and stroke. 
          * Stroke is drawing only the border, and fill is drawing the border and inside.
@@ -28,7 +28,9 @@ public class Editor extends Canvas {
          * All methods can be found here: https://docs.oracle.com/javase/8/javafx/api/javafx/scene/canvas/GraphicsContext.html
          * Make the background how you think it should look, I can give pointers.
          */
-    }
+        gc.setFill(javafx.scene.paint.Color.SKYBLUE); // chooses color
+        gc.fillRect(0,0, height, width); // makes a rectangle
+        }
 
 
     public void drawBlocks() {
