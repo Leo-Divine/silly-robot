@@ -6,4 +6,4 @@ rustflags = ["-C", "target-cpu=atmega2560"]
 runner = "ravedude"
 
 [unstable]
-build-std = ["core", "alloc"]
+build-std = ["core"]

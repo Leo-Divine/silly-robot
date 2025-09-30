@@ -13,7 +13,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         Pane root = new Pane();
         
-        canvas.test();
+        canvas.drawBlocks();
         root.getChildren().add(canvas);
 
         stage.setTitle("silly-bot-ide");
