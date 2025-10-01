@@ -19,7 +19,7 @@ public class Editor extends Canvas {
         ));
     }
 
-    public void drawBackground(GraphicsContext gc, double height, double width) {
+    public void drawBackground(double height, double width) {
         /*
          * Everything drawn on the canvas is done with gc. To draw there is fill and stroke. 
          * Stroke is drawing only the border, and fill is drawing the border and inside.

@@ -21,7 +21,7 @@ fn main() -> ! {
     loop {
         match get_ultrasonic_sensor_value(&mut trig, &echo, &mut ultrasensor_timer) {
             Some(value) => sensor_value = value,
-            None => sensor_value = 0,
+            None => sensor_value = 1000,
         };
 
         if sensor_value < 15 {
