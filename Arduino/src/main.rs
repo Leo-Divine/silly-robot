@@ -18,24 +18,32 @@ fn main() -> ! {
     let dp: Peripherals = arduino_hal::Peripherals::take().unwrap();
     let pins: Pins = arduino_hal::pins!(dp);
 
-    // set up serial interface for text output
-    let mut serial = arduino_hal::default_serial!(dp, pins, 57600);
+    // Ultrasensor Variables
+    let mut trig = pins.d25.into_output();
+    let echo = pins.d26; // pin is input by default
+    let mut ultrasensor_timer: arduino_hal::pac::TC1 = dp.TC1;
+    ultrasensor_timer.tccr1b.write(|w| w.cs1().prescale_64());
+    let mut sensor_value: u16;
+    
     let mut light = pins.a0.into_output().downgrade();
 
-    if get_block("
+    let command: &str = "
       <Equal>
         <GetSensorValue/>
         <Number>
           40
         </Number>
       </Equal>
-    ")[0] == 1 {
-      light.set_high();
-    } else {
-      light.set_low();
-    }
+    ";
 
-    loop { }
+    loop { 
+      if get_block(command)[0] == 1 {
+        light.set_high();
+      } else {
+        light.set_low();
+      }
+      arduino_hal::delay_ms(100);
+    }
 }
 
 fn get_block(block: &str) -> [u8; 3] {
@@ -131,7 +139,7 @@ fn run_block(block: Block) -> [u8; 3] {
       return [block.params[0], 0, 0];
     },
     BlockType::Equal => {
-      return[(block.params[0] == block.params[1]) as u8, 0, 0];
+      return[(block.params[0] >= block.params[1]) as u8, 0, 0];
     },
     }
   return [0, 0, 0];
