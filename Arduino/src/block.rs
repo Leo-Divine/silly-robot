@@ -1,53 +1,40 @@
-use alloc::{boxed::Box, vec::Vec};
-
 #[derive(PartialEq, Eq)]
-pub enum Action {
-  START,
-  STOP
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum BlockType {
   Wait,
   SetSpeed,
-  Move,
   RotateLeft,
   RotateRight,
   SetLeftColor,
-  SetRightColor
+  SetRightColor,
+  GetSensorDistance,
+  Number,
+  Equal,
 }
 
-#[derive(Clone, Copy)]
+impl BlockType {
+  pub fn from_string(string: &str) -> Option<Self> {
+    match string {
+      "Wait" => return Some(BlockType::Wait),
+      "SetSpeed" => return Some(BlockType::SetSpeed),
+      "RotateLeft" => return Some(BlockType::RotateLeft),
+      "RotateRight" => return Some(BlockType::RotateRight),
+      "SetLeftColor" => return Some(BlockType::SetLeftColor),
+      "SetRightColor" => return Some(BlockType::SetRightColor),
+      "GetSensorValue" => return Some(BlockType::GetSensorDistance),
+      "Number" => return Some(BlockType::Number),
+      "Equal" => return Some(BlockType::Equal),
+      _ => None,
+    }
+  }
+}
+
 pub struct Block {
-  block: BlockType,
-  params: [u8; 3]
+  pub block: BlockType,
+  pub params: [u8; 3]
 }
 
 impl Block {
   pub fn new(block: BlockType, params: [u8; 3]) -> Self {
     Self { block, params }
-  }
-
-  pub fn run_block(&mut self) {
-    match self.block {
-        BlockType::Wait => todo!(),
-        BlockType::SetSpeed => todo!(),
-        BlockType::Move => todo!(),
-        BlockType::RotateLeft => todo!(),
-        BlockType::RotateRight => todo!(),
-        BlockType::SetLeftColor => todo!(),
-        BlockType::SetRightColor => todo!(),
-    }
-  }
-}
-
-pub struct Command<'a> {
-  pub action: Action,
-  pub blocks: &'a mut [Block]
-}
-
-impl<'a> Command<'a> {
-  pub fn new(action: Action, blocks: &'a mut [Block]) -> Self {
-    Self { action, blocks }
   }
 }
