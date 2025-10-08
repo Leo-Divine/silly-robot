@@ -1,8 +1,0 @@
-[package]
-name = "silly-bot-temp"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-no_std_strings = "0.1.3"
-panic-halt = "1.0.0"
