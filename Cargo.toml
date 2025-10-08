@@ -1,5 +1,10 @@
 [package]
 name = "silly-bot"
+authors = [
+    "Austin Isidoro-Rossini",
+    "Clover Bruce-Paul Johnson <callmeclover@clovr.rocks>",
+    "Ariana Silva",
+]
 version = "0.1.0"
 edition = "2024"
 
@@ -11,15 +16,14 @@ bench = false
 [dependencies]
 embedded-hal = "1.0.0"
 nb = "1.1.0"
-no_std_strings = "0.1.3"
 panic-halt = "1.0.0"
 ufmt = "0.2.0"
 
 [dependencies.arduino-hal]
 git = "https://github.com/rahix/avr-hal"
-features = ["arduino-mega2560"]
+features = ["arduino-uno"]
 
-# Configure the build for minimal size - AVRs have very little program memory
+# Configure all builds for minimal size with `opt-level = "s"`
 [profile.dev]
 panic = "abort"
 lto = true
@@ -31,7 +35,3 @@ codegen-units = 1
 debug = true
 lto = true
 opt-level = "s"
-embedded-hal = "1.0.0"
-nb = "1.1.0"
-panic-halt = "1.0.0"
-ufmt = "0.2.0"

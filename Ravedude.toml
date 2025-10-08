@@ -1,5 +1,5 @@
 [general]
-board = "mega2560"
+board = "uno"
 serial-baudrate = 57600
 open-console = true
 
