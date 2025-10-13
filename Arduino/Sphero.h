@@ -10,11 +10,17 @@ class Sphero {
   public:
     Sphero();
     void initialize();
-    void moveForward(int speed);
+    void moveForward(uint8_t speed, uint8_t length);
+    void rotateRight();
+    void rotateLeft();
+    void setRightColor(uint8_t red, uint8_t green, uint8_t blue);
+    void setLeftColor(uint8_t red, uint8_t green, uint8_t blue);
     void getSensorData();
 
   private:
-    int sensorDistance;
+    uint8_t sensorDistance;
+    uint32_t ledGroup;
+    uint8_t LEDColors[6];
 };
 
 #endif

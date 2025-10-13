@@ -2,8 +2,9 @@
 #define READER_H
 
 #include <string.h>
+#include "ArduinoJson.h"
+#include "Sphero.h"
 
-void runCode(char serializedCode[]);
-void parseCode();
+int runCode(Sphero sphero, char* serializedCode);
 
 #endif

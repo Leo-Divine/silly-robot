@@ -6,10 +6,9 @@ import java.net.URL;
 enum BlockType {
     Wait(""),
     SetSpeed("/temp.png"),
-    Move(""),
-    RotateLeft(""),
-    RotateRight(""),
-    SetLeftColor(""),
+    RotateLeft("/temp2.jpeg"),
+    RotateRight("/temp3.jpeg"),
+    SetLeftColor("/temp4.jpeg"),
     SetRightColor("");
 
     public final String imagePath;
