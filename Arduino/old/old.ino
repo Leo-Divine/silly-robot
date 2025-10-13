@@ -15,11 +15,12 @@ const uint8_t PURPLE[] = {0x76, 0x00, 0xBC};
 const uint8_t WHITE[] = {0xFF, 0xFF, 0xFF};
 uint8_t LEDColors[] = {0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF};
 
-char command[] = "0002001000000000000255000000";
+char command[] = "0001001255000000";
 uint8_t lineCount;
 bool isProgramRunning = true;
 
 void setup() {
+    Serial.begin(9600);
     rvr.configUART(&Serial);
     ledGroup = 0;
     
@@ -121,6 +122,10 @@ void setRightColor(uint8_t chosenColor[]) {
   LEDColors[3] = chosenColor[0];
   LEDColors[4] = chosenColor[1];
   LEDColors[5] = chosenColor[2];
+
+  Serial.println(ledGroup);
+  Serial.println(LEDColors[0]);
+  Serial.println(sizeof(LEDColors) / sizeof(LEDColors[0]));
 
   rvr.setAllLeds(ledGroup, LEDColors, sizeof(LEDColors) / sizeof(LEDColors[0]));
 }

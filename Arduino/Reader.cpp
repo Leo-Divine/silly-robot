@@ -7,7 +7,6 @@ int runCode(Sphero sphero, char serializedCode[]) {
 
   DeserializationError error = deserializeJson(blocks, serializedCode);
   if (error) {
-    Serial.println(error.c_str());
     return 1;
   }
   
@@ -20,10 +19,8 @@ int runCode(Sphero sphero, char serializedCode[]) {
       sphero.rotateLeft();
     } else if (block["block"] == "RotateRight") {
       sphero.rotateRight();
-    } else if (block["block"] == "SetRightColor") {
-      sphero.setRightColor(block["parameters"][0], block["parameters"][1], block["parameters"][2]);
-    } else if (block["block"] == "SetLeftColor") {
-      sphero.setLeftColor(block["parameters"][0], block["parameters"][1], block["parameters"][2]);
+    } else if (block["block"] == "SetColor") {
+      sphero.setColor(block["parameters"][0]);
     }
   }
   
