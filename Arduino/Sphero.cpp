@@ -10,7 +10,6 @@ void Sphero::initialize() {
 }
 
 void Sphero::moveForward(uint8_t speed, uint8_t length) {
-  Serial.println("test");
   rvr.rawMotors(RawMotorModes::forward, speed, RawMotorModes::forward, speed);
   delay(1000 * length);
   rvr.rawMotors(RawMotorModes::forward, 0, RawMotorModes::forward, 0);
