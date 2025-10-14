@@ -2,11 +2,15 @@ package silly.bot;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 import java.util.Vector;
+
+enum MouseState {
+    Default,
+    Dragging
+}
 
 public class Editor extends Canvas {
     final private int MENU_NAVIGATOR_BUTTON_SIZE = 25;
@@ -14,13 +18,14 @@ public class Editor extends Canvas {
     private GraphicsContext gc = getGraphicsContext2D();
     private Vector<Block> blocks = new Vector<Block>();
     private int blockMenuScroll = 0;
+    private int currentDraggingBlock = 0;
 
     public Editor(int i, int j) {
         super(i, j);
-        blocks.add(new Block(
-            0,
-            BlockType.SetSpeed
-        ));
+    }
+
+    public void clearCanvas() {
+        gc.clearRect(0, 0, 800, 800);
     }
 
     public void drawBackground() {
@@ -53,33 +58,72 @@ public class Editor extends Canvas {
         gc.setFill(Color.BLACK);
         gc.fillText("Movement", 100, 50 + blockMenuScroll);
 
-        Image setSpeedImage = new Image(getClass().getResource(BlockType.SetSpeed.imagePath).toExternalForm());
-        gc.drawImage(setSpeedImage, 100, 75 + blockMenuScroll, 100, 50);
+        gc.drawImage(BlockType.SetSpeed.image, 100, 75 - blockMenuScroll, 100, 50);
 
-        Image rotateLeftImage = new Image(getClass().getResource(BlockType.RotateLeft.imagePath).toExternalForm());
-        gc.drawImage(rotateLeftImage, 100, 150 + blockMenuScroll, 100, 50);
+        gc.drawImage(BlockType.RotateLeft.image, 100, 150 - blockMenuScroll, 100, 50);
 
-        Image rotateRightImage = new Image(getClass().getResource(BlockType.RotateRight.imagePath).toExternalForm());
-        gc.drawImage(rotateRightImage, 100, 225 + blockMenuScroll, 100, 50);
+        gc.drawImage(BlockType.RotateRight.image, 100, 225 - blockMenuScroll, 100, 50);
 
-        gc.fillText("Display", 100, 325 + blockMenuScroll);
+        gc.fillText("Display", 100, 325 - blockMenuScroll);
 
-        Image setLeftColorImage = new Image(getClass().getResource(BlockType.SetLeftColor.imagePath).toExternalForm());
-        gc.drawImage(setLeftColorImage, 100, 350 + blockMenuScroll, 100, 50);
+        gc.drawImage(BlockType.SetColor.image, 100, 350 - blockMenuScroll, 100, 50);
     }
 
     public void drawBlocks() {
         for(Block block : blocks) {
-            Image blockImage = new Image(getClass().getResource(block.blockType.imagePath).toExternalForm());
-            gc.drawImage(blockImage, block.xPos, block.yPos, 100, 50);
+            gc.drawImage(block.blockType.image, block.xPos + 325, block.yPos, 100, 50);
         }
     }
 
     public void mousePressed(double eventXPos, double eventYPos) {
-        
+        for(Block block : blocks) {
+            if(!block.isMouseOnBlock(eventXPos, eventYPos)) { continue; }
+            block.isDragging = true;
+            block.mouseOffsetX = eventXPos - 325 - block.xPos;
+            block.mouseOffsetY = eventYPos - block.yPos;
+            currentDraggingBlock = block.getId();
+            break;
+        }
+
+        //Check if a Menu Block was Selected
+        if(eventXPos >= 100 && 
+        eventXPos <= 200 &&
+        eventYPos >= 75 - blockMenuScroll &&
+        eventYPos <= 75 - blockMenuScroll + 50) {
+            Block block = new Block(
+                BlockType.SetSpeed,
+                100,
+                75 - blockMenuScroll
+            );
+            block.isDragging = true;
+            block.mouseOffsetX = eventXPos - 325 - block.xPos;
+            block.mouseOffsetY = eventYPos - block.yPos;
+            currentDraggingBlock = block.getId();
+
+            blocks.add(block);
+
+            return;
+        }
     }
 
     public void mouseReleased(double eventXPos, double eventYPos) {
-        
+        if(currentDraggingBlock == 0) { return; }
+
+        // Get block
+        Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
+        block.isDragging = false;
+        block.mouseOffsetX = 0;
+        block.mouseOffsetY = 0;
+        currentDraggingBlock = 0;
+    }
+
+    public void mouseMoved(double eventXPos, double eventYPos) {
+        if(currentDraggingBlock == 0) { return; }
+
+        // Get block
+        Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
+
+        block.xPos = eventXPos - 325 - block.mouseOffsetX;
+        block.yPos = eventYPos - block.mouseOffsetY;
     }
 }
