@@ -4,15 +4,17 @@ import javafx.scene.image.Image;
 
 enum BlockType {
     //Wait(""),
-    SetSpeed(new Image(Editor.class.getResource("/temp.png").toExternalForm())),
-    RotateLeft(new Image(Editor.class.getResource("/temp2.jpeg").toExternalForm())),
-    RotateRight(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm())),
-    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()));
+    SetSpeed(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 75),
+    RotateLeft(new Image(Editor.class.getResource("/temp2.jpeg").toExternalForm()), 150),
+    RotateRight(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 225),
+    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()), 350);
 
     public final Image image;
+    public final int menuPositionY;
 
-    private BlockType(Image image) {
+    private BlockType(Image image, int posY) {
         this.image = image;
+        this.menuPositionY = posY;
     }
 }
 
@@ -20,8 +22,8 @@ public class Block {
     static int nextBlockId = 1;
     private int id;
     BlockType blockType;
-    int aboveBlock;
-    int belowBlock;
+    int aboveBlock = 0;
+    int belowBlock = 0;
     double xPos = 0.0;
     double yPos = 0.0;
     boolean isDragging = false;

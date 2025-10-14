@@ -86,44 +86,88 @@ public class Editor extends Canvas {
         }
 
         //Check if a Menu Block was Selected
-        if(eventXPos >= 100 && 
-        eventXPos <= 200 &&
-        eventYPos >= 75 - blockMenuScroll &&
-        eventYPos <= 75 - blockMenuScroll + 50) {
-            Block block = new Block(
-                BlockType.SetSpeed,
-                100,
-                75 - blockMenuScroll
-            );
-            block.isDragging = true;
-            block.mouseOffsetX = eventXPos - 325 - block.xPos;
-            block.mouseOffsetY = eventYPos - block.yPos;
-            currentDraggingBlock = block.getId();
+        for(BlockType blockType : BlockType.values()) {
+            if(eventXPos >= 100 && 
+            eventXPos <= 200 &&
+            eventYPos >= blockType.menuPositionY - blockMenuScroll &&
+            eventYPos <= blockType.menuPositionY - blockMenuScroll + 50) {
+                Block block = new Block(
+                    blockType,
+                    100,
+                    blockType.menuPositionY - blockMenuScroll
+                );
+                block.isDragging = true;
+                block.mouseOffsetX = eventXPos - 325 - block.xPos;
+                block.mouseOffsetY = eventYPos - block.yPos;
+                currentDraggingBlock = block.getId();
 
-            blocks.add(block);
+                blocks.add(block);
 
-            return;
+                return;
+            }
         }
     }
 
     public void mouseReleased(double eventXPos, double eventYPos) {
         if(currentDraggingBlock == 0) { return; }
 
-        // Get block
+        // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
         block.isDragging = false;
         block.mouseOffsetX = 0;
         block.mouseOffsetY = 0;
         currentDraggingBlock = 0;
+
+        //Remove Previous Connection
+        if(block.aboveBlock != 0) {
+            Block aboveBlock = (Block) blocks.stream().filter(s -> s.getId() == block.aboveBlock).toArray()[0];
+            aboveBlock.belowBlock = 0;
+            block.aboveBlock = 0;
+        }
+
+        // Check if Block Can Connect to Another Block
+        for(Block surroundingBlock : blocks) {
+            if(surroundingBlock.getId() == block.getId()) { continue; }
+
+            // Check if Block is Close Enough
+            if(Math.abs(surroundingBlock.xPos - block.xPos) <= 15 &&
+               Math.abs(surroundingBlock.yPos + 50 - block.yPos) <= 40)  {
+                block.aboveBlock = surroundingBlock.getId();
+                surroundingBlock.belowBlock = block.getId();
+
+                block.xPos = surroundingBlock.xPos;
+                block.yPos = surroundingBlock.yPos + 50;
+
+                if(block.belowBlock == 0) { break; }
+                moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+                break;
+            }
+        }
+        System.out.println(block.aboveBlock);
     }
 
     public void mouseMoved(double eventXPos, double eventYPos) {
         if(currentDraggingBlock == 0) { return; }
 
-        // Get block
+        // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
 
         block.xPos = eventXPos - 325 - block.mouseOffsetX;
         block.yPos = eventYPos - block.mouseOffsetY;
+
+        if(block.belowBlock == 0) { return; }
+        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+    }
+
+    private void moveConnectedBlock(int blockId, double xPos, double yPos) {
+        // Get Block
+        Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
+
+        // Move Block
+        block.xPos = xPos;
+        block.yPos = yPos + 50;
+
+        if(block.belowBlock == 0) { return; }
+        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
     }
 }

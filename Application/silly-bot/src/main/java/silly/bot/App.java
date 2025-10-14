@@ -13,7 +13,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         Pane root = new Pane();
-        
+
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long arg0) {
@@ -39,7 +39,6 @@ public class App extends Application {
         stage.getScene().setOnMouseReleased(event -> {
             canvas.mouseReleased(event.getSceneX(), event.getSceneY());
         });
-        
 
         stage.show();
     }
