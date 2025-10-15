@@ -3,11 +3,18 @@ package silly.bot;
 import javafx.scene.image.Image; 
 
 enum BlockType {
-    //Wait(""),
-    SetSpeed(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 75),
+    MoveForward(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 75),
     RotateLeft(new Image(Editor.class.getResource("/temp2.jpeg").toExternalForm()), 150),
     RotateRight(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 225),
-    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()), 350);
+    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()), 350),
+    GetSensorValue(new Image(Editor.class.getResource("/temp5.jpg").toExternalForm()), 475),
+    Wait(new Image(Editor.class.getResource("/temp6.jpg").toExternalForm()), 600),
+    If(new Image(Editor.class.getResource("/temp7.jpg").toExternalForm()), 675),
+    Loop(new Image(Editor.class.getResource("/temp8.jpg").toExternalForm()), 750),
+    Equal(new Image(Editor.class.getResource("/temp9.jpg").toExternalForm()), 875),
+    Less(new Image(Editor.class.getResource("/temp10.jpg").toExternalForm()), 950),
+    Greater(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 1025),
+    Start(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 0);
 
     public final Image image;
     public final int menuPositionY;

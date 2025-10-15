@@ -15,4 +15,4 @@
 008 - Less
 009 - Greater
 
-10 - SensorValue
+010 - SensorValue

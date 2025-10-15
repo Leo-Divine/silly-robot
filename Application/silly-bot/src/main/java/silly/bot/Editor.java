@@ -17,11 +17,12 @@ public class Editor extends Canvas {
 
     private GraphicsContext gc = getGraphicsContext2D();
     private Vector<Block> blocks = new Vector<Block>();
-    private int blockMenuScroll = 0;
+    private double blockMenuScroll = 0;
     private int currentDraggingBlock = 0;
 
     public Editor(int i, int j) {
         super(i, j);
+        blocks.add(new Block(BlockType.Start, 425, 25));
     }
 
     public void clearCanvas() {
@@ -54,19 +55,22 @@ public class Editor extends Canvas {
         gc.setFill(Color.rgb(153, 102, 255));
         gc.fillOval(25, 175, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        // Draw Blocks and Text
+        gc.setFill(Color.rgb(255, 171, 25));
+        gc.fillOval(25, 225, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
+
+        // Draw Text
         gc.setFill(Color.BLACK);
-        gc.fillText("Movement", 100, 50 + blockMenuScroll);
-
-        gc.drawImage(BlockType.SetSpeed.image, 100, 75 - blockMenuScroll, 100, 50);
-
-        gc.drawImage(BlockType.RotateLeft.image, 100, 150 - blockMenuScroll, 100, 50);
-
-        gc.drawImage(BlockType.RotateRight.image, 100, 225 - blockMenuScroll, 100, 50);
-
+        gc.fillText("Movement", 100, 50 - blockMenuScroll);
         gc.fillText("Display", 100, 325 - blockMenuScroll);
+        gc.fillText("Sensors", 100, 450 - blockMenuScroll);
+        gc.fillText("Control", 100, 575 - blockMenuScroll);
+        gc.fillText("Operands", 100, 850 - blockMenuScroll);
 
-        gc.drawImage(BlockType.SetColor.image, 100, 350 - blockMenuScroll, 100, 50);
+        //Draw Blocks
+        for(BlockType blockType : BlockType.values()) {
+            if(blockType == BlockType.Start) { continue; }
+            gc.drawImage(blockType.image, 100, blockType.menuPositionY - blockMenuScroll, 100, 50);
+        }
     }
 
     public void drawBlocks() {
@@ -77,6 +81,7 @@ public class Editor extends Canvas {
 
     public void mousePressed(double eventXPos, double eventYPos) {
         for(Block block : blocks) {
+            if(block.blockType == BlockType.Start) { continue; }
             if(!block.isMouseOnBlock(eventXPos, eventYPos)) { continue; }
             block.isDragging = true;
             block.mouseOffsetX = eventXPos - 325 - block.xPos;
@@ -169,5 +174,15 @@ public class Editor extends Canvas {
 
         if(block.belowBlock == 0) { return; }
         moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+    }
+
+    public void mouseClicked(double eventXPos, double eventYPos) {
+        //TODO Check if circle was clicked.
+    }
+
+    public void mouseScroll(double eventXPos, double scrollAmount) {
+        if(eventXPos > 75 && eventXPos < 325) {
+            blockMenuScroll = Math.max(0, Math.min(300, blockMenuScroll - scrollAmount));
+        }
     }
 }

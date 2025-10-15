@@ -30,6 +30,7 @@ public class App extends Application {
         stage.setTitle("silly-bot-ide");
         stage.setScene(new Scene(root, 1200, 800));
 
+        // Handle all Events
         stage.getScene().setOnMouseDragged(event -> {
             canvas.mouseMoved(event.getSceneX(), event.getSceneY());
         });
@@ -38,6 +39,12 @@ public class App extends Application {
         });
         stage.getScene().setOnMouseReleased(event -> {
             canvas.mouseReleased(event.getSceneX(), event.getSceneY());
+        });
+        stage.getScene().setOnMouseClicked(event -> {
+            canvas.mouseClicked(event.getSceneX(), event.getSceneY());
+        });
+        root.setOnScroll(event -> {
+            canvas.mouseScroll(event.getSceneX(), event.getDeltaY());
         });
 
         stage.show();
