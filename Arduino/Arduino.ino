@@ -5,7 +5,7 @@ Sphero sphero;
 
 char* test = R"([
   {"block": "If", parameters: [
-    {"block": "Equal", parameters: [4, 3, 0]}, 
+    {"block": "Equal", parameters: [4, 4, 0]}, 
     [
       {"block": "SetColor", parameters: [3, 0, 0]}
     ], 
@@ -23,7 +23,7 @@ void setup() {
 
 void loop() {
   runCode(sphero, test);
-  delay(1000);
+  delay(2000);
 }
 
 /* 
@@ -32,3 +32,16 @@ void loop() {
     {"block": "Wait", parameters: [2, 0, 0]},
     {"block": "SetColor", parameters: [3, 0, 0]},
     {"block": "Wait", parameters: [2, 0, 0]}*/
+
+    /*
+    {"block": "If", parameters: [
+    {"block": "Equal", parameters: [4, 3, 0]}, 
+    [
+      {"block": "SetColor", parameters: [3, 0, 0]}
+    ], 
+    [
+      {"block": "SetColor", parameters: [0, 0, 0]}
+    ]
+  ]},
+  {"block": "Wait", parameters: [2, 0, 0]}
+    */
