@@ -1,21 +1,6 @@
 [
   {
-    "block": "If",
-    "statement": {
-      "block": "Equal",
-      "parameters": [
-        {
-          "block": "GetSensorValue",
-          "parameters": [0, 0, 0]
-        },
-        7
-      ]
-    },
-    "true": [
-      {
-
-      }
-    ],
-    "false": []
+    "block": "Loop",
+    "parameters": [5, [{}, {}], 0]
   }
 ]

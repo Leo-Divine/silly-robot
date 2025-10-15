@@ -1,9 +1,5 @@
 #include "Sphero.h"
 
-Sphero::Sphero() {
-
-}
-
 void Sphero::initialize() {
   rvr.configUART(&Serial);
   rvr.resetYaw();
@@ -20,6 +16,7 @@ void Sphero::rotateRight() {
   delay(950);
   rvr.getDriveControl().rollStop(93);
   rvr.resetYaw();
+  delay(150);
 }
 
 void Sphero::rotateLeft() {
@@ -27,6 +24,7 @@ void Sphero::rotateLeft() {
   delay(950);
   rvr.getDriveControl().rollStop(267);
   rvr.resetYaw();
+  delay(150);
 }
 
 void Sphero::setColor(uint8_t colorCode) {
