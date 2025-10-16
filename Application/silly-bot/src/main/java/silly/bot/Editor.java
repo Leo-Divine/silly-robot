@@ -75,6 +75,10 @@ public class Editor extends Canvas {
 
     public void drawBlocks() {
         for(Block block : blocks) {
+            if(block.blockType == BlockType.Start) {
+                block.drawBlock(gc);
+                continue;
+            }
             gc.drawImage(block.blockType.image, block.xPos + 325, block.yPos, block.blockType.startWidth, block.blockType.startHeight);
         }
     }
@@ -151,7 +155,7 @@ public class Editor extends Canvas {
                 surroundingBlock.belowBlock = block.getId();
 
                 block.xPos = surroundingBlock.xPos;
-                block.yPos = surroundingBlock.yPos + surroundingBlock.blockType.startHeight;
+                block.yPos = surroundingBlock.yPos + surroundingBlock.blockType.startHeight + 8;
 
                 if(block.belowBlock == 0) { break; }
                 moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
@@ -189,7 +193,7 @@ public class Editor extends Canvas {
 
         // Move Block
         block.xPos = xPos;
-        block.yPos = yPos + aboveBlockHeight;
+        block.yPos = yPos + aboveBlockHeight + 8;
 
         if(block.belowBlock == 0) { return; }
         moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
