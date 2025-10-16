@@ -14,7 +14,7 @@ enum BlockType {
     Equal(new Image(Editor.class.getResource("/temp9.jpg").toExternalForm()), 875),
     Less(new Image(Editor.class.getResource("/temp10.jpg").toExternalForm()), 950),
     Greater(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 1025),
-    Start(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 0);
+    Start(new Image(Editor.class.getResource("/Start.png").toExternalForm()), 0);
 
     public final Image image;
     public final int menuPositionY;

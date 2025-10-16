@@ -12,8 +12,8 @@
 - [x] Work on Dragging Blocks
 - [x] Make Blocks Connect
 - [ ] Make a Starting Block
-- [ ] Block Deletion
-- [ ] Buttons Scrolling
+- [x] Block Deletion
+- [x] Buttons Scrolling
 
 ## Sphero
 - [ ] Create a 3D Model to Hold All Components
