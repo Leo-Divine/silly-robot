@@ -11,9 +11,17 @@
 - [x] Create a Background
 - [x] Work on Dragging Blocks
 - [x] Make Blocks Connect
-- [ ] Make a Starting Block
+- [x] Make a Starting Block
 - [x] Block Deletion
 - [x] Buttons Scrolling
+- [ ] Give Blocks Parameters
+    - [ ] Customize Parameters
+- [ ] Add Wifi Stuffs
+- [ ] Turn Blocks into JSON Code
+- [ ] Make Different Block Types (Operator, Nested Block, etc)
+    - [ ] Different Block Widths
+- [ ] Replace Block Images with SVG's
+
 
 ## Sphero
 - [ ] Create a 3D Model to Hold All Components

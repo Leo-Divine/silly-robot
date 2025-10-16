@@ -64,18 +64,18 @@ public class Editor extends Canvas {
         gc.fillText("Display", 100, 325 - blockMenuScroll);
         gc.fillText("Sensors", 100, 450 - blockMenuScroll);
         gc.fillText("Control", 100, 575 - blockMenuScroll);
-        gc.fillText("Operands", 100, 850 - blockMenuScroll);
+        gc.fillText("Operands", 100, 925 - blockMenuScroll);
 
         //Draw Blocks
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
-            gc.drawImage(blockType.image, 100, blockType.menuPositionY - blockMenuScroll, 100, 50);
+            gc.drawImage(blockType.image, 100, blockType.menuPositionY - blockMenuScroll, blockType.startWidth, blockType.startHeight);
         }
     }
 
     public void drawBlocks() {
         for(Block block : blocks) {
-            gc.drawImage(block.blockType.image, block.xPos + 325, block.yPos, 100, 50);
+            gc.drawImage(block.blockType.image, block.xPos + 325, block.yPos, block.blockType.startWidth, block.blockType.startHeight);
         }
     }
 
@@ -94,9 +94,9 @@ public class Editor extends Canvas {
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
             if(eventXPos >= 100 && 
-            eventXPos <= 200 &&
+            eventXPos <= 100 + blockType.startWidth &&
             eventYPos >= blockType.menuPositionY - blockMenuScroll &&
-            eventYPos <= blockType.menuPositionY - blockMenuScroll + 50) {
+            eventYPos <= blockType.menuPositionY - blockMenuScroll + blockType.startHeight) {
                 Block block = new Block(
                     blockType,
                     100,
@@ -146,15 +146,15 @@ public class Editor extends Canvas {
 
             // Check if Block is Close Enough
             if(Math.abs(surroundingBlock.xPos - block.xPos) <= 15 &&
-               Math.abs(surroundingBlock.yPos + 50 - block.yPos) <= 40)  {
+               Math.abs(surroundingBlock.yPos + surroundingBlock.blockType.startHeight - block.yPos) <= 40)  {
                 block.aboveBlock = surroundingBlock.getId();
                 surroundingBlock.belowBlock = block.getId();
 
                 block.xPos = surroundingBlock.xPos;
-                block.yPos = surroundingBlock.yPos + 50;
+                block.yPos = surroundingBlock.yPos + surroundingBlock.blockType.startHeight;
 
                 if(block.belowBlock == 0) { break; }
-                moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+                moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
                 break;
             }
         }
@@ -180,19 +180,19 @@ public class Editor extends Canvas {
         block.yPos = eventYPos - block.mouseOffsetY;
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
     }
 
-    private void moveConnectedBlock(int blockId, double xPos, double yPos) {
+    private void moveConnectedBlock(int blockId, double xPos, double yPos, int aboveBlockHeight) {
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
 
         // Move Block
         block.xPos = xPos;
-        block.yPos = yPos + 50;
+        block.yPos = yPos + aboveBlockHeight;
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos);
+        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
     }
 
     public void mouseClicked(double eventXPos, double eventYPos) {
@@ -206,16 +206,16 @@ public class Editor extends Canvas {
             blockMenuScroll = 400;
         }
         if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 175), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 500;
+            blockMenuScroll = 525;
         }
         if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 225), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 500;
+            blockMenuScroll = 525;
         }
     }
 
     public void mouseScroll(double eventXPos, double scrollAmount) {
         if(eventXPos > 75 && eventXPos < 325) {
-            blockMenuScroll = Math.max(0, Math.min(300, blockMenuScroll - scrollAmount));
+            blockMenuScroll = Math.max(0, Math.min(525, blockMenuScroll - scrollAmount));
         }
     }
 }

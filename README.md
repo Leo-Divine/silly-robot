@@ -9,6 +9,7 @@
 004 - SetColor(Color);
 
 005 - If(equal, true, false);
+005 - IfEl
 006 - Loop(LoopTimes, Code);
 
 007 - Equal
