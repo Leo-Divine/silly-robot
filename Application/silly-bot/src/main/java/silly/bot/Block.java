@@ -1,68 +1,97 @@
 package silly.bot;
 
 import java.io.Serializable;
-import java.util.AbstractCollection;
-
-import javafx.scene.Group;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath; 
 
 enum BlockCategory {
-    Movement(Color.rgb(255, 102, 128), Color.rgb(255, 51, 85));
+    Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204), 0, 0),
+    Movement(Color.rgb(255, 102, 128), Color.rgb(255, 51, 85), 25, 50),
+    Display(Color.rgb(89, 192, 89), Color.rgb(56, 148, 56), 75, 325),
+    Sensors(Color.rgb(92, 177, 214), Color.rgb(46, 142, 184), 125, 450),
+    Control(Color.rgb(153, 102, 255), Color.rgb(119, 77, 203), 175, 575),
+    Operands(Color.rgb(255, 171, 25), Color.rgb(207, 139, 23), 225, 925);
 
     public final Color fill;
     public final Color border;
+    public final int menuButtonPos;
+    public final int menuTextPos;
 
-    private BlockCategory(Color fill, Color border) {
+    private BlockCategory(Color fill, Color border, int menuButtonPos, int menuTextPos) {
         this.fill = fill;
         this.border = border;
+        this.menuButtonPos = menuButtonPos;
+        this.menuTextPos = menuTextPos;
     }
 }
 
 enum BlockShape {
     Default {
         @Override
-        public drawBlock() [
-
-        ]
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawDefaultBlock(gc, block);
+        }
     },
-    Operand,
-    Value,
-    Nesting,
-    DoubleNesting,
-    Start;
+    Operand {
+        @Override
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawDefaultBlock(gc, block);
+        }
+    },
+    Value {
+        @Override
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawDefaultBlock(gc, block);
+        }
+    },
+    Nesting {
+        @Override
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawDefaultBlock(gc, block);
+        }
+    },
+    DoubleNesting {
+        @Override
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawDefaultBlock(gc, block);
+        }
+    },
+    Start {
+        @Override
+        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+            return BlockPaths.drawStartBlock(gc, block);
+        }
+    };
+
+    abstract GraphicsContext drawBlock(GraphicsContext gc, Block block);
 }
 
 enum BlockType {
-    MoveForward(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 75, BlockShape.Default, 100, 50, 2),
-    RotateLeft(new Image(Editor.class.getResource("/temp2.jpeg").toExternalForm()), 150, BlockShape.Default, 100, 50, 0),
-    RotateRight(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 225, BlockShape.Default, 100, 50, 0),
-    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()), 350, BlockShape.Default, 100, 50, 1),
-    GetSensorValue(new Image(Editor.class.getResource("/temp5.jpg").toExternalForm()), 475, BlockShape.Value, 100, 50, 0),
-    Wait(new Image(Editor.class.getResource("/temp6.jpg").toExternalForm()), 600, BlockShape.Default, 100, 50, 1),
-    If(new Image(Editor.class.getResource("/temp7.jpg").toExternalForm()), 675, BlockShape.Nesting, 100, 50, 3),
-    IfEl(new Image(Editor.class.getResource("/temp7.jpg").toExternalForm()), 750, BlockShape.DoubleNesting, 100, 50, 3),
-    Loop(new Image(Editor.class.getResource("/temp8.jpg").toExternalForm()), 825, BlockShape.Nesting, 100, 50, 2),
-    Equal(new Image(Editor.class.getResource("/temp9.jpg").toExternalForm()), 950, BlockShape.Operand, 100, 50, 2),
-    Less(new Image(Editor.class.getResource("/temp10.jpg").toExternalForm()), 1025, BlockShape.Operand, 100, 50, 2),
-    Greater(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 1100, BlockShape.Operand, 100, 50, 2),
-    Start(new Image(Editor.class.getResource("/Start.png").toExternalForm()), 0, BlockShape.Start, 100, 25, 0);
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 25, 2),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
+    SetColor(BlockShape.Default, BlockCategory.Display, 100, 50, 1),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 50, 0),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 50, 1),
+    If(BlockShape.Nesting, BlockCategory.Control, 100, 50, 3),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 100, 50, 3),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 100, 50, 2),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
+    Start(BlockShape.Start, BlockCategory.Start, 125, 25, 0);
 
-    public final Image image;
-    public final int menuPositionY;
     public final BlockShape shape;
+    public final BlockCategory category;
     public final int startWidth;
     public final int startHeight;
     public final int parameterCount;
 
-    private BlockType(Image image, int posY, BlockShape shape, int width, int height, int parameterCount) {
-        this.image = image;
-        this.menuPositionY = posY;
+    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int parameterCount) {
         this.shape = shape;
-        this.startWidth = width;
-        this.startHeight = height;
+        this.category = category;
+        this.startWidth = startWidth;
+        this.startHeight = startHeight;
         this.parameterCount = parameterCount;
     }
 }
@@ -73,25 +102,18 @@ abstract class Block implements Serializable {
     BlockType blockType;
     int aboveBlock = 0;
     int belowBlock = 0;
-    double xPos = 0.0;
-    double yPos = 0.0;
+    Position position = new Position(0, 0);
     boolean isDragging = false;
-    double mouseOffsetX = 0;
-    double mouseOffsetY = 0;
-    int startWidth;
-    int startHeight;
+    Position mouseOffset = new Position(0, 0);
     int width;
     int height;
     int menuPosition;
-    BlockShape shape;
-    int parameterCount;
 
     public Block(BlockType b, double xPos, double yPos) {
         this.id = nextBlockId;
         nextBlockId++;
         this.blockType = b;
-        this.xPos = xPos - 325;
-        this.yPos = yPos;
+        this.position = new Position(xPos - 325, yPos);
     }
 
     public int getId() {
@@ -99,34 +121,35 @@ abstract class Block implements Serializable {
     }
 
     public boolean isMouseOnBlock(double mouseX, double mouseY) {
-        return mouseX - 325 >= xPos && 
-        mouseX - 325 <= xPos + width &&
-        mouseY >= yPos &&
-        mouseY <= yPos + height;
+        return mouseX - 325 >= position.x && 
+        mouseX - 325 <= position.x + width &&
+        mouseY >= position.y &&
+        mouseY <= position.y + height;
     }
 
     public String getJSONCode() {
         return "";
     }
 
-    abstract public GraphicsContext drawBlock(GraphicsContext gc);
+    public GraphicsContext drawBlock(GraphicsContext gc) {
+        return blockType.shape.drawBlock(gc, this);
+    }
+}
+
+class Start extends Block {
+    public Start(double xPos, double yPos) {
+        super(BlockType.Start, xPos, yPos);
+        width = BlockType.Start.startWidth;
+        height = BlockType.Start.startHeight;
+        menuPosition = 0;
+    }
 }
 
 class MoveForward extends Block {
     public MoveForward(double xPos, double yPos) {
         super(BlockType.MoveForward, xPos, yPos);
-        startWidth = 150;
-        startHeight = 25;
-        width = startWidth;
-        height = startHeight;
+        width = BlockType.MoveForward.startWidth;
+        height = BlockType.MoveForward.startHeight;
         menuPosition = 75;
-        shape = BlockShape.Default;
-        parameterCount = 2;
     }
-
-    public GraphicsContext drawBlock(GraphicsContext gc) {
-        BlockShape.drawBlock(gc, this);
-    }
-
-    
 }
