@@ -1,7 +1,20 @@
 package silly.bot;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.shape.ArcTo;
+import javafx.scene.shape.CubicCurveTo;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.QuadCurveTo;
 
+
+/*
+ * 1) Create Path with Path Object
+ * 2) Check if Touching
+ * 3) Turn Into String
+ * 4) gc.appendSVGPath to Draw String
+ */
 public class BlockPaths {
     public static GraphicsContext drawDefaultBlock(GraphicsContext gc, Block block) {
         double x = block.position.x + 325;
@@ -99,8 +112,274 @@ public class BlockPaths {
         gc.stroke();
         gc.fill();
 
+        //return gc;
+
+        Path path = new Path();
+
+        path.getElements().add(new MoveTo(x, y + 4));
+
+        path.getElements().add(new ArcTo(4, 4, 0, x + 4, y, false, true));
+        x = x + 4;
+
+        path.getElements().add(new LineTo(x + 12, y));
+        x = x + 12;
+
+        path.getElements().add(new CubicCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2));
+        x = x + 4;
+        y = y + 2;
+
+        path.getElements().add(new LineTo(x + 4, y + 4));
+        x = x + 4;
+        y = y + 4;
+
+        path.getElements().add(new CubicCurveTo(x + 1, y + 1, x + 2, y + 2, x + 4, y + 2));
+        x = x + 4;
+        y = y + 2;
+
+        path.getElements().add(new LineTo(x + 12, y));
+        x = x + 12;
+
+        path.getElements().add(new CubicCurveTo(x + 2, y, x + 3, y - 1, x + 4, y - 2));
+        x = x + 4;
+        y = y - 2;
+
+        path.getElements().add(new LineTo(x + 4, y - 4));
+        x = x + 4;
+        y = y - 4;
+
+        path.getElements().add(new CubicCurveTo(x + 1, y - 1, x + 2, y - 2, x + 4, y - 2));
+        x = x + 4;
+        y = y - 2;
+
+        path.getElements().add(new LineTo(x + block.width - 52, y));
+        x = x + block.width - 52;
+
+        path.getElements().add(new ArcTo(4, 4, 0, x + 4, y + 4, false, true));
+        x = x + 4;
+        y = y + 4;
+
+        path.getElements().add(new LineTo(x, y + block.height));
+        y = y + block.height;
+
+        path.getElements().add(new ArcTo(4, 4, 0, x - 4, y + 4, false, true));
+        x = x - 4;
+        y = y + 4;
+
+        path.getElements().add(new LineTo(x - block.width + 52, y));
+        x = x - block.width + 52;
+    }
+
+    //public static GraphicsContext drawValueBlock(GraphicsContext gc, Block block) {}
+
+    public static GraphicsContext drawOperandBlock(GraphicsContext gc, Block block) {
+        double x = block.position.x + 325 + 20;
+        double y = block.position.y;
+        gc.setFill(block.blockType.category.fill);
+        gc.setStroke(block.blockType.category.border);
+        gc.beginPath();
+        gc.moveTo(x, y);
+
+        gc.lineTo(x + block.width - 40, y);
+        x = x + block.width - 40;
+
+        gc.lineTo(x + 20, y + 20);
+        x = x + 20;
+        y = y + 20;
+
+        
+    }
+
+    public static GraphicsContext drawNestingBlock(GraphicsContext gc, Block block) {
+        double x = block.position.x + 325;
+        double y = block.position.y;
+        gc.setFill(block.blockType.category.fill);
+        gc.setStroke(block.blockType.category.border);
+        gc.beginPath();
+        gc.moveTo(x, y + 4);
+
+        gc.bezierCurveTo(x, y, x, y, x + 4, y);
+        x = x + 4;
+
+        gc.lineTo(x + 8, y);
+        x = x + 8;
+
+        gc.bezierCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2);
+        x = x + 4;
+        y = y + 2;
+
+        gc.lineTo(x + 4, y + 4);
+        x = x + 4;
+        y = y + 4;
+
+        gc.bezierCurveTo(x + 1, y + 1, x + 2, y + 2, x + 4, y + 2);
+        x = x + 4;
+        y = y + 2;
+
+        gc.lineTo(x + 12, y);
+        x = x + 12;
+
+        gc.bezierCurveTo(x + 2, y, x + 3, y - 2, x + 4, y - 2);
+        x = x + 4;
+        y = y - 2;
+
+        gc.lineTo(x + 4, y - 4);
+        x = x + 4;
+        y = y - 4;
+
+        gc.bezierCurveTo(x + 1, y - 1, x + 2, y - 2, x + 4, y - 2);
+        x = x + 4;
+        y = y - 2;
+
+        gc.lineTo(x + block.width - 52, y);
+        x = x + block.width - 52;
+
+        gc.bezierCurveTo(x + 4, y, x + 4, y, x + 4, y + 4);
+        x = x + 4;
+        y = y + 4;
+
+        gc.lineTo(x, y + block.height);
+        y = y + block.height;
+
+        gc.bezierCurveTo(x, y + 4, x, y + 4, x - 4, y + 4);
+        x = x - 4;
+        y = y + 4;
+
+        gc.appendSVGPath(null);
+
+        gc.lineTo(x - block.width + 64, y);
+        x = x - block.width + 64;
+
+        gc.bezierCurveTo(x - 2, y, x - 3, y + 1, x - 4, y + 2);
+        x = x - 4;
+        y = y + 2;
+
+        gc.lineTo(x - 4, y + 4);
+        x = x - 4;
+        y = y + 4;
+
+        gc.bezierCurveTo(x - 1, y + 1, x - 2, y + 2, x - 4, y + 2);
+        x = x - 4;
+        y = y + 2;
+
+        gc.lineTo(x - 12, y);
+        x = x - 12;
+
+        gc.bezierCurveTo(x - 2, y, x - 3, y - 1, x - 4, y - 2);
+        x = x - 4;
+        y = y - 2;
+
+        gc.lineTo(x - 4, y - 4);
+        x = x - 4;
+        y = y - 4;
+
+        gc.bezierCurveTo(x - 1, y - 1, x - 2, y - 2, x - 4, y - 2);
+        x = x - 4;
+        y = y - 2;
+
+        gc.lineTo(x - 4, y);
+        x = x - 4;
+
+        gc.bezierCurveTo(x - 4, y, x - 4, y, x - 4, y + 4);
+        x = x - 4;
+        y = y + 4;
+
+        //Nested Block Heights
+        gc.lineTo(x, y + 25);
+        y = y + 25;
+
+        gc.bezierCurveTo(x, y + 4, x, y + 4, x + 4, y + 4);
+        x = x + 4;
+        y = y + 4;
+
+        gc.lineTo(x + 4, y);
+        x = x + 4;
+
+        gc.bezierCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2);
+        x = x + 4;
+        y = y + 2;
+
+        gc.lineTo(x + 4, y + 4);
+        x = x + 4;
+        y = y + 4;
+
+        gc.bezierCurveTo(x + 1, y + 1, x + 2, y + 2, x + 4, y + 2);
+        x = x + 4;
+        y = y + 2;
+
+        gc.lineTo(x + 12, y);
+        x = x + 12;
+
+        gc.bezierCurveTo(x + 2, y, x + 3, y - 2, x + 4, y - 2);
+        x = x + 4;
+        y = y - 2;
+
+        gc.lineTo(x + 4, y - 4);
+        x = x + 4;
+        y = y - 4;
+
+        gc.bezierCurveTo(x + 1, y - 1, x + 2, y - 2, x + 4, y - 2);
+        x = x + 4;
+        y = y - 2;
+
+        gc.lineTo(x + block.width - 64, y);
+        x = x + block.width - 64;
+
+        gc.bezierCurveTo(x + 4, y, x + 4, y, x + 4, y + 4);
+        x = x + 4;
+        y = y + 4;
+
+        gc.lineTo(x, y + 24);
+        y = y + 24;
+
+        gc.bezierCurveTo(x, y + 4, x, y + 4, x - 4, y + 4);
+        x = x - 4;
+        y = y + 4;
+
+        gc.lineTo(x - block.width + 52, y);
+        x = x - block.width + 52;
+
+        gc.bezierCurveTo(x - 2, y, x - 3, y + 1, x - 4, y + 2);
+        x = x - 4;
+        y = y + 2;
+
+        gc.lineTo(x - 4, y + 4);
+        x = x - 4;
+        y = y + 4;
+
+        gc.bezierCurveTo(x - 1, y + 1, x - 2, y + 2, x - 4, y + 2);
+        x = x - 4;
+        y = y + 2;
+
+        gc.lineTo(x - 12, y);
+        x = x - 12;
+
+        gc.bezierCurveTo(x - 2, y, x - 3, y - 1, x - 4, y - 2);
+        x = x - 4;
+        y = y - 2;
+
+        gc.lineTo(x - 4, y - 4);
+        x = x - 4;
+        y = y - 4;
+
+        gc.bezierCurveTo(x - 1, y - 1, x - 2, y - 2, x - 4, y - 2);
+        x = x - 4;
+        y = y - 2;
+
+        gc.lineTo(x - 8, y);
+        x = x - 8;
+
+        gc.bezierCurveTo(x - 4, y, x - 4, y, x - 4, y - 4);
+        x = x - 4;
+        y = y - 4;
+
+        gc.closePath();
+        gc.stroke();
+        gc.fill();
+
         return gc;
     }
+
+    //public static GraphicsContext drawDoubleNestingBlock(GraphicsContext gc, Block block) {}
 
     public static GraphicsContext drawStartBlock(GraphicsContext gc, Block block) {
         double x = block.position.x + 325;

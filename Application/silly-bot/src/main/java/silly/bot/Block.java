@@ -3,6 +3,7 @@ package silly.bot;
 import java.io.Serializable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
 
 enum BlockCategory {
     Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204), 0, 0),
@@ -28,46 +29,46 @@ enum BlockCategory {
 enum BlockShape {
     Default {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+        public GraphicsContext getPath(GraphicsContext gc, Block block) {
             return BlockPaths.drawDefaultBlock(gc, block);
         }
     },
     Operand {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+        public GraphicsContext getPath(GraphicsContext gc, Block block) {
             return BlockPaths.drawDefaultBlock(gc, block);
         }
     },
     Value {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
+        public GraphicsContext getPath(GraphicsContext gc, Block block) {
             return BlockPaths.drawDefaultBlock(gc, block);
         }
     },
     Nesting {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
-            return BlockPaths.drawDefaultBlock(gc, block);
+        public GraphicsContext getPath(Block block) {
+            return BlockPaths.drawNestingBlock(block);
         }
     },
     DoubleNesting {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
-            return BlockPaths.drawDefaultBlock(gc, block);
+        public GraphicsContext getPath(Block block) {
+            return BlockPaths.drawDefaultBlock(block);
         }
     },
     Start {
         @Override
-        public GraphicsContext drawBlock(GraphicsContext gc, Block block) {
-            return BlockPaths.drawStartBlock(gc, block);
+        public GraphicsContext getPath(Block block) {
+            return BlockPaths.drawStartBlock(block);
         }
     };
 
-    abstract GraphicsContext drawBlock(GraphicsContext gc, Block block);
+    abstract GraphicsContext getPath(Block block);
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 25, 2),
+    MoveForward(BlockShape.Nesting, BlockCategory.Control, 150, 25, 2),
     RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
     RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
     SetColor(BlockShape.Default, BlockCategory.Display, 100, 50, 1),
@@ -108,6 +109,7 @@ abstract class Block implements Serializable {
     int width;
     int height;
     int menuPosition;
+    Path blockPath;
 
     public Block(BlockType b, double xPos, double yPos) {
         this.id = nextBlockId;
@@ -132,7 +134,7 @@ abstract class Block implements Serializable {
     }
 
     public GraphicsContext drawBlock(GraphicsContext gc) {
-        return blockType.shape.drawBlock(gc, this);
+        blockPath = blockType.shape.getPath(this);
     }
 }
 
@@ -143,6 +145,7 @@ class Start extends Block {
         height = BlockType.Start.startHeight;
         menuPosition = 0;
     }
+
 }
 
 class MoveForward extends Block {
