@@ -21,38 +21,29 @@ public class Server {
     }
 
     public void sendMessage() throws IOException {
-        System.out.println("SERVER: Check this out imma send a message...");
-        serverOutput.println("5");
-        while (true) {
-            String response = serverInput.readLine();
-            if(response == null) { continue; }
-            if (!"OK".equals(response)) {
-                System.out.println("SERVER: Client is being a bit autistic.");
-                return;
+        serverOutput.flush();
+
+        String inputLine;
+        while(true) {
+            if((inputLine = serverInput.readLine()) != null) {
+                if (".".equals(inputLine)) {
+                   serverOutput.println("good bye");
+                   break;
+                }
+                System.out.println(inputLine);
+                serverOutput.println("Recieved");
+                continue;
             }
-            break;
-        }
-        
-        serverOutput.println("Hello");
-        while (true) {
-            String response = serverInput.readLine();
-            if(response == null) { continue; }
-            if (!"OK".equals(response)) {
-                System.out.println("SERVER: Client is being a bit autistic.");
-                return;
-            }
-            break;
+            serverOutput.close();
+            serverInput.close();
+            clientSocket.close();
+            clientSocket = serverSocket.accept();
+            serverOutput = new PrintWriter(clientSocket.getOutputStream(), true);
+            serverInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         }
     }
 
     public void stopServer() throws IOException {
-        serverOutput.println("MSG_1");
-        String response = serverInput.readLine();
-        if (!"OK".equals(response)) {
-            System.out.println("SERVER: Client refuses to die.");
-            return;
-        }
-
         System.out.println("SERVER: Shutting down server.");
         serverOutput.close();
         serverInput.close();

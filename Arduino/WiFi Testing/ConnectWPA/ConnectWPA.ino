@@ -187,7 +187,7 @@ void loop()
       client.write("OK");
       break;
     }
-    char message[messageLength];
+    char message[5];
     for(char c : message) {
       c = client.read();
     }
