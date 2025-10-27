@@ -3,6 +3,7 @@ package silly.bot;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 
 import java.util.Vector;
@@ -22,8 +23,8 @@ public class Editor extends Canvas {
 
     public Editor(int i, int j) {
         super(i, j);
-        blocks.add(new Start(425, 25));
-        blocks.add(new MoveForward(700, 25));
+        //blocks.add(new Start(425, 25));
+        blocks.add(new Block(BlockType.MoveForward, 700, 25));
     }
 
     public void clearCanvas() {
@@ -70,7 +71,19 @@ public class Editor extends Canvas {
         //Draw Blocks
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
-            
+            Path blockPath = blockType.shape.getPath(
+                new Position(-225, blockType.menuPosition - blockMenuScroll),
+                blockType.startWidth,
+                blockType.startHeight
+            );
+
+            gc.setStroke(blockType.category.border);
+            gc.setFill(blockType.category.fill);
+
+            gc.beginPath();
+            gc.appendSVGPath(BlockPaths.pathToString(blockPath));
+            gc.closePath();
+            gc.fill();
         }
     }
 

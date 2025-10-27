@@ -29,75 +29,77 @@ enum BlockCategory {
 enum BlockShape {
     Default {
         @Override
-        public GraphicsContext getPath(GraphicsContext gc, Block block) {
-            return BlockPaths.drawDefaultBlock(gc, block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
     Operand {
         @Override
-        public GraphicsContext getPath(GraphicsContext gc, Block block) {
-            return BlockPaths.drawDefaultBlock(gc, block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
     Value {
         @Override
-        public GraphicsContext getPath(GraphicsContext gc, Block block) {
-            return BlockPaths.drawDefaultBlock(gc, block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
     Nesting {
         @Override
-        public GraphicsContext getPath(Block block) {
-            return BlockPaths.drawNestingBlock(block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
     DoubleNesting {
         @Override
-        public GraphicsContext getPath(Block block) {
-            return BlockPaths.drawDefaultBlock(block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
     Start {
         @Override
-        public GraphicsContext getPath(Block block) {
-            return BlockPaths.drawStartBlock(block);
+        public Path getPath(Position position, int width, int height) {
+            return BlockPaths.drawDefaultBlock(position, width, height);
         }
     };
 
-    abstract GraphicsContext getPath(Block block);
+    abstract Path getPath(Position position, int width, int height);
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Nesting, BlockCategory.Control, 150, 25, 2),
-    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
-    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 25, 0),
-    SetColor(BlockShape.Default, BlockCategory.Display, 100, 50, 1),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 50, 0),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 50, 1),
-    If(BlockShape.Nesting, BlockCategory.Control, 100, 50, 3),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 100, 50, 3),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 100, 50, 2),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2),
-    Start(BlockShape.Start, BlockCategory.Start, 125, 25, 0);
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 30, 2, 75),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 25, 0, 150),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 25, 0, 225),
+    SetColor(BlockShape.Default, BlockCategory.Display, 100, 50, 1, 350),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 50, 0, 475),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 50, 1, 600),
+    If(BlockShape.Nesting, BlockCategory.Control, 100, 50, 3, 675),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 100, 50, 3, 750),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 100, 50, 2, 825),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 950),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 1025),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 1100),
+    Start(BlockShape.Start, BlockCategory.Start, 125, 25, 0, 0);
 
     public final BlockShape shape;
     public final BlockCategory category;
     public final int startWidth;
     public final int startHeight;
     public final int parameterCount;
+    public final int menuPosition;
 
-    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int parameterCount) {
+    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int parameterCount, int menuPosition) {
         this.shape = shape;
         this.category = category;
         this.startWidth = startWidth;
         this.startHeight = startHeight;
         this.parameterCount = parameterCount;
+        this.menuPosition = menuPosition;
     }
 }
 
-abstract class Block implements Serializable {
+public class Block implements Serializable {
     static int nextBlockId = 1;
     private int id;
     BlockType blockType;
@@ -116,6 +118,10 @@ abstract class Block implements Serializable {
         nextBlockId++;
         this.blockType = b;
         this.position = new Position(xPos - 325, yPos);
+        this.width = BlockType.Start.startWidth;
+        this.height = BlockType.Start.startHeight;
+        this.menuPosition = blockType.menuPosition;
+        this.blockPath = blockType.shape.getPath(position, width, height);
     }
 
     public int getId() {
@@ -123,10 +129,7 @@ abstract class Block implements Serializable {
     }
 
     public boolean isMouseOnBlock(double mouseX, double mouseY) {
-        return mouseX - 325 >= position.x && 
-        mouseX - 325 <= position.x + width &&
-        mouseY >= position.y &&
-        mouseY <= position.y + height;
+        return blockPath.contains(mouseX, mouseY);
     }
 
     public String getJSONCode() {
@@ -134,25 +137,15 @@ abstract class Block implements Serializable {
     }
 
     public GraphicsContext drawBlock(GraphicsContext gc) {
-        blockPath = blockType.shape.getPath(this);
-    }
-}
+        blockPath = blockType.shape.getPath(position, width, height);
 
-class Start extends Block {
-    public Start(double xPos, double yPos) {
-        super(BlockType.Start, xPos, yPos);
-        width = BlockType.Start.startWidth;
-        height = BlockType.Start.startHeight;
-        menuPosition = 0;
-    }
+        gc.setStroke(blockType.category.border);
+        gc.setFill(blockType.category.fill);
 
-}
-
-class MoveForward extends Block {
-    public MoveForward(double xPos, double yPos) {
-        super(BlockType.MoveForward, xPos, yPos);
-        width = BlockType.MoveForward.startWidth;
-        height = BlockType.MoveForward.startHeight;
-        menuPosition = 75;
+        gc.beginPath();
+        gc.appendSVGPath(BlockPaths.pathToString(blockPath));
+        gc.closePath();
+        gc.fill();
+        return gc;
     }
 }
