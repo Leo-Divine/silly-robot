@@ -21,17 +21,16 @@ public class Server {
     }
 
     public void sendMessage() throws IOException {
-        serverOutput.flush();
-
         String inputLine;
         while(true) {
+            serverOutput.println("Hello;");
             if((inputLine = serverInput.readLine()) != null) {
                 if (".".equals(inputLine)) {
                    serverOutput.println("good bye");
                    break;
                 }
                 System.out.println(inputLine);
-                serverOutput.println("Recieved");
+                
                 continue;
             }
             serverOutput.close();
