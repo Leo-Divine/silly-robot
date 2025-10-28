@@ -1,29 +1,29 @@
 #include "WiFiEsp.h"
+#include <SpheroRVR.h>
 
-// Emulate Serial1 on pins 6/7 if not present
 #ifndef HAVE_HWSERIAL1
 #include "SoftwareSerial.h"
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "IT-Shop";            // your network SSID (name)
-char pass[] = "B0n_J0v!";       // your network password
-int status = WL_IDLE_STATUS;     // the Wifi radio's status
+char ssid[] = "Rossini Family";
+char pass[] = "Ajgabmas171";
+int status = WL_IDLE_STATUS;
+char server[] = "192.168.68.50";
+unsigned long lastConnectionTime = 0;
+const unsigned long postingInterval = 100000L;
 
-char server[] = "192.168.0.68";
-
-unsigned long lastConnectionTime = 0;         // last time you connected to the server, in milliseconds
-const unsigned long postingInterval = 10000L; // delay between updates, in milliseconds
-
-// Initialize the Ethernet client object
 WiFiEspClient client;
+extern SpheroRVR rvr;
 
-//char* buffer = (char*) malloc(256 * sizeof(char));
+
 
 void setup()
 {
   // initialize serial for debugging
   Serial.begin(115200);
+  rvr.configUART(&Serial);
+  rvr.resetYaw();
   // initialize serial for ESP module
   Serial1.begin(9600);
   // initialize ESP module
@@ -47,12 +47,23 @@ void setup()
   Serial.println("You're connected to the network");
   
   printWifiStatus();
+
+  if (client.connect(server, 9090)) {
+    Serial.println("Connected");
+    
+    client.println("Howdy!");
+
+    // note the time that the connection was made
+    lastConnectionTime = millis();
+  }
+  else {
+    // if you couldn't make a connection
+    Serial.println("Connection failed");
+  }
 }
 
 void loop()
 {
-  // if there's incoming data from the net connection send it out the serial port
-  // this is for debugging purposes only
   String c = "";
   while (client.available()) {
     c += static_cast<char>(client.read());
@@ -65,8 +76,10 @@ void loop()
     Serial.print(c);
     if(c == "Hello") {
       client.println("Wassup");
+      
     } else {
       client.println("Other");
+      rotateRight();
     }
     
     
@@ -76,11 +89,21 @@ void loop()
     delay(2000);
   }
 
-  // if 10 seconds have passed since your last connection,
-  // then connect again and send data
+  
   if (millis() - lastConnectionTime > postingInterval) {
+    client.println("FCKOFF");
     httpRequest();
   }
+  
+}
+
+void rotateRight() {
+  Serial.println("test");
+  rvr.getDriveControl().rollStart(93, 64);
+  delay(950);
+  rvr.getDriveControl().rollStop(93);
+  rvr.resetYaw();
+  delay(150);
 }
 
 // this method makes a HTTP connection to the server

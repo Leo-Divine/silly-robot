@@ -23,7 +23,7 @@ public class Server {
     public void sendMessage() throws IOException {
         String inputLine;
         while(true) {
-            serverOutput.println("Hello;");
+            //serverOutput.println("Hello;");
             if((inputLine = serverInput.readLine()) != null) {
                 if (".".equals(inputLine)) {
                    serverOutput.println("good bye");
@@ -33,6 +33,7 @@ public class Server {
                 
                 continue;
             }
+            System.out.println("test");
             serverOutput.close();
             serverInput.close();
             clientSocket.close();
@@ -48,5 +49,12 @@ public class Server {
         serverInput.close();
         clientSocket.close();
         serverSocket.close();
+    }
+
+    public static void main(String[] args) throws IOException {
+        Server server = new Server();
+        server.startServer();
+        server.sendMessage();
+
     }
 }
