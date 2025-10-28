@@ -11,30 +11,40 @@ import javafx.stage.Stage;
 import java.net.*;
 import java.io.*;
 
-/**
- * JavaFX App
- */
+enum ResponseCode {
+  OK,
+  DISCONNECT;
+}
+
+enum RobotCommand {
+  MOVE_FORWARD,
+  ROTATE_RIGHT,
+  ROTATE_LEFT,
+  SET_COLOR;
+}
+
 public class App extends Application {
-  private static Server server;
+  private Server server;
+  private boolean isConnected = false;
+
+  private static Pane root = new Pane();;
   private static Button btn_rotateRight;
   private static Button btn_rotateLeft;
-
-  private static boolean isConnected = false;
+  private static Button btn_moveForward;
+  private static Button btn_setColor;
 
   @Override
   public void start(Stage stage) throws IOException {
-    Pane root = new Pane();
+    server = new Server();
 
     AnimationTimer timer = new AnimationTimer() {
       @Override
       public void handle(long arg0) {
         try {
-          // Find a Client if None is to be had;
           if(!isConnected) { server.findClient(); isConnected = true; }
 
-          if(server.serverInput.ready()) {
-            
-            if ((server.inputLine = server.serverInput.readLine()) == null) {
+          if(server.isMessageAvailable()) {
+            if (server.getMessage() == null) {
               server.disconnectClient();
               server.findClient();
               return;
@@ -45,23 +55,29 @@ public class App extends Application {
               server.findClient();
             }
           }
-          
         } catch (IOException e) {
-          System.out.println("fuck: " + e.getMessage());
+          System.out.println("SERVER ERROR: " + e.getMessage());
         }
       }
     };
     timer.start();
 
+    createInterface();
+    createEventHandlers();
+    stage.setScene(new Scene(root, 1200, 800));
+    stage.show();
+  }
+
+  private void createInterface() {
     btn_rotateLeft = new Button("Rotate Left");
     btn_rotateLeft.relocate(50, 25);
     btn_rotateLeft.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         try {
-          server.sendMessage("000");
+          server.sendCommand(RobotCommand.ROTATE_LEFT, null);
         } catch (IOException e) {
-          System.out.println("fuck: " + e.getMessage());
+          System.out.println("SERVER ERROR: " + e.getMessage());
         }
       }
     });
@@ -73,33 +89,56 @@ public class App extends Application {
       @Override
       public void handle(ActionEvent event) {
         try {
-          server.sendMessage("001");
+          server.sendCommand(RobotCommand.ROTATE_RIGHT, null);
         } catch (IOException e) {
-          System.out.println("fuck: " + e.getMessage());
+          System.out.println("SERVER ERROR: " + e.getMessage());
         }
       }
     });
     root.getChildren().add(btn_rotateRight);
 
-    stage.setScene(new Scene(root, 1200, 800));
-    stage.show();
+    btn_moveForward = new Button("Move Forward");
+    btn_moveForward.relocate(50, 125);
+    btn_moveForward.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        try {
+          server.sendCommand(RobotCommand.MOVE_FORWARD, new int[]{128, 1});
+        } catch (IOException e) {
+          System.out.println("SERVER ERROR: " + e.getMessage());
+        }
+      }
+    });
+    root.getChildren().add(btn_moveForward);
+
+    btn_setColor = new Button("Set Color");
+    btn_setColor.relocate(50, 175);
+    btn_setColor.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        try {
+          server.sendCommand(RobotCommand.SET_COLOR, new int[]{255, 0, 0, 255, 0, 0});
+        } catch (IOException e) {
+          System.out.println("SERVER ERROR: " + e.getMessage());
+        }
+      }
+    });
+    root.getChildren().add(btn_setColor);
+  }
+
+  private void createEventHandlers() {
+
   }
 
   public static void main(String[] args) throws IOException {
-    server = new Server();
     launch();
   }
-}
-
-enum ResponseCode {
-  OK,
-  DISCONNECT;
 }
 
 class Server {
   private ServerSocket serverSocket;
   private Socket clientSocket;
-  public PrintWriter serverOutput;
+  private PrintWriter serverOutput;
   public BufferedReader serverInput;
   public String inputLine;
 
@@ -124,8 +163,38 @@ class Server {
     clientSocket.close();
   }
 
-  public void sendMessage(String message) throws IOException {
-    serverOutput.println(message);
+  public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
+    switch(command) {
+      case MOVE_FORWARD:
+        serverOutput.println("R_000" + String.format("%03d", parameters[0]) + String.format("%03d", parameters[1]));
+        break;
+      case ROTATE_LEFT:
+        serverOutput.println("R_001");
+        break;
+      case ROTATE_RIGHT:
+        serverOutput.println("R_002");
+        break;
+      case SET_COLOR:
+        serverOutput.println(
+          "R_003" +
+          String.format("%03d", parameters[0]) +
+          String.format("%03d", parameters[1]) +
+          String.format("%03d", parameters[2]) +
+          String.format("%03d", parameters[3]) +
+          String.format("%03d", parameters[4]) +
+          String.format("%03d", parameters[5])
+          );
+        break;
+    }
+  }
+
+  public boolean isMessageAvailable() throws IOException {
+    return serverInput.ready();
+  }
+
+  public String getMessage() throws IOException {
+    inputLine = serverInput.readLine();
+    return inputLine;
   }
 
   public ResponseCode readMessage() throws IOException {
