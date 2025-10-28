@@ -14,11 +14,11 @@ public class App extends Application {
   private Server server;
   private boolean isConnected = false;
 
-  private static Pane root = new Pane();
-  private static Button btn_rotateRight;
-  private static Button btn_rotateLeft;
-  private static Button btn_moveForward;
-  private static Button btn_setColor;
+  private Pane root = new Pane();
+  private Button btn_rotateRight;
+  private Button btn_rotateLeft;
+  private Button btn_moveForward;
+  private Button btn_setColor;
 
   @Override
   public void start(Stage stage) throws IOException {

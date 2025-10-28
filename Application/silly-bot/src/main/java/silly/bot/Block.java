@@ -19,18 +19,18 @@ enum BlockShape {
 
 enum BlockType {
     MoveForward(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 75, BlockShape.Default, 100, 50, 2),
-    RotateLeft(new Image(Editor.class.getResource("/temp2.jpeg").toExternalForm()), 150, BlockShape.Default, 100, 50, 0),
-    RotateRight(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 225, BlockShape.Default, 100, 50, 0),
-    SetColor(new Image(Editor.class.getResource("/temp4.jpeg").toExternalForm()), 350, BlockShape.Default, 100, 50, 1),
-    GetSensorValue(new Image(Editor.class.getResource("/temp5.jpg").toExternalForm()), 475, BlockShape.Value, 100, 50, 0),
-    Wait(new Image(Editor.class.getResource("/temp6.jpg").toExternalForm()), 600, BlockShape.Default, 100, 50, 1),
-    If(new Image(Editor.class.getResource("/temp7.jpg").toExternalForm()), 675, BlockShape.Nesting, 100, 50, 3),
-    IfEl(new Image(Editor.class.getResource("/temp7.jpg").toExternalForm()), 750, BlockShape.DoubleNesting, 100, 50, 3),
-    Loop(new Image(Editor.class.getResource("/temp8.jpg").toExternalForm()), 825, BlockShape.Nesting, 100, 50, 2),
-    Equal(new Image(Editor.class.getResource("/temp9.jpg").toExternalForm()), 950, BlockShape.Operand, 100, 50, 2),
-    Less(new Image(Editor.class.getResource("/temp10.jpg").toExternalForm()), 1025, BlockShape.Operand, 100, 50, 2),
-    Greater(new Image(Editor.class.getResource("/temp3.jpeg").toExternalForm()), 1100, BlockShape.Operand, 100, 50, 2),
-    Start(new Image(Editor.class.getResource("/Start.png").toExternalForm()), 0, BlockShape.Start, 100, 50, 0);
+    RotateLeft(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 150, BlockShape.Default, 100, 50, 0),
+    RotateRight(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 225, BlockShape.Default, 100, 50, 0),
+    SetColor(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 350, BlockShape.Default, 100, 50, 1),
+    GetSensorValue(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 475, BlockShape.Value, 100, 50, 0),
+    Wait(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 600, BlockShape.Default, 100, 50, 1),
+    If(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 675, BlockShape.Nesting, 100, 50, 3),
+    IfEl(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 750, BlockShape.DoubleNesting, 100, 50, 3),
+    Loop(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 825, BlockShape.Nesting, 100, 50, 2),
+    Equal(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 950, BlockShape.Operand, 100, 50, 2),
+    Less(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 1025, BlockShape.Operand, 100, 50, 2),
+    Greater(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 1100, BlockShape.Operand, 100, 50, 2),
+    Start(new Image(Editor.class.getResource("/temp.png").toExternalForm()), 0, BlockShape.Start, 100, 50, 0);
 
     public final Image image;
     public final int menuPositionY;

@@ -1,60 +1,93 @@
 package silly.bot;
 
-import java.net.*;
 import java.io.*;
+import java.net.*;
+
+enum ResponseCode {
+  OK,
+  DISCONNECT;
+}
+
+enum RobotCommand {
+  MOVE_FORWARD,
+  ROTATE_RIGHT,
+  ROTATE_LEFT,
+  SET_COLOR;
+}
 
 public class Server {
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private PrintWriter serverOutput;
-    private BufferedReader serverInput;
+  private ServerSocket serverSocket;
+  private Socket clientSocket;
+  private PrintWriter serverOutput;
+  public BufferedReader serverInput;
+  public String inputLine;
 
-    public void startServer() throws IOException {
-        serverSocket = new ServerSocket(9090);
-        System.out.println("SERVER: Server waiting for client...");
-        clientSocket = serverSocket.accept();
-        System.out.println("SERVER: A client has been connected (" + clientSocket.getInetAddress().getHostName() + ")!");
-        
-        // Set up Communication
-        serverOutput = new PrintWriter(clientSocket.getOutputStream(), true);
-        serverInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+  public Server() throws IOException {
+    serverSocket = new ServerSocket(9090);
+  }
+
+  public void findClient() throws IOException {
+    System.out.println("SERVER: Server waiting for client...");
+    clientSocket = serverSocket.accept();
+    System.out.println("SERVER: A client has been connected (" + clientSocket.getInetAddress().getHostName() + ")!");
+
+    // Set up Communication
+    serverOutput = new PrintWriter(clientSocket.getOutputStream(), true);
+    serverInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+  }
+
+  public void disconnectClient() throws IOException {
+    System.out.println("Disconnecting");
+    serverOutput.close();
+    serverInput.close();
+    clientSocket.close();
+  }
+
+  public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
+    switch (command) {
+      case MOVE_FORWARD:
+        serverOutput.println("R_000" + String.format("%03d", parameters[0]) + String.format("%03d", parameters[1]));
+        break;
+      case ROTATE_LEFT:
+        serverOutput.println("R_001");
+        break;
+      case ROTATE_RIGHT:
+        serverOutput.println("R_002");
+        break;
+      case SET_COLOR:
+        serverOutput.println(
+          "R_003" +
+          String.format("%03d", parameters[0]) +
+          String.format("%03d", parameters[1]) +
+          String.format("%03d", parameters[2]) +
+          String.format("%03d", parameters[3]) +
+          String.format("%03d", parameters[4]) +
+          String.format("%03d", parameters[5])
+        );
+        break;
     }
+  }
 
-    public void sendMessage() throws IOException {
-        String inputLine;
-        while(true) {
-            //serverOutput.println("Hello;");
-            if((inputLine = serverInput.readLine()) != null) {
-                if (".".equals(inputLine)) {
-                   serverOutput.println("good bye");
-                   break;
-                }
-                System.out.println(inputLine);
-                
-                continue;
-            }
-            System.out.println("test");
-            serverOutput.close();
-            serverInput.close();
-            clientSocket.close();
-            clientSocket = serverSocket.accept();
-            serverOutput = new PrintWriter(clientSocket.getOutputStream(), true);
-            serverInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        }
+  public boolean isMessageAvailable() throws IOException {
+    return serverInput.ready();
+  }
+
+  public String getMessage() throws IOException {
+    inputLine = serverInput.readLine();
+    return inputLine;
+  }
+
+  public ResponseCode readMessage() throws IOException {
+    if ("FCKOFF".equals(inputLine)) {
+      return ResponseCode.DISCONNECT;
     }
+    System.out.println(inputLine);
+    return ResponseCode.OK;
+  }
 
-    public void stopServer() throws IOException {
-        System.out.println("SERVER: Shutting down server.");
-        serverOutput.close();
-        serverInput.close();
-        clientSocket.close();
-        serverSocket.close();
-    }
-
-    public static void main(String[] args) throws IOException {
-        Server server = new Server();
-        server.startServer();
-        server.sendMessage();
-
-    }
+  public void stopServer() throws IOException {
+    System.out.println("SERVER: Shutting down server.");
+    disconnectClient();
+    serverSocket.close();
+  }
 }
