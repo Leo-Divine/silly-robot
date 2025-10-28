@@ -16,9 +16,8 @@
 - [x] Buttons Scrolling
 - [ ] Give Blocks Parameters
     - [ ] Customize Parameters
-- [ ] Add Wifi Stuffs
 - [ ] Turn Blocks into JSON Code
-- [ ] Make Different Block Types (Operator, Nested Block, etc)
+- [x] Make Different Block Types (Operator, Nested Block, etc)
     - [ ] Different Block Widths
 - [ ] Replace Block Images with SVG's
 

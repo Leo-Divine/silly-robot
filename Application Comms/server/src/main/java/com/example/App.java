@@ -16,7 +16,8 @@ import java.io.*;
  */
 public class App extends Application {
   private static Server server;
-  private static Button btn;
+  private static Button btn_rotateRight;
+  private static Button btn_rotateLeft;
 
   private static boolean isConnected = false;
 
@@ -52,18 +53,33 @@ public class App extends Application {
     };
     timer.start();
 
-    btn = new Button("Wassup!");
-    btn.setOnAction(new EventHandler<ActionEvent>() {
+    btn_rotateLeft = new Button("Rotate Left");
+    btn_rotateLeft.relocate(50, 25);
+    btn_rotateLeft.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         try {
-          server.sendMessage();
+          server.sendMessage("000");
         } catch (IOException e) {
           System.out.println("fuck: " + e.getMessage());
         }
       }
     });
-    root.getChildren().add(btn);
+    root.getChildren().add(btn_rotateLeft);
+
+    btn_rotateRight = new Button("Rotate Right");
+    btn_rotateRight.relocate(50, 75);
+    btn_rotateRight.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        try {
+          server.sendMessage("001");
+        } catch (IOException e) {
+          System.out.println("fuck: " + e.getMessage());
+        }
+      }
+    });
+    root.getChildren().add(btn_rotateRight);
 
     stage.setScene(new Scene(root, 1200, 800));
     stage.show();
@@ -108,8 +124,8 @@ class Server {
     clientSocket.close();
   }
 
-  public void sendMessage() throws IOException {
-    serverOutput.println("Hello;");
+  public void sendMessage(String message) throws IOException {
+    serverOutput.println(message);
   }
 
   public ResponseCode readMessage() throws IOException {

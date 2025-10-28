@@ -6,17 +6,15 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "Rossini Family";
-char pass[] = "Ajgabmas171";
+char ssid[] = "IT-Shop";
+char pass[] = "B0n_J0v!";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.68.50";
+char server[] = "192.168.0.68";
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 100000L;
 
 WiFiEspClient client;
 extern SpheroRVR rvr;
-
-
 
 void setup()
 {
@@ -24,9 +22,8 @@ void setup()
   Serial.begin(115200);
   rvr.configUART(&Serial);
   rvr.resetYaw();
-  // initialize serial for ESP module
+
   Serial1.begin(9600);
-  // initialize ESP module
   WiFi.init(&Serial1);
 
   // check for the presence of the shield
@@ -73,15 +70,16 @@ void loop()
       client.read();
     }
 
-    Serial.print(c);
-    if(c == "Hello") {
+    Serial.print(c.substring(0, 2));
+    if(c.substring(0, 3) == "000") {
       client.println("Wassup");
-      
+      rotateLeft();
+    } else if(c.substring(0, 3) == "001") {
+      rotateRight();
     } else {
       client.println("Other");
-      rotateRight();
+      
     }
-    
     
     lastConnectionTime = millis();
     Serial.println();
@@ -94,7 +92,6 @@ void loop()
     client.println("FCKOFF");
     httpRequest();
   }
-  
 }
 
 void rotateRight() {
@@ -102,6 +99,14 @@ void rotateRight() {
   rvr.getDriveControl().rollStart(93, 64);
   delay(950);
   rvr.getDriveControl().rollStop(93);
+  rvr.resetYaw();
+  delay(150);
+}
+
+void rotateLeft() {
+  rvr.getDriveControl().rollStart(267, 64);
+  delay(950);
+  rvr.getDriveControl().rollStop(267);
   rvr.resetYaw();
   delay(150);
 }
