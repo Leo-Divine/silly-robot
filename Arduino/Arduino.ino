@@ -1,44 +1,122 @@
+#include "WiFiEsp.h"
 #include "Sphero.h"
-#include "Reader.h"
 
+#ifndef HAVE_HWSERIAL1
+#include "SoftwareSerial.h"
+SoftwareSerial Serial1(2, 3); // RX, TX
+#endif
+
+char ssid[] = "IT-Shop";
+char pass[] = "B0n_J0v!";
+int status = WL_IDLE_STATUS;
+char server[] = "192.168.0.68";
+unsigned long lastConnectionTime = 0;
+const unsigned long postingInterval = 60000L; // 1 Min
+
+WiFiEspClient client;
 Sphero sphero;
 
-void setup() {
-  Serial.begin(115220);
+void setup()
+{
+  // Set up Robot
+  Serial.begin(115200);
   sphero.initialize();
-  delay(2000);
+
+  // Set up WiFi
+  Serial1.begin(9600);
+  WiFi.init(&Serial1);
+
+  // Check for WiFi Shield
+  if (WiFi.status() == WL_NO_SHIELD) {
+    Serial.println("WiFi shield not present");
+    while (true);
+  }
+
+  // Connect to WiFi
+  while (status != WL_CONNECTED) {
+    Serial.print("Attempting to connect to WPA SSID: ");
+    Serial.println(ssid);
+    // Connect to WPA/WPA2 network
+    status = WiFi.begin(ssid, pass);
+  }
+  Serial.println("You're connected to the network");
+  printWifiStatus();
+
+  connectToServer();
 }
 
-void loop() {
-  char* code = R"([{"b":4,p:[3,0,0]},{"b":1,p:[128,1,0]},{"b":6,p:[3,[{"b":4,p:[4,0,0]},{"b":0,p:[1,0,0]},{"b":4,p:[5,0,0]},{"b":0,p:[1,0,0]}],0]}])";
-  runCode(sphero, code);
-  while(true);
+void loop()
+{
+  String c = "";
+  while (client.available()) {
+    c += static_cast<char>(client.read());
+    if(client.peek() != 13) { continue; };
+
+    while(client.available()) {
+      client.read();
+    }
+
+    Serial.print(c.substring(0, 5));
+    if(c.substring(0, 5) == "R_000") {
+      sphero.moveForward(c.substring(5, 8).toInt(), c.substring(8, 11).toInt());
+    } else if(c.substring(0, 5) == "R_001") {
+      sphero.rotateLeft();
+    } else if(c.substring(0, 5) == "R_002") {
+      sphero.rotateRight();
+    }  else if(c.substring(0, 5) == "R_003") {
+      sphero.setColor(
+        c.substring(5, 8).toInt(),
+        c.substring(8, 11).toInt(),
+        c.substring(11, 14).toInt(),
+        c.substring(14, 17).toInt(),
+        c.substring(17, 20).toInt(),
+        c.substring(20, 23).toInt());
+    } else {
+      client.println("Beep Boop Does not Compoop");
+    }
+    
+    lastConnectionTime = millis();
+    c = "";
+    delay(2000);
+  }
+  
+  if (millis() - lastConnectionTime > postingInterval) {
+    client.println("FCKOFF");
+    resetConnection();
+  }
 }
 
-/* 
-    {"block": "Loop", parameters: [
-      3, 
-      [
-        {"block": "SetColor", parameters: [4, 0, 0]},
-        {"block": "Wait", parameters: [1, 0, 0]},
-        {"block": "SetColor", parameters: [5, 0, 0]},
-        {"block": "Wait", parameters: [1, 0, 0]}
-      ], 
-      0
-    ]
-  },*/
+void connectToServer() {
+  if (client.connect(server, 9090)) {
+    Serial.println("Connected");
+    lastConnectionTime = millis();
+    
+    // Greet the Server Politely
+    client.println("Howdy!");
+  }
+  else {
+    Serial.println("Connection failed");
+  }
+}
 
-    /*
-    {"block": "If", parameters: [
-    {"block": "Equal", parameters: [4, 3, 0]}, 
-    [
-      {"block": "SetColor", parameters: [3, 0, 0]}
-    ], 
-    [
-      {"block": "SetColor", parameters: [0, 0, 0]}
-    ]
-  ]},
-  {"block": "Wait", parameters: [2, 0, 0]}
-    */
-    /**/ 
-    /* [{"b":6,"p":[4,[{"b":3,"p":[0,0,0]}],0]}]*/    // Turn 4 Times
+void resetConnection()
+{
+  Serial.println();
+  client.stop();
+  connectToServer();
+}
+
+void printWifiStatus()
+{
+  Serial.print("SSID: ");
+  Serial.println(WiFi.SSID());
+
+  IPAddress ip = WiFi.localIP();
+  Serial.print("IP Address: ");
+  Serial.println(ip);
+
+  long rssi = WiFi.RSSI();
+  Serial.print("Signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+}
