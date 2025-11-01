@@ -9,11 +9,8 @@ extern SpheroRVR rvr;
 class Sphero {
   public:
     void initialize();
-    void moveForward(uint8_t speed);
-    void moveBackward(uint8_t speed);
-    void stopMoving();
-    void rotateRight();
-    void rotateLeft();
+    void drive(uint8_t speed, int heading);
+    void stop(int lastHeading);
     void setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint8_t redRight, uint8_t greenRight, uint8_t blueRight);
     void getSensorData();
 };

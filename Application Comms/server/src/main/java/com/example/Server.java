@@ -10,8 +10,10 @@ enum ResponseCode {
 
 enum RobotCommand {
   MOVE_FORWARD,
-  ROTATE_RIGHT,
-  ROTATE_LEFT,
+  MOVE_LEFT,
+  MOVE_RIGHT,
+  MOVE_BACKWARD,
+  STOP_MOVING,
   SET_COLOR;
 }
 
@@ -46,17 +48,23 @@ public class Server {
   public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
     switch (command) {
       case MOVE_FORWARD:
-        serverOutput.println("R_000" + String.format("%03d", parameters[0]) + String.format("%03d", parameters[1]));
+        serverOutput.println("R_000" + String.format("%03d", parameters[0]));
         break;
-      case ROTATE_LEFT:
-        serverOutput.println("R_001");
+      case MOVE_LEFT:
+        serverOutput.println("R_001" + String.format("%03d", parameters[0]));
         break;
-      case ROTATE_RIGHT:
-        serverOutput.println("R_002");
+      case MOVE_BACKWARD:
+        serverOutput.println("R_002" + String.format("%03d", parameters[0]));
+        break;
+      case MOVE_RIGHT:
+        serverOutput.println("R_003" + String.format("%03d", parameters[0]));
+        break;
+      case STOP_MOVING:
+        serverOutput.println("R_004");
         break;
       case SET_COLOR:
         serverOutput.println(
-          "R_003" +
+          "R_005" +
           String.format("%03d", parameters[0]) +
           String.format("%03d", parameters[1]) +
           String.format("%03d", parameters[2]) +

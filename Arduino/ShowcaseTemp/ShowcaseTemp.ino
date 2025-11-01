@@ -6,15 +6,20 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "IT-Shop";
-char pass[] = "B0n_J0v!";
+char ssid[] = "Rossini Family";
+char pass[] = "Ajgabmas171";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.0.68";
+char server[] = "192.168.68.58";
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 60000L; // 1 Min
 
 WiFiEspClient client;
 Sphero sphero;
+
+enum Direction { FORWARD, LEFT, BACKWARD, RIGHT, STOPPED };
+Direction driving = Direction::STOPPED;
+int lastHeading = 0;
+uint8_t speed = 64;
 
 void setup()
 {
@@ -40,7 +45,6 @@ void setup()
     status = WiFi.begin(ssid, pass);
   }
   Serial.println("You're connected to the network");
-  printWifiStatus();
 
   connectToServer();
 }
@@ -56,14 +60,25 @@ void loop()
       client.read();
     }
 
-    Serial.print(c.substring(0, 5));
     if(c.substring(0, 5) == "R_000") {
-      sphero.moveForward(c.substring(5, 8).toInt());
+      driving = Direction::FORWARD;
+      speed = c.substring(5, 8).toInt();
+      lastHeading = 2;
     } else if(c.substring(0, 5) == "R_001") {
-      sphero.rotateLeft();
+      driving = Direction::LEFT;
+      speed = c.substring(5, 8).toInt();
+      lastHeading = 272;
     } else if(c.substring(0, 5) == "R_002") {
-      sphero.rotateRight();
+      driving = Direction::BACKWARD;
+      speed = c.substring(5, 8).toInt();
+      lastHeading = 182;
     } else if(c.substring(0, 5) == "R_003") {
+      driving = Direction::RIGHT;
+      speed = c.substring(5, 8).toInt();
+      lastHeading = 92;
+    } else if(c.substring(0, 5) == "R_004") {
+      driving = Direction::STOPPED;
+    } else if(c.substring(0, 5) == "R_005") {
       sphero.setColor(
         c.substring(5, 8).toInt(),
         c.substring(8, 11).toInt(),
@@ -71,20 +86,35 @@ void loop()
         c.substring(14, 17).toInt(),
         c.substring(17, 20).toInt(),
         c.substring(20, 23).toInt());
-    } else if(c.substring(0, 5) == "R_004") {
-      sphero.moveBackward(c.substring(5, 8).toInt());
-    } else if(c.substring(0, 5) == "R_005") {
-      sphero.stopMoving();
     } else {
       client.println("Beep Boop Does not Compoop");
     }
     
     lastConnectionTime = millis();
     c = "";
-    delay(2000);
+  }
+
+  sphero.drive(speed, lastHeading);
+  switch(driving) {
+    case FORWARD:
+      sphero.drive(speed, 0);
+      break;
+    case BACKWARD:
+      sphero.drive(speed, 180);
+      break;
+    case LEFT:
+      sphero.drive(speed, 270);
+      break;
+    case RIGHT:
+      sphero.drive(speed, 90);
+      break;
+    case STOPPED:
+      sphero.stop(lastHeading);
+      break;
   }
   
   if (millis() - lastConnectionTime > postingInterval) {
+    sphero.stop(lastHeading);
     client.println("FCKOFF");
     resetConnection();
   }
@@ -108,19 +138,4 @@ void resetConnection()
   Serial.println();
   client.stop();
   connectToServer();
-}
-
-void printWifiStatus()
-{
-  Serial.print("SSID: ");
-  Serial.println(WiFi.SSID());
-
-  IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
-
-  long rssi = WiFi.RSSI();
-  Serial.print("Signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
 }

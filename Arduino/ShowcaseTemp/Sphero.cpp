@@ -5,34 +5,12 @@ void Sphero::initialize() {
   rvr.resetYaw();
 }
 
-void Sphero::moveForward(uint8_t speed) {
-  rvr.rawMotors(RawMotorModes::forward, speed, RawMotorModes::forward, speed);
+void Sphero::drive(uint8_t speed, int heading) {
+  rvr.getDriveControl().rollStart(heading, speed);
 }
 
-void Sphero::moveBackward(uint8_t speed) {
-  rvr.rawMotors(RawMotorModes::reverse, speed, RawMotorModes::reverse, speed);
-}
-
-void Sphero::stopMoving() {
-  rvr.rawMotors(RawMotorModes::forward, 0, RawMotorModes::forward, 0);
-}
-
-void Sphero::rotateRight() {
-  rvr.resetYaw();
-  rvr.getDriveControl().rollStart(93, 64);
-  delay(950);
-  rvr.getDriveControl().rollStop(93);
-  rvr.resetYaw();
-  delay(150);
-}
-
-void Sphero::rotateLeft() {
-  rvr.resetYaw();
-  rvr.getDriveControl().rollStart(267, 64);
-  delay(950);
-  rvr.getDriveControl().rollStop(267);
-  rvr.resetYaw();
-  delay(150);
+void Sphero::stop(int lastHeading) {
+  rvr.getDriveControl().rollStop(lastHeading);
 }
 
 void Sphero::setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint8_t redRight, uint8_t greenRight, uint8_t blueRight) {
