@@ -3,6 +3,7 @@ package silly.bot;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 
 import java.util.Vector;
@@ -22,7 +23,7 @@ public class Editor extends Canvas {
 
     public Editor(int i, int j) {
         super(i, j);
-        blocks.add(new Block(BlockType.Start, 425, 25));
+        blocks.add(new StartBlock(BlockType.Start, new Position(425, 40)));
     }
 
     public void clearCanvas() {
@@ -43,19 +44,19 @@ public class Editor extends Canvas {
         gc.setFont(new Font("Arial", 20));
 
         // Draw Navigation Buttons
-        gc.setFill(Color.rgb(255, 102, 128));
+        gc.setFill(BlockCategory.Movement.fill);
         gc.fillOval(25, 25, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.rgb(89, 192, 89));
+        gc.setFill(BlockCategory.Display.fill);
         gc.fillOval(25, 75, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.GREY);
+        gc.setFill(BlockCategory.Sensors.fill);
         gc.fillOval(25, 125, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.rgb(153, 102, 255));
+        gc.setFill(BlockCategory.Control.fill);
         gc.fillOval(25, 175, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.rgb(255, 171, 25));
+        gc.setFill(BlockCategory.Operands.fill);
         gc.fillOval(25, 225, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
         // Draw Text
@@ -69,46 +70,76 @@ public class Editor extends Canvas {
         //Draw Blocks
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
-            gc.drawImage(blockType.image, 100, blockType.menuPositionY - blockMenuScroll, blockType.startWidth, blockType.startHeight);
+
+            if(blockType == BlockType.Start) { continue; }
+            Path blockPath = blockType.shape.getPath(
+                new Position(-225, blockType.menuPosition - blockMenuScroll),
+                blockType.startWidth,
+                blockType.startHeight
+            );
+
+            gc.setStroke(blockType.category.border);
+            gc.setLineWidth(Block.borderWidth);
+            gc.setFill(blockType.category.fill);
+
+            gc.beginPath();
+            gc.appendSVGPath(BlockPaths.pathToString(blockPath));
+            gc.closePath();
+            gc.fill();
+            gc.stroke();
         }
     }
 
     public void drawBlocks() {
         for(Block block : blocks) {
-            gc.drawImage(block.blockType.image, block.xPos + 325, block.yPos, block.blockType.startWidth, block.blockType.startHeight);
+            block.drawBlock(gc);
         }
     }
 
     public void mousePressed(double eventXPos, double eventYPos) {
         for(Block block : blocks) {
             if(block.blockType == BlockType.Start) { continue; }
-            if(!block.isMouseOnBlock(eventXPos, eventYPos)) { continue; }
+            if(!block.isMouseOnBlock(new Position(eventXPos, eventYPos))) { continue; }
             block.isDragging = true;
-            block.mouseOffsetX = eventXPos - 325 - block.xPos;
-            block.mouseOffsetY = eventYPos - block.yPos;
+            block.mouseOffset = new Position(eventXPos - 325 - block.position.x, eventYPos - block.position.y);
             currentDraggingBlock = block.getId();
             break;
         }
-
-        //Check if a Menu Block was Selected
+         
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
             if(eventXPos >= 100 && 
             eventXPos <= 100 + blockType.startWidth &&
-            eventYPos >= blockType.menuPositionY - blockMenuScroll &&
-            eventYPos <= blockType.menuPositionY - blockMenuScroll + blockType.startHeight) {
-                Block block = new Block(
-                    blockType,
-                    100,
-                    blockType.menuPositionY - blockMenuScroll
-                );
+            eventYPos >= blockType.menuPosition - blockMenuScroll &&
+            eventYPos <= blockType.menuPosition - blockMenuScroll + blockType.startHeight) {
+                Block block;
+                switch(blockType.shape) {
+                    case Default:
+                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Value:
+                        block = new ValueBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Operand:
+                        block = new OperandBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Nesting:
+                        block = new NestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case DoubleNesting:
+                        block = new DoubleNestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    default: 
+                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                }
+
                 block.isDragging = true;
-                block.mouseOffsetX = eventXPos - 325 - block.xPos;
-                block.mouseOffsetY = eventYPos - block.yPos;
+                block.mouseOffset.x = eventXPos - 325 - block.position.x;
+                block.mouseOffset.y = eventYPos - block.position.y;
                 currentDraggingBlock = block.getId();
 
                 blocks.add(block);
-
                 return;
             }
         }
@@ -120,8 +151,7 @@ public class Editor extends Canvas {
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
         block.isDragging = false;
-        block.mouseOffsetX = 0;
-        block.mouseOffsetY = 0;
+        block.mouseOffset = new Position(0, 0);
         currentDraggingBlock = 0;
 
         //Remove Previous Connection
@@ -132,7 +162,7 @@ public class Editor extends Canvas {
         }
 
         // Check if Dragged to Block Menu
-        if(block.xPos < 0) {
+        if(block.position.x < 0) {
             if(block.belowBlock != 0) {
                 deleteConnectedBlock(block.belowBlock);
             }
@@ -145,16 +175,18 @@ public class Editor extends Canvas {
             if(surroundingBlock.belowBlock != 0) { continue; }
 
             // Check if Block is Close Enough
-            if(Math.abs(surroundingBlock.xPos - block.xPos) <= 15 &&
-               Math.abs(surroundingBlock.yPos + surroundingBlock.blockType.startHeight - block.yPos) <= 40)  {
+            if(Math.abs(surroundingBlock.position.x - block.position.x) <= 15 &&
+               Math.abs(surroundingBlock.position.y + surroundingBlock.getHeight() - block.position.y) <= 40)  {
                 block.aboveBlock = surroundingBlock.getId();
                 surroundingBlock.belowBlock = block.getId();
 
-                block.xPos = surroundingBlock.xPos;
-                block.yPos = surroundingBlock.yPos + surroundingBlock.blockType.startHeight;
+                block.position = new Position(
+                    surroundingBlock.position.x,
+                    surroundingBlock.position.y + surroundingBlock.getHeight() + 8 + Block.borderWidth
+                );
 
                 if(block.belowBlock == 0) { break; }
-                moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
+                moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
                 break;
             }
         }
@@ -176,23 +208,21 @@ public class Editor extends Canvas {
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
 
-        block.xPos = eventXPos - 325 - block.mouseOffsetX;
-        block.yPos = eventYPos - block.mouseOffsetY;
+        block.position = new Position(eventXPos - 325 - block.mouseOffset.x, eventYPos - block.mouseOffset.y);
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
+        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
     }
 
-    private void moveConnectedBlock(int blockId, double xPos, double yPos, int aboveBlockHeight) {
+    private void moveConnectedBlock(int blockId, Position position, int aboveBlockHeight) {
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
 
         // Move Block
-        block.xPos = xPos;
-        block.yPos = yPos + aboveBlockHeight;
+        block.position = new Position(position.x, position.y + aboveBlockHeight + 8);
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.xPos, block.yPos, block.blockType.startHeight);
+        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
     }
 
     public void mouseClicked(double eventXPos, double eventYPos) {

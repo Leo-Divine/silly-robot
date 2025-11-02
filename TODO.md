@@ -14,12 +14,15 @@
 - [x] Make a Starting Block
 - [x] Block Deletion
 - [x] Buttons Scrolling
-- [ ] Give Blocks Parameters
-    - [ ] Customize Parameters
-- [ ] Turn Blocks into JSON Code
-- [x] Make Different Block Types (Operator, Nested Block, etc)
-    - [ ] Different Block Widths
-- [ ] Replace Block Images with SVG's
+- [x] Add Wifi Stuffs
+- [ ] Turn Blocks into Code
+- [x] Replace Block Images with SVG's
+    - [x] Drag Blocks From Menu
+    - [x] Fix Block Snapping Position
+    - [x] Make Different Block Types (Operator, Nested Block, etc)
+    - [ ] Give Blocks Parameters
+        - [ ] Customize Parameters
+- [ ] Move Blocks to the Back of BlockList When Dragged
 
 
 ## Sphero
