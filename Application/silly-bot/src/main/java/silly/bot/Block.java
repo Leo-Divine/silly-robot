@@ -1,6 +1,5 @@
 package silly.bot;
 
-import java.io.Serializable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
@@ -36,31 +35,31 @@ enum BlockShape {
     Operand {
         @Override
         public Path getPath(Position position, int width, int height) {
-            return BlockPaths.drawDefaultBlock(position, width, height);
+            return BlockPaths.drawOperandBlock(position, width, height);
         }
     },
     Value {
         @Override
         public Path getPath(Position position, int width, int height) {
-            return BlockPaths.drawDefaultBlock(position, width, height);
+            return BlockPaths.drawValueBlock(position, width, height);
         }
     },
     Nesting {
         @Override
         public Path getPath(Position position, int width, int height) {
-            return BlockPaths.drawDefaultBlock(position, width, height);
+            return BlockPaths.drawNestingBlock(position, width, height, 25);
         }
     },
     DoubleNesting {
         @Override
         public Path getPath(Position position, int width, int height) {
-            return BlockPaths.drawDefaultBlock(position, width, height);
+            return BlockPaths.drawDoubleNestingBlock(position, width, height, 25, 25);
         }
     },
     Start {
         @Override
         public Path getPath(Position position, int width, int height) {
-            return BlockPaths.drawDefaultBlock(position, width, height);
+            return BlockPaths.drawStartBlock(position, width, height);
         }
     };
 
@@ -68,18 +67,18 @@ enum BlockShape {
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 30, 2, 75),
-    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 25, 0, 150),
-    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 25, 0, 225),
-    SetColor(BlockShape.Default, BlockCategory.Display, 100, 50, 1, 350),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 50, 0, 475),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 50, 1, 600),
-    If(BlockShape.Nesting, BlockCategory.Control, 100, 50, 3, 675),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 100, 50, 3, 750),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 100, 50, 2, 825),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 950),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 1025),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 50, 2, 1100),
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 35, 2, 75),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 35, 0, 150),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 35, 0, 225),
+    SetColor(BlockShape.Default, BlockCategory.Display, 100, 35, 1, 350),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, 0, 475),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, 1, 600),
+    If(BlockShape.Nesting, BlockCategory.Control, 150, 40, 3, 675),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 40, 3, 750),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 40, 2, 825),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 950),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 1025),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 1100),
     Start(BlockShape.Start, BlockCategory.Start, 125, 25, 0, 0);
 
     public final BlockShape shape;
@@ -99,8 +98,9 @@ enum BlockType {
     }
 }
 
-public class Block implements Serializable {
+public abstract class Block {
     static int nextBlockId = 1;
+    static double borderWidth = 1.15;
     private int id;
     BlockType blockType;
     int aboveBlock = 0;
@@ -108,44 +108,183 @@ public class Block implements Serializable {
     Position position = new Position(0, 0);
     boolean isDragging = false;
     Position mouseOffset = new Position(0, 0);
-    int width;
-    int height;
-    int menuPosition;
-    Path blockPath;
+    protected int baseWidth;
+    protected int baseHeight;
 
-    public Block(BlockType b, double xPos, double yPos) {
+    public Block(BlockType type, Position position) {
         this.id = nextBlockId;
         nextBlockId++;
-        this.blockType = b;
-        this.position = new Position(xPos - 325, yPos);
-        this.width = BlockType.Start.startWidth;
-        this.height = BlockType.Start.startHeight;
-        this.menuPosition = blockType.menuPosition;
-        this.blockPath = blockType.shape.getPath(position, width, height);
+        this.blockType = type;
+        this.position = position;
+        position.x -= 325;
+        this.baseWidth = blockType.startWidth;
+        this.baseHeight = blockType.startHeight;
     }
 
     public int getId() {
         return id;
     }
 
-    public boolean isMouseOnBlock(double mouseX, double mouseY) {
-        return blockPath.contains(mouseX, mouseY);
-    }
+    abstract int getWidth();
+    abstract int getHeight();
+    abstract Path getPath();
 
-    public String getJSONCode() {
-        return "";
+    public boolean isMouseOnBlock(Position mousePosition) {
+        return getPath().contains(mousePosition.x, mousePosition.y);
     }
 
     public GraphicsContext drawBlock(GraphicsContext gc) {
-        blockPath = blockType.shape.getPath(position, width, height);
-
         gc.setStroke(blockType.category.border);
+        gc.setLineWidth(borderWidth);
         gc.setFill(blockType.category.fill);
 
         gc.beginPath();
-        gc.appendSVGPath(BlockPaths.pathToString(blockPath));
+        String test = BlockPaths.pathToString(getPath());
+        gc.appendSVGPath(test);
         gc.closePath();
         gc.fill();
+        gc.stroke();
         return gc;
+    }
+}
+
+class DefaultBlock extends Block {
+    public DefaultBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight;
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawDefaultBlock(position, baseWidth, baseHeight);
+    }
+}
+
+class ValueBlock extends Block {
+    public ValueBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight;
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawValueBlock(position, baseWidth, baseHeight);
+    }
+}
+
+class OperandBlock extends Block {
+    public OperandBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight;
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawOperandBlock(position, baseWidth, baseHeight);
+    }
+}
+
+class StartBlock extends Block {
+    public StartBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight;
+    }
+
+    public String getCode() {
+        return "";
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawStartBlock(position, baseWidth, baseHeight);
+    }
+}
+
+class NestingBlock extends Block {
+    int nestedBlock;
+
+    public NestingBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight + getTotalNestingBlockHeight() + 24 + 16;
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawNestingBlock(position, baseWidth, baseHeight, getTotalNestingBlockHeight());
+    }
+
+    private int getTotalNestingBlockHeight() {
+        return 25;
+    }
+}
+
+class DoubleNestingBlock extends Block {
+    int firstNestedBlock;
+    int secondNestedBlock;
+
+    public DoubleNestingBlock(BlockType type, Position position) {
+        super(type, position);
+    }
+
+    public int getWidth() {
+        // TODO Add Changing Width With Value and Operand Blocks
+        return baseWidth;
+    }
+
+    public int getHeight() {
+        return baseHeight + getFirstNestingBlockHeight() + getSecondNestingBlockHeight() + 24 + 24 + 32;
+    }
+
+    @Override
+    public Path getPath() {
+        return BlockPaths.drawDoubleNestingBlock(position, baseWidth, baseHeight, getFirstNestingBlockHeight(), getSecondNestingBlockHeight());
+    }
+
+    private int getFirstNestingBlockHeight() {
+        return 25;
+    }
+
+    private int getSecondNestingBlockHeight() {
+        return 25;
     }
 }

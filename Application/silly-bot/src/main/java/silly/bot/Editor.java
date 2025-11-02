@@ -23,8 +23,7 @@ public class Editor extends Canvas {
 
     public Editor(int i, int j) {
         super(i, j);
-        //blocks.add(new Start(425, 25));
-        blocks.add(new Block(BlockType.MoveForward, 700, 25));
+        blocks.add(new StartBlock(BlockType.Start, new Position(425, 40)));
     }
 
     public void clearCanvas() {
@@ -45,19 +44,19 @@ public class Editor extends Canvas {
         gc.setFont(new Font("Arial", 20));
 
         // Draw Navigation Buttons
-        gc.setFill(Color.rgb(255, 102, 128));
+        gc.setFill(BlockCategory.Movement.fill);
         gc.fillOval(25, 25, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
         gc.setFill(BlockCategory.Display.fill);
         gc.fillOval(25, 75, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.GREY);
+        gc.setFill(BlockCategory.Sensors.fill);
         gc.fillOval(25, 125, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.rgb(153, 102, 255));
+        gc.setFill(BlockCategory.Control.fill);
         gc.fillOval(25, 175, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
-        gc.setFill(Color.rgb(255, 171, 25));
+        gc.setFill(BlockCategory.Operands.fill);
         gc.fillOval(25, 225, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
 
         // Draw Text
@@ -71,6 +70,8 @@ public class Editor extends Canvas {
         //Draw Blocks
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
+
+            if(blockType == BlockType.Start) { continue; }
             Path blockPath = blockType.shape.getPath(
                 new Position(-225, blockType.menuPosition - blockMenuScroll),
                 blockType.startWidth,
@@ -78,12 +79,14 @@ public class Editor extends Canvas {
             );
 
             gc.setStroke(blockType.category.border);
+            gc.setLineWidth(Block.borderWidth);
             gc.setFill(blockType.category.fill);
 
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(blockPath));
             gc.closePath();
             gc.fill();
+            gc.stroke();
         }
     }
 
@@ -96,37 +99,50 @@ public class Editor extends Canvas {
     public void mousePressed(double eventXPos, double eventYPos) {
         for(Block block : blocks) {
             if(block.blockType == BlockType.Start) { continue; }
-            if(!block.isMouseOnBlock(eventXPos, eventYPos)) { continue; }
+            if(!block.isMouseOnBlock(new Position(eventXPos, eventYPos))) { continue; }
             block.isDragging = true;
             block.mouseOffset = new Position(eventXPos - 325 - block.position.x, eventYPos - block.position.y);
             currentDraggingBlock = block.getId();
             break;
         }
-
-        // TODO Check if a Menu Block was Selected
-        /* 
+         
         for(BlockType blockType : BlockType.values()) {
             if(blockType == BlockType.Start) { continue; }
             if(eventXPos >= 100 && 
             eventXPos <= 100 + blockType.startWidth &&
-            eventYPos >= blockType.menuPositionY - blockMenuScroll &&
-            eventYPos <= blockType.menuPositionY - blockMenuScroll + blockType.startHeight) {
-                Block block = new Block(
-                    blockType,
-                    100,
-                    blockType.menuPositionY - blockMenuScroll
-                );
+            eventYPos >= blockType.menuPosition - blockMenuScroll &&
+            eventYPos <= blockType.menuPosition - blockMenuScroll + blockType.startHeight) {
+                Block block;
+                switch(blockType.shape) {
+                    case Default:
+                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Value:
+                        block = new ValueBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Operand:
+                        block = new OperandBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case Nesting:
+                        block = new NestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    case DoubleNesting:
+                        block = new DoubleNestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                    default: 
+                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        break;
+                }
+
                 block.isDragging = true;
-                block.mouseOffsetX = eventXPos - 325 - block.xPos;
-                block.mouseOffsetY = eventYPos - block.yPos;
+                block.mouseOffset.x = eventXPos - 325 - block.position.x;
+                block.mouseOffset.y = eventYPos - block.position.y;
                 currentDraggingBlock = block.getId();
 
                 blocks.add(block);
-
                 return;
             }
         }
-            */
     }
 
     public void mouseReleased(double eventXPos, double eventYPos) {
@@ -160,17 +176,17 @@ public class Editor extends Canvas {
 
             // Check if Block is Close Enough
             if(Math.abs(surroundingBlock.position.x - block.position.x) <= 15 &&
-               Math.abs(surroundingBlock.position.y + surroundingBlock.blockType.startHeight - block.position.y) <= 40)  {
+               Math.abs(surroundingBlock.position.y + surroundingBlock.getHeight() - block.position.y) <= 40)  {
                 block.aboveBlock = surroundingBlock.getId();
                 surroundingBlock.belowBlock = block.getId();
 
                 block.position = new Position(
                     surroundingBlock.position.x,
-                    surroundingBlock.position.y + surroundingBlock.blockType.startHeight + 8
+                    surroundingBlock.position.y + surroundingBlock.getHeight() + 8 + Block.borderWidth
                 );
 
                 if(block.belowBlock == 0) { break; }
-                moveConnectedBlock(block.belowBlock, block.position, block.blockType.startHeight);
+                moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
                 break;
             }
         }
@@ -195,7 +211,7 @@ public class Editor extends Canvas {
         block.position = new Position(eventXPos - 325 - block.mouseOffset.x, eventYPos - block.mouseOffset.y);
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.position, block.height);
+        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
     }
 
     private void moveConnectedBlock(int blockId, Position position, int aboveBlockHeight) {
@@ -206,7 +222,7 @@ public class Editor extends Canvas {
         block.position = new Position(position.x, position.y + aboveBlockHeight + 8);
 
         if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.position, block.height);
+        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
     }
 
     public void mouseClicked(double eventXPos, double eventYPos) {
