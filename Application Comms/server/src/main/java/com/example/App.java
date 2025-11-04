@@ -178,8 +178,6 @@ public class App extends Application {
       && !keyTracker.isKeyPressed(moveRightKey)) {
       server.sendCommand(RobotCommand.STOP_MOVING, null);
     }
-
-    
   }
 
   public static void main(String[] args) throws IOException {
