@@ -11,6 +11,7 @@ class Sphero {
     void initialize();
     void drive(uint8_t speed, int heading);
     void stop(int lastHeading);
+    void partyMode();
     void setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint8_t redRight, uint8_t greenRight, uint8_t blueRight);
     void getSensorData();
 };

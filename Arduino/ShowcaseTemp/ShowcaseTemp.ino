@@ -9,7 +9,7 @@ SoftwareSerial Serial1(2, 3); // RX, TX
 char ssid[] = "Rossini Family";
 char pass[] = "Ajgabmas171";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.68.58";
+char server[] = "192.168.68.68";
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 60000L; // 1 Min
 
@@ -86,6 +86,8 @@ void loop()
         c.substring(14, 17).toInt(),
         c.substring(17, 20).toInt(),
         c.substring(20, 23).toInt());
+    } else if(c.substring(0, 5) == "R_006") {
+      sphero.partyMode();
     } else {
       client.println("Beep Boop Does not Compoop");
     }

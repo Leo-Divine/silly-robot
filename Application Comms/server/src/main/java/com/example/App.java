@@ -10,15 +10,20 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class App extends Application {
   private Server server;
   private boolean isConnected = false;
-  private boolean isWPressed = false;
-  private boolean isSPressed = false;
-  private boolean isDPressed = false;
-  private boolean isAPressed = false;
-  private int speed = 128;
+  private int speed = 64;
+  private boolean isPartyModeOn = false;
+  private KeyCode moveForwardKey = KeyCode.W;
+  private KeyCode moveLeftKey = KeyCode.A;
+  private KeyCode moveBackwardKey = KeyCode.S;
+  private KeyCode moveRightKey = KeyCode.D;
+  private KeyCode partyBotToggleKey = KeyCode.P;
+  private KeyTracker keyTracker = new KeyTracker();
 
   private Pane root = new Pane();
   private Button btn_moveForward;
@@ -80,88 +85,19 @@ public class App extends Application {
 
   private void createEventHandlers(Stage stage) {
     stage.getScene().setOnKeyPressed(event -> {
-      if (event.getCode() == KeyCode.W) {
-        try {
-          if (!isWPressed && !isSPressed && !isAPressed && !isDPressed) {
-            server.sendCommand(RobotCommand.MOVE_FORWARD, new int[]{speed});
-            isWPressed = true;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.S) {
-        try {
-          if (!isWPressed && !isSPressed && !isAPressed && !isDPressed) {
-            server.sendCommand(RobotCommand.MOVE_BACKWARD, new int[]{speed});
-            isSPressed = true;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.A) {
-        try {
-          if (!isWPressed && !isSPressed && !isAPressed && !isDPressed) {
-            server.sendCommand(RobotCommand.MOVE_LEFT, new int[]{speed});
-            isAPressed = true;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.D) {
-        try {
-          if (!isWPressed && !isSPressed && !isAPressed && !isDPressed) {
-            server.sendCommand(RobotCommand.MOVE_RIGHT, new int[]{speed});
-            isDPressed = true;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
+      if(event.getCode() == partyBotToggleKey && !keyTracker.isKeyPressed(partyBotToggleKey)) {
+        isPartyModeOn = !isPartyModeOn;
       }
+      keyTracker.handleKeyPress(event.getCode());
     });
 
     stage.getScene().setOnKeyReleased(event -> {
-      if (event.getCode() == KeyCode.W) {
-        try {
-          if (isWPressed) {
-            server.sendCommand(RobotCommand.STOP_MOVING, null);
-            isWPressed = false;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.S) {
-        try {
-          if (isSPressed) {
-            server.sendCommand(RobotCommand.STOP_MOVING, null);
-            isSPressed = false;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.A) {
-        try {
-          if (isAPressed) {
-            server.sendCommand(RobotCommand.STOP_MOVING, null);
-            isAPressed = false;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      } else if (event.getCode() == KeyCode.D) {
-        try {
-          if (isDPressed) {
-            server.sendCommand(RobotCommand.STOP_MOVING, null);
-            isDPressed = false;
-          }
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      }
+      keyTracker.handleKeyRelease(event.getCode());
     });
 
     root.setOnScroll(event -> {
       int scroll = (int)(event.getDeltaY() / 10);
-      speed = Math.max(Math.min(speed + scroll, 255), 0);
+      speed = Math.max(Math.min(speed + scroll, 255), 30);
       System.out.println(speed);
     });
   }
@@ -192,9 +128,83 @@ public class App extends Application {
         isConnected = true;
       }
     }
+
+    handleKeyInput();
+  }
+
+  private void handleKeyInput() throws IOException {
+    // Party Mode
+    if(isPartyModeOn) {
+      server.sendCommand(RobotCommand.PARTY_MODE, null);
+      return;
+    }
+
+    // Move Forward
+    if(keyTracker.isKeyPressed(moveForwardKey)
+      && !keyTracker.isKeyPressed(moveLeftKey)
+      && !keyTracker.isKeyPressed(moveBackwardKey)
+      && !keyTracker.isKeyPressed(moveRightKey)) {
+      server.sendCommand(RobotCommand.MOVE_FORWARD, new int[]{speed});
+    }
+
+    // Move Left
+    if(!keyTracker.isKeyPressed(moveForwardKey)
+      && keyTracker.isKeyPressed(moveLeftKey)
+      && !keyTracker.isKeyPressed(moveBackwardKey)
+      && !keyTracker.isKeyPressed(moveRightKey)) {
+      server.sendCommand(RobotCommand.MOVE_LEFT, new int[]{speed});
+    }
+
+    // Move Backward
+    if(!keyTracker.isKeyPressed(moveForwardKey)
+      && !keyTracker.isKeyPressed(moveLeftKey)
+      && keyTracker.isKeyPressed(moveBackwardKey)
+      && !keyTracker.isKeyPressed(moveRightKey)) {
+      server.sendCommand(RobotCommand.MOVE_BACKWARD, new int[]{speed});
+    }
+
+    // Move Right
+    if(!keyTracker.isKeyPressed(moveForwardKey)
+      && !keyTracker.isKeyPressed(moveLeftKey)
+      && !keyTracker.isKeyPressed(moveBackwardKey)
+      && keyTracker.isKeyPressed(moveRightKey)) {
+      server.sendCommand(RobotCommand.MOVE_RIGHT, new int[]{speed});
+    }
+
+    // Stop Moving
+    if(!keyTracker.isKeyPressed(moveForwardKey)
+      && !keyTracker.isKeyPressed(moveLeftKey)
+      && !keyTracker.isKeyPressed(moveBackwardKey)
+      && !keyTracker.isKeyPressed(moveRightKey)) {
+      server.sendCommand(RobotCommand.STOP_MOVING, null);
+    }
+
+    
   }
 
   public static void main(String[] args) throws IOException {
     launch();
+  }
+}
+
+class KeyTracker {
+  private final Map<KeyCode, Boolean> keyPressedMap = new HashMap<>();
+
+  public KeyTracker() {
+    for (KeyCode code : KeyCode.values()) {
+      keyPressedMap.put(code, false);
+    }
+  }
+
+  public void handleKeyPress(KeyCode code) {
+    keyPressedMap.put(code, true);
+  }
+
+  public void handleKeyRelease(KeyCode code) {
+    keyPressedMap.put(code, false);
+  }
+
+  public boolean isKeyPressed(KeyCode code) {
+    return keyPressedMap.getOrDefault(code, false);
   }
 }

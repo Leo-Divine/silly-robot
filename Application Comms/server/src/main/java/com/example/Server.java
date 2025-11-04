@@ -14,7 +14,8 @@ enum RobotCommand {
   MOVE_RIGHT,
   MOVE_BACKWARD,
   STOP_MOVING,
-  SET_COLOR;
+  SET_COLOR,
+  PARTY_MODE;
 }
 
 public class Server {
@@ -72,6 +73,9 @@ public class Server {
           String.format("%03d", parameters[4]) +
           String.format("%03d", parameters[5])
         );
+        break;
+      case PARTY_MODE:
+        serverOutput.println("R_006");
         break;
     }
   }
