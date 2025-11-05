@@ -15,12 +15,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class App extends Application {
+  private final static int FONT_SIZE = 24;
   private Server server;
   private boolean isConnected = false;
   private int speed = 64;
@@ -46,7 +48,7 @@ public class App extends Application {
         catch (IOException e) { System.out.println("SERVER ERROR: " + e.getMessage()); }
       }
     };
-    timer.start();
+    //timer.start();
     
     stage.setTitle("silly-bot-ide");
     stage.setScene(new Scene(root, 1200, 800));
@@ -64,26 +66,34 @@ public class App extends Application {
       options.add(code);
     }
 
+    root.setHgap(25);
+    root.setVgap(25);
+
     ColumnConstraints col = new ColumnConstraints();
     col.setPercentWidth(33);
+    col.setFillWidth(true);
     root.getColumnConstraints().add(col);
     root.getColumnConstraints().add(col);
     root.getColumnConstraints().add(col);
 
     RowConstraints row = new RowConstraints();
     row.setPercentHeight(25);
+    row.setFillHeight(true);
     root.getRowConstraints().add(row);
     root.getRowConstraints().add(row);
     root.getRowConstraints().add(row);
     root.getRowConstraints().add(row);
 
+    lbl_title.setFont(Font.font("Arial", 30));
     GridPane.setHalignment(lbl_title, HPos.CENTER);
     root.add(lbl_title, 0, 0, 3, 1);
 
     ComboBox<KeyCode> cmb_moveForward = new ComboBox<>(options);
     cmb_moveForward.setValue(moveForwardKey);
+    cmb_moveForward.setMaxWidth(Double.MAX_VALUE);
+    cmb_moveForward.setMaxHeight(Double.MAX_VALUE);
     cmb_moveForward.setOnMouseEntered(event -> {
-      lbl_title.setText("You guys ever hit the g-spot on your pillow?");
+      lbl_title.setText("Set the Key to Move Forward");
     });
     cmb_moveForward.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -101,8 +111,10 @@ public class App extends Application {
 
     ComboBox<KeyCode> cmb_moveLeft = new ComboBox<>(options);
     cmb_moveLeft.setValue(moveLeftKey);
+    cmb_moveLeft.setMaxWidth(Double.MAX_VALUE);
+    cmb_moveLeft.setMaxHeight(Double.MAX_VALUE);
     cmb_moveLeft.setOnMouseEntered(event -> {
-      lbl_title.setText("They Already Banged?!?!");
+      lbl_title.setText("Set the Key to Move Left");
     });
     cmb_moveLeft.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -119,13 +131,17 @@ public class App extends Application {
     root.add(cmb_moveLeft, 0, 2);
 
     Button btn_PartyMode = new Button("Party Mode");
+    btn_PartyMode.setFont(Font.font("Arial", FONT_SIZE));
+    btn_PartyMode.setMaxWidth(Double.MAX_VALUE);
+    btn_PartyMode.setMaxHeight(Double.MAX_VALUE);
     btn_PartyMode.setOnMouseEntered(event -> {
-      lbl_title.setText("I have a carreer as an actor in a waffle house bathroom");
+      lbl_title.setText("Activate Party Mode (" + (isPartyModeOn ? "On" : "Off") + ")");
     });
     btn_PartyMode.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         isPartyModeOn = !isPartyModeOn;
+        lbl_title.setText("Activate Party Mode (" + (isPartyModeOn ? "On" : "Off") + ")");
       }
     });
     GridPane.setHalignment(btn_PartyMode, HPos.CENTER);
@@ -133,8 +149,10 @@ public class App extends Application {
 
     ComboBox<KeyCode> cmb_moveRight = new ComboBox<>(options);
     cmb_moveRight.setValue(moveRightKey);
+    cmb_moveRight.setMaxWidth(Double.MAX_VALUE);
+    cmb_moveRight.setMaxHeight(Double.MAX_VALUE);
     cmb_moveRight.setOnMouseEntered(event -> {
-      lbl_title.setText("Holy shit I didn’t know gay people were real");
+      lbl_title.setText("Set the Key to Move Right");
     });
     cmb_moveRight.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -151,22 +169,28 @@ public class App extends Application {
     root.add(cmb_moveRight, 2, 2);
 
     Button btn_speedUp = new Button("Speed Up");
+    btn_speedUp.setFont(Font.font("Arial", FONT_SIZE));
+    btn_speedUp.setMaxWidth(Double.MAX_VALUE);
+    btn_speedUp.setMaxHeight(Double.MAX_VALUE);
     btn_speedUp.setOnMouseEntered(event -> {
-      lbl_title.setText("i think some of us should've remained slaves");
+      lbl_title.setText("Speed up the Robot (Speed: " + speed + ")");
     });
     btn_speedUp.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        speed += Math.min(speed + 10, 255);
+        speed = Math.min(speed + 10, 255);
+        lbl_title.setText("Speed up the Robot (Speed: " + speed + ")");
       }
     });
     GridPane.setHalignment(btn_speedUp, HPos.CENTER);
     root.add(btn_speedUp, 0, 3);
 
     ComboBox<KeyCode> cmb_moveBackward = new ComboBox<>(options);
-    cmb_moveBackward.setValue(moveForwardKey);
+    cmb_moveBackward.setValue(moveBackwardKey);
+    cmb_moveBackward.setMaxWidth(Double.MAX_VALUE);
+    cmb_moveBackward.setMaxHeight(Double.MAX_VALUE);
     cmb_moveBackward.setOnMouseEntered(event -> {
-      lbl_title.setText("god gives the prettiest women the biggest dicks");
+      lbl_title.setText("Set the Key to Move Backward");
     });
     cmb_moveBackward.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -183,13 +207,17 @@ public class App extends Application {
     root.add(cmb_moveBackward, 1, 3);
 
     Button btn_slowDown = new Button("Slow Down");
+    btn_slowDown.setFont(Font.font("Arial", FONT_SIZE));
+    btn_slowDown.setMaxWidth(Double.MAX_VALUE);
+    btn_slowDown.setMaxHeight(Double.MAX_VALUE);
     btn_slowDown.setOnMouseEntered(event -> {
-      lbl_title.setText("I'll kill everyone with my meat if I have to");
+      lbl_title.setText("Slow down the Robot (Speed: " + speed + ")");
     });
     btn_slowDown.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        speed -= Math.max(speed - 10, 30);
+        speed = Math.max(speed - 10, 30);
+        lbl_title.setText("Slow down the Robot (Speed: " + speed + ")");
       }
     });
     GridPane.setHalignment(btn_slowDown, HPos.CENTER);

@@ -1,4 +1,4 @@
 - [x] Plan Out UI
-- [ ] Actually Make UI
-    - [ ] Proper Titles
+- [x] Actually Make UI
+    - [x] Proper Titles
 - [x] Change Keybinds
