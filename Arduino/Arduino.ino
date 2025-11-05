@@ -78,14 +78,6 @@ void loop()
       lastHeading = 92;
     } else if(c.substring(0, 5) == "R_004") {
       driving = Direction::STOPPED;
-    } else if(c.substring(0, 5) == "R_005") {
-      sphero.setColor(
-        c.substring(5, 8).toInt(),
-        c.substring(8, 11).toInt(),
-        c.substring(11, 14).toInt(),
-        c.substring(14, 17).toInt(),
-        c.substring(17, 20).toInt(),
-        c.substring(20, 23).toInt());
     } else if(c.substring(0, 5) == "R_006") {
       sphero.partyMode();
     } else {
@@ -95,6 +87,7 @@ void loop()
     lastConnectionTime = millis();
     c = "";
   }
+
 
   sphero.drive(speed, lastHeading);
   switch(driving) {

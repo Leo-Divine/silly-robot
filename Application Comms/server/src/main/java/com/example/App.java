@@ -2,12 +2,19 @@ package com.example;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.RowConstraints;
 import javafx.stage.Stage;
 import java.io.*;
 import java.util.HashMap;
@@ -22,12 +29,10 @@ public class App extends Application {
   private KeyCode moveLeftKey = KeyCode.A;
   private KeyCode moveBackwardKey = KeyCode.S;
   private KeyCode moveRightKey = KeyCode.D;
-  private KeyCode partyBotToggleKey = KeyCode.P;
   private KeyTracker keyTracker = new KeyTracker();
 
-  private Pane root = new Pane();
-  private Button btn_moveForward;
-  private Button btn_setColor;
+  private Label lbl_title = new Label("Control Panel");
+  private GridPane root = new GridPane();
 
   @Override
   public void start(Stage stage) throws IOException {
@@ -54,40 +59,145 @@ public class App extends Application {
   }
 
   private void createInterface() {
-    btn_moveForward = new Button("Move Forward");
-    btn_moveForward.relocate(50, 125);
-    btn_moveForward.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        try {
-          server.sendCommand(RobotCommand.MOVE_FORWARD, null);
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
-        }
-      }
-    });
-    root.getChildren().add(btn_moveForward);
+    ObservableList<KeyCode> options = FXCollections.observableArrayList();
+    for (KeyCode code : KeyCode.values()) {
+      options.add(code);
+    }
 
-    btn_setColor = new Button("Set Color");
-    btn_setColor.relocate(50, 175);
-    btn_setColor.setOnAction(new EventHandler<ActionEvent>() {
+    ColumnConstraints col = new ColumnConstraints();
+    col.setPercentWidth(33);
+    root.getColumnConstraints().add(col);
+    root.getColumnConstraints().add(col);
+    root.getColumnConstraints().add(col);
+
+    RowConstraints row = new RowConstraints();
+    row.setPercentHeight(25);
+    root.getRowConstraints().add(row);
+    root.getRowConstraints().add(row);
+    root.getRowConstraints().add(row);
+    root.getRowConstraints().add(row);
+
+    GridPane.setHalignment(lbl_title, HPos.CENTER);
+    root.add(lbl_title, 0, 0, 3, 1);
+
+    ComboBox<KeyCode> cmb_moveForward = new ComboBox<>(options);
+    cmb_moveForward.setValue(moveForwardKey);
+    cmb_moveForward.setOnMouseEntered(event -> {
+      lbl_title.setText("You guys ever hit the g-spot on your pillow?");
+    });
+    cmb_moveForward.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
-        try {
-          server.sendCommand(RobotCommand.SET_COLOR, new int[]{255, 0, 0, 255, 0, 0});
-        } catch (IOException e) {
-          System.out.println("SERVER ERROR: " + e.getMessage());
+        KeyCode item = cmb_moveForward.getSelectionModel().getSelectedItem();
+        if(item == moveLeftKey || item == moveBackwardKey || item == moveRightKey) {
+          cmb_moveForward.getSelectionModel().select(moveForwardKey);
+          return;
         }
+        moveForwardKey = item;
       }
     });
-    root.getChildren().add(btn_setColor);
+    GridPane.setHalignment(cmb_moveForward, HPos.CENTER);
+    root.add(cmb_moveForward, 1, 1);
+
+    ComboBox<KeyCode> cmb_moveLeft = new ComboBox<>(options);
+    cmb_moveLeft.setValue(moveLeftKey);
+    cmb_moveLeft.setOnMouseEntered(event -> {
+      lbl_title.setText("They Already Banged?!?!");
+    });
+    cmb_moveLeft.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        KeyCode item = cmb_moveLeft.getSelectionModel().getSelectedItem();
+        if(item == moveForwardKey || item == moveBackwardKey || item == moveRightKey) {
+          cmb_moveLeft.getSelectionModel().select(moveLeftKey);
+          return;
+        }
+        moveLeftKey = item;
+      }
+    });
+    GridPane.setHalignment(cmb_moveLeft, HPos.CENTER);
+    root.add(cmb_moveLeft, 0, 2);
+
+    Button btn_PartyMode = new Button("Party Mode");
+    btn_PartyMode.setOnMouseEntered(event -> {
+      lbl_title.setText("I have a carreer as an actor in a waffle house bathroom");
+    });
+    btn_PartyMode.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        isPartyModeOn = !isPartyModeOn;
+      }
+    });
+    GridPane.setHalignment(btn_PartyMode, HPos.CENTER);
+    root.add(btn_PartyMode, 1, 2);
+
+    ComboBox<KeyCode> cmb_moveRight = new ComboBox<>(options);
+    cmb_moveRight.setValue(moveRightKey);
+    cmb_moveRight.setOnMouseEntered(event -> {
+      lbl_title.setText("Holy shit I didn’t know gay people were real");
+    });
+    cmb_moveRight.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        KeyCode item = cmb_moveRight.getSelectionModel().getSelectedItem();
+        if(item == moveForwardKey || item == moveLeftKey || item == moveBackwardKey) {
+          cmb_moveRight.getSelectionModel().select(moveRightKey);
+          return;
+        }
+        moveRightKey = item;
+      }
+    });
+    GridPane.setHalignment(cmb_moveRight, HPos.CENTER);
+    root.add(cmb_moveRight, 2, 2);
+
+    Button btn_speedUp = new Button("Speed Up");
+    btn_speedUp.setOnMouseEntered(event -> {
+      lbl_title.setText("i think some of us should've remained slaves");
+    });
+    btn_speedUp.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        speed += Math.min(speed + 10, 255);
+      }
+    });
+    GridPane.setHalignment(btn_speedUp, HPos.CENTER);
+    root.add(btn_speedUp, 0, 3);
+
+    ComboBox<KeyCode> cmb_moveBackward = new ComboBox<>(options);
+    cmb_moveBackward.setValue(moveForwardKey);
+    cmb_moveBackward.setOnMouseEntered(event -> {
+      lbl_title.setText("god gives the prettiest women the biggest dicks");
+    });
+    cmb_moveBackward.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        KeyCode item = cmb_moveBackward.getSelectionModel().getSelectedItem();
+        if(item == moveForwardKey || item == moveLeftKey || item == moveRightKey) {
+          cmb_moveBackward.getSelectionModel().select(moveBackwardKey);
+          return;
+        }
+        moveBackwardKey = item;
+      }
+    });
+    GridPane.setHalignment(cmb_moveBackward, HPos.CENTER);
+    root.add(cmb_moveBackward, 1, 3);
+
+    Button btn_slowDown = new Button("Slow Down");
+    btn_slowDown.setOnMouseEntered(event -> {
+      lbl_title.setText("I'll kill everyone with my meat if I have to");
+    });
+    btn_slowDown.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        speed -= Math.max(speed - 10, 30);
+      }
+    });
+    GridPane.setHalignment(btn_slowDown, HPos.CENTER);
+    root.add(btn_slowDown, 2, 3);
   }
 
   private void createEventHandlers(Stage stage) {
     stage.getScene().setOnKeyPressed(event -> {
-      if(event.getCode() == partyBotToggleKey && !keyTracker.isKeyPressed(partyBotToggleKey)) {
-        isPartyModeOn = !isPartyModeOn;
-      }
       keyTracker.handleKeyPress(event.getCode());
     });
 

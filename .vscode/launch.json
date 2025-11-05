@@ -5,34 +5,8 @@
       "type": "java",
       "name": "App",
       "request": "launch",
-      "mainClass": "silly.bot/silly.bot.App",
-      "projectName": "silly-bot"
-    },
-    {
-      "type": "java",
-      "name": "App",
-      "request": "launch",
       "mainClass": "com.example/com.example.App",
       "projectName": "server"
-    },
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "externalConsole": true,
-      "cwd": "c:/Users/isido/Documents/GitHub/silly-robot/Arduino",
-      "program": "c:/Users/isido/Documents/GitHub/silly-robot/Arduino/build/Debug/outDebug",
-      "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
     }
   ]
 }

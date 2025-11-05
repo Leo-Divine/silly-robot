@@ -1,4 +1,4 @@
-- [ ] Plan Out UI
+- [x] Plan Out UI
 - [ ] Actually Make UI
-- [ ] Change Keybinds
-- [ ] Set Manual Colors
+    - [ ] Proper Titles
+- [x] Change Keybinds

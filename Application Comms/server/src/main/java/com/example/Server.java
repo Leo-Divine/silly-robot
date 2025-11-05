@@ -49,19 +49,23 @@ public class Server {
   public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
     switch (command) {
       case MOVE_FORWARD:
-        serverOutput.println("R_000" + String.format("%03d", parameters[0]));
+        serverOutput.println("R_000" +
+          String.format("%03d", parameters[0]));
         break;
       case MOVE_LEFT:
-        serverOutput.println("R_001" + String.format("%03d", parameters[0]));
+        serverOutput.println("R_001" +
+          String.format("%03d", parameters[0]));
         break;
       case MOVE_BACKWARD:
-        serverOutput.println("R_002" + String.format("%03d", parameters[0]));
+        serverOutput.println("R_002" +
+          String.format("%03d", parameters[0]));
         break;
       case MOVE_RIGHT:
-        serverOutput.println("R_003" + String.format("%03d", parameters[0]));
+        serverOutput.println("R_003" +
+          String.format("%03d", parameters[0]));
         break;
       case STOP_MOVING:
-        serverOutput.println("R_004");
+        serverOutput.println("R_004") ;
         break;
       case SET_COLOR:
         serverOutput.println(
