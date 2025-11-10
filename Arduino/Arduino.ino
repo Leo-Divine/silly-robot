@@ -9,7 +9,7 @@ SoftwareSerial Serial1(2, 3); // RX, TX
 char ssid[] = "IT-Shop";
 char pass[] = "B0n_J0v!";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.0.68";
+char server[] = "192.168.0.52";
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 60000L; // 1 Min
 
@@ -63,7 +63,7 @@ void loop()
       sphero.rotateLeft();
     } else if(c.substring(0, 5) == "R_002") {
       sphero.rotateRight();
-    }  else if(c.substring(0, 5) == "R_003") {
+    } else if(c.substring(0, 5) == "R_003") {
       sphero.setColor(
         c.substring(5, 8).toInt(),
         c.substring(8, 11).toInt(),
@@ -71,6 +71,8 @@ void loop()
         c.substring(14, 17).toInt(),
         c.substring(17, 20).toInt(),
         c.substring(20, 23).toInt());
+    } else if(c.substring(0, 5) == "R_004") {
+      client.println(sphero.getSensorData());
     } else {
       client.println("Beep Boop Does not Compoop");
     }

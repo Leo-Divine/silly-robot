@@ -12,7 +12,8 @@ enum RobotCommand {
   MOVE_FORWARD,
   ROTATE_RIGHT,
   ROTATE_LEFT,
-  SET_COLOR;
+  SET_COLOR,
+  GET_SENSOR_DATA;
 }
 
 public class Server {
@@ -64,6 +65,9 @@ public class Server {
           String.format("%03d", parameters[4]) +
           String.format("%03d", parameters[5])
         );
+        break;
+      case GET_SENSOR_DATA:
+        serverOutput.println("R_004");
         break;
     }
   }

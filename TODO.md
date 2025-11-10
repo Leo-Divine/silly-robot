@@ -2,7 +2,7 @@
 - [x] Create a Find Function Without STD and With Wildcards
 - [ ] If Time Permits, get Buddy Holly on the Arduino
 - [x] Get WiFi Working
-- [ ] Create Code for Sensor
+- [x] Create Code for Sensor
 
 ## Arduino Hardware
 - [x] Find a Good WifI Module

@@ -38,19 +38,20 @@ public class App extends Application {
     createInterface();
     createEventHandlers();
     
-    stage.setTitle("silly-bot-ide");
+    stage.setTitle("silly-bot-ifff");
     stage.setScene(new Scene(root, 1200, 800));
     stage.show();
   }
 
   private void createInterface() {
-    btn_rotateLeft = new Button("Rotate Left");
+    btn_rotateLeft = new Button("Get Sensor Data");
     btn_rotateLeft.relocate(50, 25);
     btn_rotateLeft.setOnAction(new EventHandler<ActionEvent>() {
       @Override
       public void handle(ActionEvent event) {
         try {
-          server.sendCommand(RobotCommand.ROTATE_LEFT, null);
+          server.sendCommand(RobotCommand.GET_SENSOR_DATA, null);
+          System.out.println(server.getMessage());
         } catch (IOException e) {
           System.out.println("SERVER ERROR: " + e.getMessage());
         }

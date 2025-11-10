@@ -1,6 +1,14 @@
 #include "Sphero.h"
 
+const int buzzerPin = 8;
+const int trigPin = 9;
+const int echoPin = 10;
+
 void Sphero::initialize() {
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+
   rvr.configUART(&Serial);
   rvr.resetYaw();
 }
@@ -34,6 +42,12 @@ void Sphero::setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint
   rvr.setAllLeds(63, leds, 6);
 }
 
-void Sphero::getSensorData() {
+float Sphero::getSensorData() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
 
+  return (pulseIn(echoPin, HIGH) * 0.0343) / 2;
 }
