@@ -51,3 +51,13 @@ float Sphero::getSensorData() {
 
   return (pulseIn(echoPin, HIGH) * 0.0343) / 2;
 }
+
+void Sphero::playTone(int frequency, int duration) {
+  tone(buzzerPin, frequency, duration);
+  delay(duration);
+  noTone(buzzerPin);
+}
+
+void Sphero::stopTone() {
+  noTone(buzzerPin);
+}

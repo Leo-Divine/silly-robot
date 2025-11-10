@@ -73,6 +73,9 @@ void loop()
         c.substring(20, 23).toInt());
     } else if(c.substring(0, 5) == "R_004") {
       client.println(sphero.getSensorData());
+    } else if(c.substring(0, 5) == "R_005") {
+      sphero.playTone(c.substring(5, 9).toInt(), c.substring(9, 13).toInt());
+      client.println("Next Bitch");
     } else {
       client.println("Beep Boop Does not Compoop");
     }

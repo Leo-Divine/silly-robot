@@ -3,6 +3,7 @@
 - [ ] If Time Permits, get Buddy Holly on the Arduino
 - [x] Get WiFi Working
 - [x] Create Code for Sensor
+- [ ] Create Code for Bottom Sensor
 
 ## Arduino Hardware
 - [x] Find a Good WifI Module
