@@ -6,10 +6,10 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "Rossini Family";
-char pass[] = "Ajgabmas171";
+char ssid[] = "IT-Shop";
+char pass[] = "B0n_J0v!";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.68.68";
+char server[] = "192.168.0.52";
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 60000L; // 1 Min
 

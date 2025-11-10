@@ -48,7 +48,7 @@ public class App extends Application {
         catch (IOException e) { System.out.println("SERVER ERROR: " + e.getMessage()); }
       }
     };
-    //timer.start();
+    timer.start();
     
     stage.setTitle("silly-bot-ide");
     stage.setScene(new Scene(root, 1200, 800));
@@ -92,6 +92,7 @@ public class App extends Application {
     cmb_moveForward.setValue(moveForwardKey);
     cmb_moveForward.setMaxWidth(Double.MAX_VALUE);
     cmb_moveForward.setMaxHeight(Double.MAX_VALUE);
+    cmb_moveForward.setFocusTraversable(false);
     cmb_moveForward.setOnMouseEntered(event -> {
       lbl_title.setText("Set the Key to Move Forward");
     });
@@ -113,6 +114,7 @@ public class App extends Application {
     cmb_moveLeft.setValue(moveLeftKey);
     cmb_moveLeft.setMaxWidth(Double.MAX_VALUE);
     cmb_moveLeft.setMaxHeight(Double.MAX_VALUE);
+    cmb_moveLeft.setFocusTraversable(false);
     cmb_moveLeft.setOnMouseEntered(event -> {
       lbl_title.setText("Set the Key to Move Left");
     });
@@ -134,6 +136,7 @@ public class App extends Application {
     btn_PartyMode.setFont(Font.font("Arial", FONT_SIZE));
     btn_PartyMode.setMaxWidth(Double.MAX_VALUE);
     btn_PartyMode.setMaxHeight(Double.MAX_VALUE);
+    btn_PartyMode.setFocusTraversable(false);
     btn_PartyMode.setOnMouseEntered(event -> {
       lbl_title.setText("Activate Party Mode (" + (isPartyModeOn ? "On" : "Off") + ")");
     });
@@ -151,6 +154,7 @@ public class App extends Application {
     cmb_moveRight.setValue(moveRightKey);
     cmb_moveRight.setMaxWidth(Double.MAX_VALUE);
     cmb_moveRight.setMaxHeight(Double.MAX_VALUE);
+    cmb_moveRight.setFocusTraversable(false);
     cmb_moveRight.setOnMouseEntered(event -> {
       lbl_title.setText("Set the Key to Move Right");
     });
@@ -172,6 +176,7 @@ public class App extends Application {
     btn_speedUp.setFont(Font.font("Arial", FONT_SIZE));
     btn_speedUp.setMaxWidth(Double.MAX_VALUE);
     btn_speedUp.setMaxHeight(Double.MAX_VALUE);
+    btn_speedUp.setFocusTraversable(false);
     btn_speedUp.setOnMouseEntered(event -> {
       lbl_title.setText("Speed up the Robot (Speed: " + speed + ")");
     });
@@ -189,6 +194,7 @@ public class App extends Application {
     cmb_moveBackward.setValue(moveBackwardKey);
     cmb_moveBackward.setMaxWidth(Double.MAX_VALUE);
     cmb_moveBackward.setMaxHeight(Double.MAX_VALUE);
+    cmb_moveBackward.setFocusTraversable(false);
     cmb_moveBackward.setOnMouseEntered(event -> {
       lbl_title.setText("Set the Key to Move Backward");
     });
@@ -210,6 +216,7 @@ public class App extends Application {
     btn_slowDown.setFont(Font.font("Arial", FONT_SIZE));
     btn_slowDown.setMaxWidth(Double.MAX_VALUE);
     btn_slowDown.setMaxHeight(Double.MAX_VALUE);
+    btn_slowDown.setFocusTraversable(false);
     btn_slowDown.setOnMouseEntered(event -> {
       lbl_title.setText("Slow down the Robot (Speed: " + speed + ")");
     });
