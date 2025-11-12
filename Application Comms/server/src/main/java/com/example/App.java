@@ -65,42 +65,37 @@ public class App extends Application {
       @Override
       public void handle(ActionEvent event) {
         try {
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_E2.frequency, 500});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 600});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 500});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C3.frequency, 600});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 1000});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 600});
           server.getMessage();
-
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_E2.frequency, 500});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_FS3.frequency, 800});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 500});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_E3.frequency, 800});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 1000});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 400});
           server.getMessage();
-
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_A2.frequency, 400});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_G2.frequency, 400});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 1000});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 600});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C3.frequency, 600});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 600});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_FS3.frequency, 800});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 250});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_E3.frequency, 800});
           server.getMessage();
-
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_E2.frequency, 500});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_B2.frequency, 400});
           server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_D2.frequency, 500});
-          server.getMessage();
-          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_C2.frequency, 1000});
+          server.sendCommand(RobotCommand.PLAY_NOTE, new int[]{Notes.NOTE_G2.frequency, 1000});
           server.getMessage();
         } catch (IOException e) {
           System.out.println("SERVER ERROR: " + e.getMessage());

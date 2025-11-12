@@ -6,12 +6,12 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "IT-Shop";
-char pass[] = "B0n_J0v!";
+char ssid[] = "Rossini Family";
+char pass[] = "Ajgabmas171";
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.0.52";
+char server[] = "192.168.68.68";
 unsigned long lastConnectionTime = 0;
-const unsigned long postingInterval = 60000L; // 1 Min
+const unsigned long postingInterval = 15000L; // 1 Min
 
 WiFiEspClient client;
 Sphero sphero;
@@ -74,8 +74,8 @@ void loop()
     } else if(c.substring(0, 5) == "R_004") {
       client.println(sphero.getSensorData());
     } else if(c.substring(0, 5) == "R_005") {
-      sphero.playTone(c.substring(5, 9).toInt(), c.substring(9, 13).toInt());
       client.println("Next Bitch");
+      sphero.playTone(c.substring(5, 9).toInt(), c.substring(9, 13).toInt());
     } else {
       client.println("Beep Boop Does not Compoop");
     }
