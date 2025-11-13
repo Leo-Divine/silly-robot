@@ -3,6 +3,7 @@ package silly.bot;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.text.Text;
 
 enum BlockCategory {
     Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204), 0, 0),
@@ -26,75 +27,84 @@ enum BlockCategory {
 }
 
 enum BlockShape {
-    Default {
+    Default(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
-    Operand {
+    Operand(new Position(15, 25)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawOperandBlock(position, width, height);
         }
     },
-    Value {
+    Value(new Position(5, 22)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawValueBlock(position, width, height);
         }
     },
-    Nesting {
+    Nesting(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawNestingBlock(position, width, height, 25);
         }
     },
-    DoubleNesting {
+    DoubleNesting(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawDoubleNestingBlock(position, width, height, 25, 25);
         }
     },
-    Start {
+    Start(new Position(5, 27)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawStartBlock(position, width, height);
         }
     };
 
+    public final Position labelOffset;
+
+    private BlockShape(Position labelOffset) {
+        this.labelOffset = labelOffset;
+    }
+
     abstract Path getPath(Position position, int width, int height);
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 150, 35, 2, 75),
-    RotateLeft(BlockShape.Default, BlockCategory.Movement, 150, 35, 0, 150),
-    RotateRight(BlockShape.Default, BlockCategory.Movement, 150, 35, 0, 225),
-    SetColor(BlockShape.Default, BlockCategory.Display, 100, 35, 1, 350),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, 0, 475),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, 1, 600),
-    If(BlockShape.Nesting, BlockCategory.Control, 150, 40, 3, 675),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 40, 3, 750),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 40, 2, 825),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 950),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 1025),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, 2, 1100),
-    Start(BlockShape.Start, BlockCategory.Start, 125, 25, 0, 0);
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, 75, "Move At [Speed] Speed For [Duration] Seconds"),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 95, 35, 150, "Turn Left"),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 105, 35, 225, "Turn Right"),
+    SetColor(BlockShape.Default, BlockCategory.Display, 100, 35, 350, "Set Light Color To [Color]"),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, 475, "Get Front Distance"),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, 600, "Wait [Duration] Seconds"),
+    If(BlockShape.Nesting, BlockCategory.Control, 150, 40, 675, "If [Condition] Then"),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 40, 750, "If [Condition] Then"),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 40, 825, "Repeat [Iteration] Times"),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, 950, "[First] = [Second]"),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, 1025, "[First] < [Second]"),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, 1100, "[First] > [Second]"),
+    Start(BlockShape.Start, BlockCategory.Start, 167, 30, 0, "On Program Start");
 
     public final BlockShape shape;
     public final BlockCategory category;
     public final int startWidth;
     public final int startHeight;
-    public final int parameterCount;
     public final int menuPosition;
+    public final String label;
 
-    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int parameterCount, int menuPosition) {
+    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int menuPosition, String label) {
+        Text labelWidthCheck = new Text(label);
+        labelWidthCheck.setFont(Editor.COOL_FONT);
+        
         this.shape = shape;
         this.category = category;
-        this.startWidth = startWidth;
+        this.startWidth = (int)(Math.round(labelWidthCheck.getLayoutBounds().getWidth()) + shape.labelOffset.x * 2);
         this.startHeight = startHeight;
-        this.parameterCount = parameterCount;
         this.menuPosition = menuPosition;
+        this.label = label;
     }
 }
 
@@ -134,16 +144,20 @@ public abstract class Block {
     }
 
     public GraphicsContext drawBlock(GraphicsContext gc) {
+        gc.setFont(Editor.COOL_FONT);
         gc.setStroke(blockType.category.border);
         gc.setLineWidth(borderWidth);
         gc.setFill(blockType.category.fill);
 
         gc.beginPath();
-        String test = BlockPaths.pathToString(getPath());
-        gc.appendSVGPath(test);
+        gc.appendSVGPath(BlockPaths.pathToString(getPath()));
         gc.closePath();
         gc.fill();
         gc.stroke();
+
+        gc.setFill(Color.WHITE);
+        gc.fillText(blockType.label, position.x + 325 + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
+        
         return gc;
     }
 }

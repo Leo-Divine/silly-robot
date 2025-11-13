@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Vector;
 
 enum MouseState {
@@ -15,6 +17,7 @@ enum MouseState {
 
 public class Editor extends Canvas {
     final private int MENU_NAVIGATOR_BUTTON_SIZE = 25;
+    final static public Font COOL_FONT = getCocoFont();
 
     private GraphicsContext gc = getGraphicsContext2D();
     private Vector<Block> blocks = new Vector<Block>();
@@ -26,8 +29,22 @@ public class Editor extends Canvas {
         blocks.add(new StartBlock(BlockType.Start, new Position(425, 40)));
     }
 
+    private static Font getCocoFont() {
+        InputStream fontStream = Editor.class.getResourceAsStream("/Coco Chamel.ttf");
+        if (fontStream != null) {
+            Font font = Font.loadFont(fontStream, 17);
+            try {
+                fontStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return font;
+        }
+        return new Font("Arial", 18);
+    }
+
     public void clearCanvas() {
-        gc.clearRect(0, 0, 800, 800);
+        gc.clearRect(0, 0, 2000, 2000);
     }
 
     public void drawBackground() {
@@ -68,9 +85,8 @@ public class Editor extends Canvas {
         gc.fillText("Operands", 100, 925 - blockMenuScroll);
 
         //Draw Blocks
+        gc.setFont(COOL_FONT);
         for(BlockType blockType : BlockType.values()) {
-            if(blockType == BlockType.Start) { continue; }
-
             if(blockType == BlockType.Start) { continue; }
             Path blockPath = blockType.shape.getPath(
                 new Position(-225, blockType.menuPosition - blockMenuScroll),
@@ -87,6 +103,9 @@ public class Editor extends Canvas {
             gc.closePath();
             gc.fill();
             gc.stroke();
+            
+            gc.setFill(Color.WHITE);
+            gc.fillText(blockType.label, 100 + blockType.shape.labelOffset.x, blockType.menuPosition - blockMenuScroll + blockType.shape.labelOffset.y);
         }
     }
 
@@ -219,7 +238,7 @@ public class Editor extends Canvas {
         Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
 
         // Move Block
-        block.position = new Position(position.x, position.y + aboveBlockHeight + 8);
+        block.position = new Position(position.x, position.y + aboveBlockHeight + 8 + Block.borderWidth);
 
         if(block.belowBlock == 0) { return; }
         moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
