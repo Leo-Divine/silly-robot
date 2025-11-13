@@ -28,8 +28,10 @@ public class App extends Application {
                 canvas.drawBlocks();
 
                 // Handle Server Connection and Messages
+                
                 try { handleServerConnection(); }
                 catch (IOException e) { System.out.println("SERVER ERROR: " + e.getMessage()); }
+                
             }
         };
         timer.start();

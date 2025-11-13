@@ -6,23 +6,20 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Text;
 
 enum BlockCategory {
-    Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204), 0, 0),
-    Movement(Color.rgb(255, 102, 128), Color.rgb(255, 51, 85), 25, 50),
-    Display(Color.rgb(89, 192, 89), Color.rgb(56, 148, 56), 75, 325),
-    Sensors(Color.rgb(92, 177, 214), Color.rgb(46, 142, 184), 125, 450),
-    Control(Color.rgb(153, 102, 255), Color.rgb(119, 77, 203), 175, 575),
-    Operands(Color.rgb(255, 171, 25), Color.rgb(207, 139, 23), 225, 925);
+    Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204)),
+    Movement(Color.rgb(255, 102, 128), Color.rgb(255, 51, 85)),
+    Display(Color.rgb(89, 192, 89), Color.rgb(56, 148, 56)),
+    Sound(Color.rgb(255, 140, 26), Color.rgb(219, 110, 0)),
+    Sensors(Color.rgb(92, 177, 214), Color.rgb(46, 142, 184)),
+    Control(Color.rgb(153, 102, 255), Color.rgb(119, 77, 203)),
+    Operands(Color.rgb(255, 171, 25), Color.rgb(207, 139, 23));
 
     public final Color fill;
     public final Color border;
-    public final int menuButtonPos;
-    public final int menuTextPos;
 
-    private BlockCategory(Color fill, Color border, int menuButtonPos, int menuTextPos) {
+    private BlockCategory(Color fill, Color border) {
         this.fill = fill;
         this.border = border;
-        this.menuButtonPos = menuButtonPos;
-        this.menuTextPos = menuTextPos;
     }
 }
 
@@ -74,28 +71,30 @@ enum BlockShape {
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, 75, "Move At [Speed] Speed For [Duration] Seconds"),
-    RotateLeft(BlockShape.Default, BlockCategory.Movement, 95, 35, 150, "Turn Left"),
-    RotateRight(BlockShape.Default, BlockCategory.Movement, 105, 35, 225, "Turn Right"),
-    SetColor(BlockShape.Default, BlockCategory.Display, 100, 35, 350, "Set Light Color To [Color]"),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, 475, "Get Front Distance"),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, 600, "Wait [Duration] Seconds"),
-    If(BlockShape.Nesting, BlockCategory.Control, 150, 40, 675, "If [Condition] Then"),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 40, 750, "If [Condition] Then"),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 40, 825, "Repeat [Iteration] Times"),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, 950, "[First] = [Second]"),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, 1025, "[First] < [Second]"),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, 1100, "[First] > [Second]"),
-    Start(BlockShape.Start, BlockCategory.Start, 167, 30, 0, "On Program Start");
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, "Move At [Speed] Speed For [Duration] Seconds"),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 95, 35, "Turn Left"),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 105, 35, "Turn Right"),
+    SetLeftColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Left Color To [Color]"),
+    SetRightColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Right Color To [Color]"),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 100, 35, "Play Note [Note] For [Duration] Seconds"),
+    StopPlaying(BlockShape.Default, BlockCategory.Sound, 100, 35, "Stop Playing Note"),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, "Get Front Distance"),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, "Wait [Duration] Seconds"),
+    If(BlockShape.Nesting, BlockCategory.Control, 150, 35, "If [Condition] Then"),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 35, "If [Condition] Then"),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 35, "Repeat [Iteration] Times"),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] = [Second]"),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] < [Second]"),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] > [Second]"),
+    Start(BlockShape.Start, BlockCategory.Start, 167, 30, "On Program Start");
 
     public final BlockShape shape;
     public final BlockCategory category;
     public final int startWidth;
     public final int startHeight;
-    public final int menuPosition;
     public final String label;
 
-    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, int menuPosition, String label) {
+    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, String label) {
         Text labelWidthCheck = new Text(label);
         labelWidthCheck.setFont(Editor.COOL_FONT);
         
@@ -103,7 +102,6 @@ enum BlockType {
         this.category = category;
         this.startWidth = (int)(Math.round(labelWidthCheck.getLayoutBounds().getWidth()) + shape.labelOffset.x * 2);
         this.startHeight = startHeight;
-        this.menuPosition = menuPosition;
         this.label = label;
     }
 }

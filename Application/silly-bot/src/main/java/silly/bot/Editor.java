@@ -20,6 +20,7 @@ public class Editor extends Canvas {
     final static public Font COOL_FONT = getCocoFont();
 
     private GraphicsContext gc = getGraphicsContext2D();
+    private Vector<MenuItem> menuItems = createMenu();
     private Vector<Block> blocks = new Vector<Block>();
     private double blockMenuScroll = 0;
     private int currentDraggingBlock = 0;
@@ -58,45 +59,33 @@ public class Editor extends Canvas {
     }
 
     public void drawMenus() {
-        gc.setFont(new Font("Arial", 20));
-
         // Draw Navigation Buttons
-        gc.setFill(BlockCategory.Movement.fill);
-        gc.fillOval(25, 25, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
+        int buttonYPos = 25;
+        for(BlockCategory c : BlockCategory.values()) {
+            if(c == BlockCategory.Start) { continue; }
+            gc.setFill(c.fill);
+            gc.fillOval(25, buttonYPos, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
+            buttonYPos += 50;
+        }
 
-        gc.setFill(BlockCategory.Display.fill);
-        gc.fillOval(25, 75, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
-
-        gc.setFill(BlockCategory.Sensors.fill);
-        gc.fillOval(25, 125, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
-
-        gc.setFill(BlockCategory.Control.fill);
-        gc.fillOval(25, 175, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
-
-        gc.setFill(BlockCategory.Operands.fill);
-        gc.fillOval(25, 225, MENU_NAVIGATOR_BUTTON_SIZE, MENU_NAVIGATOR_BUTTON_SIZE);
-
-        // Draw Text
-        gc.setFill(Color.BLACK);
-        gc.fillText("Movement", 100, 50 - blockMenuScroll);
-        gc.fillText("Display", 100, 325 - blockMenuScroll);
-        gc.fillText("Sensors", 100, 450 - blockMenuScroll);
-        gc.fillText("Control", 100, 575 - blockMenuScroll);
-        gc.fillText("Operands", 100, 925 - blockMenuScroll);
-
-        //Draw Blocks
-        gc.setFont(COOL_FONT);
-        for(BlockType blockType : BlockType.values()) {
-            if(blockType == BlockType.Start) { continue; }
-            Path blockPath = blockType.shape.getPath(
-                new Position(-225, blockType.menuPosition - blockMenuScroll),
-                blockType.startWidth,
-                blockType.startHeight
+        // Draw Text and Blocks
+        for(MenuItem item : menuItems) {
+            if(!item.isBlock()) {
+                gc.setFont(new Font("Arial", 20));
+                gc.setFill(Color.BLACK);
+                gc.fillText(item.text, 100, item.yPos - blockMenuScroll);
+                continue;
+            }
+            gc.setFont(COOL_FONT);
+            Path blockPath = item.block.shape.getPath(
+                new Position(-225, item.yPos - blockMenuScroll),
+                item.block.startWidth,
+                item.block.startHeight
             );
 
-            gc.setStroke(blockType.category.border);
+            gc.setStroke(item.block.category.border);
             gc.setLineWidth(Block.borderWidth);
-            gc.setFill(blockType.category.fill);
+            gc.setFill(item.block.category.fill);
 
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(blockPath));
@@ -105,8 +94,37 @@ public class Editor extends Canvas {
             gc.stroke();
             
             gc.setFill(Color.WHITE);
-            gc.fillText(blockType.label, 100 + blockType.shape.labelOffset.x, blockType.menuPosition - blockMenuScroll + blockType.shape.labelOffset.y);
+            gc.fillText(item.block.label, 100 + item.block.shape.labelOffset.x, item.yPos - blockMenuScroll + item.block.shape.labelOffset.y);
         }
+    }
+
+    private static Vector<MenuItem> createMenu() {
+        Vector<MenuItem> menuItems = new Vector<MenuItem>();
+        int yPos = 50;
+        for(BlockCategory category : BlockCategory.values()) {
+            if(category == BlockCategory.Start) { continue; }
+
+            // Add The Category Header Label
+            menuItems.add(new MenuItem(category.name(), yPos));
+            yPos += 25;
+
+            // Add All Blocks From The Category
+            for(BlockType type : BlockType.values()) {
+                if(type == BlockType.Start) { continue; }
+                if(type.category != category) { continue; }
+
+                menuItems.add(new MenuItem(type, yPos));
+                if(type.shape == BlockShape.Nesting) {
+                    yPos += type.startHeight + 102;
+                } else if(type.shape == BlockShape.DoubleNesting) {
+                    yPos += type.startHeight + 167;
+                } else {
+                    yPos += type.startHeight + 32;
+                }
+            }
+            yPos += 25;
+        }
+        return menuItems;
     }
 
     public void drawBlocks() {
@@ -122,34 +140,35 @@ public class Editor extends Canvas {
             block.isDragging = true;
             block.mouseOffset = new Position(eventXPos - 325 - block.position.x, eventYPos - block.position.y);
             currentDraggingBlock = block.getId();
-            break;
+            return;
         }
          
-        for(BlockType blockType : BlockType.values()) {
-            if(blockType == BlockType.Start) { continue; }
-            if(eventXPos >= 100 && 
-            eventXPos <= 100 + blockType.startWidth &&
-            eventYPos >= blockType.menuPosition - blockMenuScroll &&
-            eventYPos <= blockType.menuPosition - blockMenuScroll + blockType.startHeight) {
+        for(MenuItem item : menuItems) {
+            if(!item.isBlock()) { continue; }
+            if(item.block.shape.getPath(
+                new Position(-225, item.yPos - blockMenuScroll),
+                item.block.startWidth,
+                item.block.startHeight
+            ).contains(eventXPos, eventYPos)) {
                 Block block;
-                switch(blockType.shape) {
+                switch(item.block.shape) {
                     case Default:
-                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new DefaultBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                     case Value:
-                        block = new ValueBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new ValueBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                     case Operand:
-                        block = new OperandBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new OperandBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                     case Nesting:
-                        block = new NestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new NestingBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                     case DoubleNesting:
-                        block = new DoubleNestingBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new DoubleNestingBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                     default: 
-                        block = new DefaultBlock(blockType, new Position(100, blockType.menuPosition - blockMenuScroll));
+                        block = new DefaultBlock(item.block, new Position(100, item.yPos - blockMenuScroll));
                         break;
                 }
 
@@ -201,7 +220,7 @@ public class Editor extends Canvas {
 
                 block.position = new Position(
                     surroundingBlock.position.x,
-                    surroundingBlock.position.y + surroundingBlock.getHeight() + 8 + Block.borderWidth
+                    surroundingBlock.position.y + surroundingBlock.getHeight() + 8 + Block.borderWidth / 2
                 );
 
                 if(block.belowBlock == 0) { break; }
@@ -238,33 +257,48 @@ public class Editor extends Canvas {
         Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
 
         // Move Block
-        block.position = new Position(position.x, position.y + aboveBlockHeight + 8 + Block.borderWidth);
+        block.position = new Position(position.x, position.y + aboveBlockHeight + 8 + Block.borderWidth / 2);
 
         if(block.belowBlock == 0) { return; }
         moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
     }
 
     public void mouseClicked(double eventXPos, double eventYPos) {
-        if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 0;
-        }
-        if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 75), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 275;
-        }
-        if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 125), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 400;
-        }
-        if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 175), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 525;
-        }
-        if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 225), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
-            blockMenuScroll = 525;
+        int yPos = 25;
+        for(BlockCategory c : BlockCategory.values()) {
+            if(c == BlockCategory.Start) { continue; }
+
+            if(Math.pow(eventXPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + 25), 2) + Math.pow(eventYPos - (MENU_NAVIGATOR_BUTTON_SIZE / 2 + yPos), 2) <= Math.pow(MENU_NAVIGATOR_BUTTON_SIZE / 2, 2)) {
+                blockMenuScroll = ((MenuItem) menuItems.stream().filter(s -> s.text == c.name()).toArray()[0]).yPos - 50;
+                break;
+            }
+            yPos += 50;
         }
     }
 
     public void mouseScroll(double eventXPos, double scrollAmount) {
         if(eventXPos > 75 && eventXPos < 325) {
-            blockMenuScroll = Math.max(0, Math.min(525, blockMenuScroll - scrollAmount));
+            blockMenuScroll = Math.max(0, blockMenuScroll - scrollAmount);
         }
+    }
+}
+
+class MenuItem {
+    BlockType block = null;
+    String text = "";
+    double yPos;
+    
+    public MenuItem(BlockType block, double yPos) {
+        this.block = block;
+        this.yPos = yPos;
+    }
+
+    public MenuItem(String text, double yPos) {
+        this.text = text;
+        this.yPos = yPos;
+    }
+
+    public boolean isBlock() {
+        return block != null;
     }
 }

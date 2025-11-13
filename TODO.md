@@ -1,6 +1,6 @@
 ## Arduino Code
 - [x] Create a Find Function Without STD and With Wildcards
-- [ ] If Time Permits, get Buddy Holly on the Arduino
+- [x] If Time Permits, get Buddy Holly on the Arduino
 - [x] Get WiFi Working
 - [x] Create Code for Sensor
 - [ ] Create Code for Bottom Sensor
@@ -24,6 +24,7 @@
     - [ ] Give Blocks Parameters
         - [ ] Customize Parameters
 - [ ] Move Blocks to the Back of BlockList When Dragged
+- [x] Select Blocks From Menu By Checking Paths
 
 
 ## Sphero
