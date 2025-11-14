@@ -71,21 +71,21 @@ enum BlockShape {
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, "Move At [Speed] Speed For [Duration] Seconds"),
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, "Move At [  ] Speed For [  ] Seconds"),
     RotateLeft(BlockShape.Default, BlockCategory.Movement, 95, 35, "Turn Left"),
     RotateRight(BlockShape.Default, BlockCategory.Movement, 105, 35, "Turn Right"),
-    SetLeftColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Left Color To [Color]"),
-    SetRightColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Right Color To [Color]"),
-    PlayNote(BlockShape.Default, BlockCategory.Sound, 100, 35, "Play Note [Note] For [Duration] Seconds"),
+    SetLeftColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Left Color To [  ]"),
+    SetRightColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Right Color To [  ]"),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 100, 35, "Play [  ] For [  ] Seconds"),
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 100, 35, "Stop Playing Note"),
     GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, "Get Front Distance"),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, "Wait [Duration] Seconds"),
-    If(BlockShape.Nesting, BlockCategory.Control, 150, 35, "If [Condition] Then"),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 35, "If [Condition] Then"),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 35, "Repeat [Iteration] Times"),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] = [Second]"),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] < [Second]"),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[First] > [Second]"),
+    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, "Wait [  ] Seconds"),
+    If(BlockShape.Nesting, BlockCategory.Control, 150, 35, "If {  } Then"),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 35, "If {  } Then"),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 35, "Repeat [  ] Times"),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] = [  ]"),
+    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] < [  ]"),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] > [  ]"),
     Start(BlockShape.Start, BlockCategory.Start, 167, 30, "On Program Start");
 
     public final BlockShape shape;
@@ -118,6 +118,7 @@ public abstract class Block {
     Position mouseOffset = new Position(0, 0);
     protected int baseWidth;
     protected int baseHeight;
+    Parameter parameters[] = new Parameter[3];
 
     public Block(BlockType type, Position position) {
         this.id = nextBlockId;
@@ -298,5 +299,24 @@ class DoubleNestingBlock extends Block {
 
     private int getSecondNestingBlockHeight() {
         return 25;
+    }
+}
+
+class BlockLabel {
+    String baseLabel;
+    int parameterCount;
+    Parameter parameters[] = new Parameter[3];
+
+    public BlockLabel(String label) {
+        this.baseLabel = label;
+        this.parameterCount = label.split("[]").length - 1;
+    }
+
+    public int getWidth() {
+        return -1;
+    }
+
+    public GraphicsContext drawBlockLabel(GraphicsContext gc) {
+        return gc;
     }
 }
