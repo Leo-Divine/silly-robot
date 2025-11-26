@@ -1,8 +1,11 @@
 package silly.bot;
 
+import java.util.Arrays;
+
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Path;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
 enum BlockCategory {
@@ -71,44 +74,53 @@ enum BlockShape {
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 135, 35, "Move At [  ] Speed For [  ] Seconds"),
-    RotateLeft(BlockShape.Default, BlockCategory.Movement, 95, 35, "Turn Left"),
-    RotateRight(BlockShape.Default, BlockCategory.Movement, 105, 35, "Turn Right"),
-    SetLeftColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Left Color To [  ]"),
-    SetRightColor(BlockShape.Default, BlockCategory.Display, 100, 35, "Set The Right Color To [  ]"),
-    PlayNote(BlockShape.Default, BlockCategory.Sound, 100, 35, "Play [  ] For [  ] Seconds"),
-    StopPlaying(BlockShape.Default, BlockCategory.Sound, 100, 35, "Stop Playing Note"),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 100, 30, "Get Front Distance"),
-    Wait(BlockShape.Default, BlockCategory.Control, 100, 35, "Wait [  ] Seconds"),
-    If(BlockShape.Nesting, BlockCategory.Control, 150, 35, "If {  } Then"),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 150, 35, "If {  } Then"),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 150, 35, "Repeat [  ] Times"),
-    Equal(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] = [  ]"),
-    Less(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] < [  ]"),
-    Greater(BlockShape.Operand, BlockCategory.Operands, 100, 35, "[  ] > [  ]"),
-    Start(BlockShape.Start, BlockCategory.Start, 167, 30, "On Program Start");
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 311, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    RotateLeft(BlockShape.Default, BlockCategory.Movement, 98, 42, "Turn Left", null),
+    RotateRight(BlockShape.Default, BlockCategory.Movement, 107, 42, "Turn Right", null),
+    SetLeftColor(BlockShape.Default, BlockCategory.Display, 233, 42, "Set The Left Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
+    SetRightColor(BlockShape.Default, BlockCategory.Display, 242, 42, "Set The Right Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 221, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
+    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
+    Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
+    If(BlockShape.Nesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
+    Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
+    Less(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α < α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
+    Greater(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α > α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
+    Start(BlockShape.Start, BlockCategory.Start, 167, 38, "On Program Start", null);
 
     public final BlockShape shape;
     public final BlockCategory category;
     public final int startWidth;
     public final int startHeight;
     public final String label;
+    public final Parameter[] parameters;
 
-    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, String label) {
+    private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, String label, Parameter[] parameters) {
         Text labelWidthCheck = new Text(label);
         labelWidthCheck.setFont(Editor.COOL_FONT);
         
         this.shape = shape;
         this.category = category;
-        this.startWidth = (int)(Math.round(labelWidthCheck.getLayoutBounds().getWidth()) + shape.labelOffset.x * 2);
+        this.startWidth = startWidth;
         this.startHeight = startHeight;
         this.label = label;
+        this.parameters = parameters;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Parameter[] getParameters() {
+        return Arrays.copyOf(this.parameters, this.parameters.length);
     }
 }
 
 public abstract class Block {
+    final static int PARAMETER_SIZE = 25;
+    final static double BORDER_WIDTH = 1.15;
+
     static int nextBlockId = 1;
-    static double borderWidth = 1.15;
     private int id;
     BlockType blockType;
     int aboveBlock = 0;
@@ -116,9 +128,9 @@ public abstract class Block {
     Position position = new Position(0, 0);
     boolean isDragging = false;
     Position mouseOffset = new Position(0, 0);
-    protected int baseWidth;
-    protected int baseHeight;
-    Parameter parameters[] = new Parameter[3];
+    protected int width;
+    protected int height;
+    Parameter[] parameters = new Parameter[]{};
 
     public Block(BlockType type, Position position) {
         this.id = nextBlockId;
@@ -126,8 +138,46 @@ public abstract class Block {
         this.blockType = type;
         this.position = position;
         position.x -= 325;
-        this.baseWidth = blockType.startWidth;
-        this.baseHeight = blockType.startHeight;
+        this.width = blockType.startWidth;
+        this.height = blockType.startHeight;
+
+        switch(this.blockType) {
+            case Equal:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
+                break;
+            case Greater:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
+                break;
+            case If:
+                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                break;
+            case IfEl:
+                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                break;
+            case Less:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
+                break;
+            case Loop:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 10)};
+                break;
+            case MoveForward:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
+                break;
+            case PlayNote:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
+                break;
+            case SetLeftColor:
+                this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)};
+                break;
+            case SetRightColor:
+                this.parameters = new Parameter[]{new Parameter<Color>(null, Color.BLUE)};
+                break;
+            case Wait:
+                this.parameters = new Parameter[]{new Parameter<Integer>(null, 1)};
+                break;
+            default:
+                break;
+        }
     }
 
     public int getId() {
@@ -145,7 +195,7 @@ public abstract class Block {
     public GraphicsContext drawBlock(GraphicsContext gc) {
         gc.setFont(Editor.COOL_FONT);
         gc.setStroke(blockType.category.border);
-        gc.setLineWidth(borderWidth);
+        gc.setLineWidth(BORDER_WIDTH);
         gc.setFill(blockType.category.fill);
 
         gc.beginPath();
@@ -153,9 +203,67 @@ public abstract class Block {
         gc.closePath();
         gc.fill();
         gc.stroke();
+        
+        drawBlockText(gc);
+        return gc;
+    }
 
+    private GraphicsContext drawBlockText(GraphicsContext gc) {
+        Text widthCheck = new Text();
+        widthCheck.setFont(Editor.COOL_FONT);
         gc.setFill(Color.WHITE);
-        gc.fillText(blockType.label, position.x + 325 + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
+        gc.setStroke(blockType.category.border);
+
+        // Display Only Text For no Parameters
+        if(blockType.label.indexOf("α") == -1) {
+            gc.fillText(blockType.label, position.x + 325 + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
+            return gc;
+        }
+
+        String[] stringParts = blockType.label.split("α");
+        double xPos = position.x + 325 + blockType.shape.labelOffset.x;
+        for(int i = 0; i < stringParts.length - 1; i++) {
+            // Draw Block Text
+            gc.setFill(Color.WHITE);
+            gc.fillText(stringParts[i], xPos, position.y + blockType.shape.labelOffset.y);
+            widthCheck.setText(stringParts[i]);
+            xPos += widthCheck.getLayoutBounds().getWidth();
+
+            // Draw Parameter Circle
+            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - PARAMETER_SIZE / 2);
+            gc.beginPath();
+            gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+            gc.closePath();
+            gc.fill();
+            gc.stroke();
+
+            // Draw Parameter Value
+            if(parameters[i].value.getClass() == Integer.class) {
+                gc.setFill(Color.BLACK);
+                gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
+            } else if(parameters[i].value.getClass() == Color.class) {
+                gc.setFill((Color) parameters[i].value);
+                gc.setStroke(Color.WHITE);
+
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+            }
+            xPos += parameters[i].getWidth();
+        }
+        gc.setFill(Color.WHITE);
+        gc.fillText(stringParts[stringParts.length - 1], xPos, position.y + blockType.shape.labelOffset.y);
+
+        // Set Block Width
+        widthCheck.setText(stringParts[stringParts.length - 1]);
+        xPos += widthCheck.getLayoutBounds().getWidth();
+        if(blockType.shape == BlockShape.Operand) {
+            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 27);
+        } else {
+            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 10);
+        }
         
         return gc;
     }
@@ -167,17 +275,16 @@ class DefaultBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight;
+        return height;
     }
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawDefaultBlock(position, baseWidth, baseHeight);
+        return BlockPaths.drawDefaultBlock(position, width, height);
     }
 }
 
@@ -187,17 +294,16 @@ class ValueBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight;
+        return height;
     }
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawValueBlock(position, baseWidth, baseHeight);
+        return BlockPaths.drawValueBlock(position, width, height);
     }
 }
 
@@ -207,17 +313,16 @@ class OperandBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight;
+        return height;
     }
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawOperandBlock(position, baseWidth, baseHeight);
+        return BlockPaths.drawOperandBlock(position, width, height);
     }
 }
 
@@ -227,12 +332,11 @@ class StartBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight;
+        return height;
     }
 
     public String getCode() {
@@ -241,7 +345,7 @@ class StartBlock extends Block {
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawStartBlock(position, baseWidth, baseHeight);
+        return BlockPaths.drawStartBlock(position, width, height);
     }
 }
 
@@ -253,17 +357,16 @@ class NestingBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight + getTotalNestingBlockHeight() + 24 + 16;
+        return height + getTotalNestingBlockHeight() + 24 + 8;
     }
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawNestingBlock(position, baseWidth, baseHeight, getTotalNestingBlockHeight());
+        return BlockPaths.drawNestingBlock(position, width, height, getTotalNestingBlockHeight());
     }
 
     private int getTotalNestingBlockHeight() {
@@ -280,17 +383,16 @@ class DoubleNestingBlock extends Block {
     }
 
     public int getWidth() {
-        // TODO Add Changing Width With Value and Operand Blocks
-        return baseWidth;
+        return width;
     }
 
     public int getHeight() {
-        return baseHeight + getFirstNestingBlockHeight() + getSecondNestingBlockHeight() + 24 + 24 + 32;
+        return height + getFirstNestingBlockHeight() + getSecondNestingBlockHeight() + 24 + 24 + 16;
     }
 
     @Override
     public Path getPath() {
-        return BlockPaths.drawDoubleNestingBlock(position, baseWidth, baseHeight, getFirstNestingBlockHeight(), getSecondNestingBlockHeight());
+        return BlockPaths.drawDoubleNestingBlock(position, width, height, getFirstNestingBlockHeight(), getSecondNestingBlockHeight());
     }
 
     private int getFirstNestingBlockHeight() {
@@ -302,21 +404,47 @@ class DoubleNestingBlock extends Block {
     }
 }
 
-class BlockLabel {
-    String baseLabel;
-    int parameterCount;
-    Parameter parameters[] = new Parameter[3];
+class Parameter<T> {
+    Position labelPosition;
+    T value;
 
-    public BlockLabel(String label) {
-        this.baseLabel = label;
-        this.parameterCount = label.split("[]").length - 1;
+    public Parameter(Position labelPosition, T value) {
+        this.labelPosition = labelPosition;
+        this.value = value;
+    }
+    
+    public double getWidth() {
+        if(value.getClass() == Integer.class) {
+            Text widthCheck = new Text(value.toString());
+            widthCheck.setFont(Editor.COOL_FONT);
+            return Math.max(Block.PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
+        }
+        return Block.PARAMETER_SIZE;
     }
 
-    public int getWidth() {
-        return -1;
-    }
+    public Path getPath() {
+        double x = labelPosition.x;
+        double y = labelPosition.y;
+        Path path = new Path();
+        path.setFill(Color.TRANSPARENT);
 
-    public GraphicsContext drawBlockLabel(GraphicsContext gc) {
-        return gc;
+        int radius = Block.PARAMETER_SIZE / 2;
+        double width = getWidth();
+
+        path.getElements().add(new MoveTo(x + radius, y));
+
+        path.getElements().add(new LineTo(x + radius + width - Block.PARAMETER_SIZE, y));
+        x = x + radius + width - Block.PARAMETER_SIZE;
+
+        path.getElements().add(new ArcTo(radius, radius, 0, x, y + Block.PARAMETER_SIZE, false, true));
+        y += Block.PARAMETER_SIZE;
+
+        path.getElements().add(new LineTo(x - width + Block.PARAMETER_SIZE, y));
+        x = x - width + Block.PARAMETER_SIZE;
+
+        path.getElements().add(new ArcTo(radius, radius, 0, x, y - Block.PARAMETER_SIZE, false, true));
+        y -= Block.PARAMETER_SIZE;
+
+        return path;
     }
 }

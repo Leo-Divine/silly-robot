@@ -50,6 +50,9 @@ public class App extends Application {
     }
 
     private void createEventHandlers(Stage stage) {
+        stage.getScene().setOnKeyPressed(event -> {
+            canvas.keyPressed(event);
+        });
         stage.getScene().setOnMouseDragged(event -> {
             canvas.mouseMoved(event.getSceneX(), event.getSceneY());
         });

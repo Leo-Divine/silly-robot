@@ -80,8 +80,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x, y + height));
-        y += height;
+        path.getElements().add(new LineTo(x, y + height - 8));
+        y += height - 8;
 
         path.getElements().add(new ArcTo(4, 4, 0, x - 4, y + 4, false, true));
         x -= 4;
@@ -235,8 +235,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x, y + baseHeight));
-        y += baseHeight;
+        path.getElements().add(new LineTo(x, y + baseHeight - 8));
+        y += baseHeight - 8;
 
         path.getElements().add(new ArcTo(4, 4, 0, x - 4, y + 4, false, true));
         x -= 4;
@@ -279,8 +279,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
      
-        path.getElements().add(new LineTo(x, y + nestedHeight));
-        y += nestedHeight;
+        path.getElements().add(new LineTo(x, y + nestedHeight - 8));
+        y += nestedHeight - 8;
 
         path.getElements().add(new CubicCurveTo(x, y + 4, x, y + 4, x + 4, y + 4));
         x += 4;
@@ -418,8 +418,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x, y + baseHeight));
-        y += baseHeight;
+        path.getElements().add(new LineTo(x, y + baseHeight - 8));
+        y += baseHeight - 8;
 
         path.getElements().add(new ArcTo(4, 4, 0, x - 4, y + 4, false, true));
         x -= 4;
@@ -462,8 +462,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
      
-        path.getElements().add(new LineTo(x, y + firstNestedHeight));
-        y += firstNestedHeight;
+        path.getElements().add(new LineTo(x, y + firstNestedHeight - 8));
+        y += firstNestedHeight - 8;
 
         path.getElements().add(new CubicCurveTo(x, y + 4, x, y + 4, x + 4, y + 4));
         x += 4;
@@ -550,8 +550,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
      
-        path.getElements().add(new LineTo(x, y + secondNestedHeight));
-        y += secondNestedHeight;
+        path.getElements().add(new LineTo(x, y + secondNestedHeight - 8));
+        y += secondNestedHeight - 8;
 
         path.getElements().add(new CubicCurveTo(x, y + 4, x, y + 4, x + 4, y + 4));
         x += 4;
@@ -659,8 +659,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x, y + height));
-        y += height;
+        path.getElements().add(new LineTo(x, y + height - 8));
+        y += height - 8;
 
         path.getElements().add(new ArcTo(4, 4, 0, x - 4, y + 4, false, true));
         x -= 4;

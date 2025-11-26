@@ -22,9 +22,17 @@
     - [x] Fix Block Snapping Position
     - [x] Make Different Block Types (Operator, Nested Block, etc)
     - [ ] Give Blocks Parameters
-        - [ ] Customize Parameters
-- [ ] Move Blocks to the Back of BlockList When Dragged
+        - [x] Display Parameters
+        - [x] Parameter Size Changes Based on Value
+        - [ ] Different Parameter For Operands
+        - [ ] Give Parameters Values
+            - [x] Display Parameter Values
+            - [ ] Color Picker
+- [x] Move Blocks to the Back of BlockList When Dragged
+- [ ] Nesting Blocks
+- [x] Display Parameters on Menu Blocks
 - [x] Select Blocks From Menu By Checking Paths
+- [ ] Make Menu Bigger to Fit All Blocks
 
 
 ## Sphero

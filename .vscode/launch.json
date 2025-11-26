@@ -9,13 +9,6 @@
       "projectName": "silly-bot"
     },
     {
-      "type": "java",
-      "name": "App",
-      "request": "launch",
-      "mainClass": "com.example/com.example.App",
-      "projectName": "server"
-    },
-    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
