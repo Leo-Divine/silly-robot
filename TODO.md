@@ -25,9 +25,9 @@
         - [x] Display Parameters
         - [x] Parameter Size Changes Based on Value
         - [ ] Different Parameter For Operands
-        - [ ] Give Parameters Values
+        - [x] Give Parameters Values
             - [x] Display Parameter Values
-            - [ ] Color Picker
+            - [x] Color Picker
 - [x] Move Blocks to the Back of BlockList When Dragged
 - [ ] Nesting Blocks
 - [x] Display Parameters on Menu Blocks

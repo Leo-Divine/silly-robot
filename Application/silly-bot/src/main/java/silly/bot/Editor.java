@@ -164,8 +164,19 @@ public class Editor extends Canvas {
         if(!isColorPickerShowing) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
         Parameter parameter = block.parameters[selectedParameter[1]];
-        gc.setFill(Color.BLACK);
-        gc.fillRect(parameter.labelPosition.x - 33, parameter.labelPosition.y + 40, 100, 100);
+
+        for (int x = (int) parameter.labelPosition.x - 33; x < parameter.labelPosition.x + 217; x++) {
+            double hue = Math.floor((x - parameter.labelPosition.x + 33) / 0.694);
+            for (int y = (int)parameter.labelPosition.y + 40; y < parameter.labelPosition.y + 190; y++) {
+                double saturation = Math.min((y - parameter.labelPosition.y - 40) / 0.75, 100) / 100;
+                double brightness = Math.min((parameter.labelPosition.y + 190 - y) / 0.75, 100) / 100;
+                Color color = Color.hsb(hue, saturation, brightness);
+                gc.setFill(color);
+                gc.fillRect(x, y, 1, 1);
+            }
+        }
+        gc.setStroke(block.blockType.category.border);
+        gc.strokeRect(parameter.labelPosition.x - 33, parameter.labelPosition.y + 40, 250, 150);
     }
 
     /**
@@ -202,8 +213,27 @@ public class Editor extends Canvas {
 
     @SuppressWarnings("rawtypes")
     public void mousePressed(double eventXPos, double eventYPos) {
+        if(isColorPickerShowing) {
+            Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
+            Parameter parameter = block.parameters[selectedParameter[1]];
+            if(parameter.labelPosition.x - 33 <= eventXPos
+                && parameter.labelPosition.x + 217 >= eventXPos
+                && parameter.labelPosition.y + 40 <= eventYPos
+                && parameter.labelPosition.y + 190 >= eventYPos
+            ) {
+                double hue = Math.floor((eventXPos - parameter.labelPosition.x + 33) / 0.694);
+                double sat = Math.min((eventYPos - parameter.labelPosition.y - 40) / 0.75, 100) / 100;
+                double bri = Math.min((parameter.labelPosition.y + 190 - eventYPos) / 0.75, 100) / 100;
+                parameter.value = Color.hsb(hue, sat, bri);
+
+                selectedParameter[0] = 0;
+                isColorPickerShowing = false;
+                return;
+            }
+        }
         selectedParameter[0] = 0;
         isColorPickerShowing = false;
+
         for(Block block : blocks) {
             if(block.blockType == BlockType.Start) { continue; }
             if(!block.isMouseOnBlock(new Position(eventXPos, eventYPos))) { continue; }
@@ -312,7 +342,6 @@ public class Editor extends Canvas {
                 break;
             }
         }
-        //System.out.println(block.getWidth());
     }
 
     private void deleteConnectedBlock(int blockId) {
@@ -375,7 +404,7 @@ public class Editor extends Canvas {
             for(Parameter parameter : block.parameters) {
                 if(parameter.value.getClass() == Block.class) { continue; }
                 if(Math.pow(eventXPos - (Block.PARAMETER_SIZE / 2 + parameter.labelPosition.x), 2) + Math.pow(eventYPos - (Block.PARAMETER_SIZE / 2 + parameter.labelPosition.y), 2) <= Math.pow(Block.PARAMETER_SIZE / 2, 2)) {
-                    System.out.println(block.position.x);
+                    
                 }
             }
         }
