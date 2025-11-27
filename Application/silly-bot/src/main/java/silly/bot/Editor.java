@@ -13,21 +13,47 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
-enum MouseState {
-    Default,
-    Dragging
-}
-
 public class Editor extends Canvas {
+    /**
+     * The size of the navagation buttons in the menu.
+     */
     final private int MENU_NAVIGATOR_BUTTON_SIZE = 25;
+    /**
+     * The main font used on the blocks.
+     */
     final static public Font COOL_FONT = getCocoFont();
 
+    /**
+     * The graphics context of the editor.
+     */
     private GraphicsContext gc = getGraphicsContext2D();
+    /**
+     * A list of all the category labels and blocks present in the menu.
+     */
     private Vector<MenuItem> menuItems = createMenu();
+    /**
+     * A collection of all the blocks that are being used in the editor.
+     */
     private Vector<Block> blocks = new Vector<Block>();
+    /**
+     * The current amount scrolled in the block menu. Determines how far down the menu displays.
+     */
     private double blockMenuScroll = 0;
+    /**
+     * <p>The block id of the block currently being dragged.</p>
+     * <p>A value of 0 means no block is being dragged.</p>
+     */
     private int currentDraggingBlock = 0;
+    /**
+     * <p>The block id and parameter index of the selected parameter.</p>
+     * <p>The first index is the id of the block that has the parameter.
+     * The second index is the index of the parameter.</p>
+     * <p>If the first index has a value of 0, it means no parameter is selected.</p>
+     */
     private int[] selectedParameter = new int[]{0, 0};
+    /**
+     * Determines if the color picker sub-menu is displayed.
+     */
     private boolean isColorPickerShowing = false;
 
     public Editor(int i, int j) {
@@ -35,6 +61,10 @@ public class Editor extends Canvas {
         blocks.add(new StartBlock(BlockType.Start, new Position(425, 40)));
     }
 
+    /**
+     * Gets the Coco Chamel font.
+     * @return the Coco font, or the Arial font if an error occurs.
+     */
     private static Font getCocoFont() {
         InputStream fontStream = Editor.class.getResourceAsStream("/Coco Chamel.ttf");
         if (fontStream != null) {
@@ -49,10 +79,16 @@ public class Editor extends Canvas {
         return new Font("Arial", 18);
     }
 
+    /**
+     * Clears the editor.
+     */
     public void clearCanvas() {
         gc.clearRect(0, 0, 2000, 2000);
     }
 
+    /**
+     * Draws the backgrouns on the editor.
+     */
     public void drawBackground() {
         gc.setStroke(javafx.scene.paint.Color.rgb(198, 198, 198));
         gc.setLineWidth(2);
@@ -63,6 +99,9 @@ public class Editor extends Canvas {
         gc.fillRect(325, 0, 1675, 2000);
     }
 
+    /**
+     * Draws all the menu icons and blocks.
+     */
     @SuppressWarnings("unchecked")
     public void drawMenus() {
         // Draw Navigation Buttons
@@ -118,14 +157,18 @@ public class Editor extends Canvas {
                 xPos += widthCheck.getLayoutBounds().getWidth();
 
                 item.block.parameters[i].labelPosition = new Position(xPos, item.yPos + item.block.shape.labelOffset.y);
-                gc.fillOval(xPos, item.yPos + (item.block.startHeight / 2) - (Block.PARAMETER_SIZE / 2) - blockMenuScroll, Block.PARAMETER_SIZE, Block.PARAMETER_SIZE);
-                gc.strokeOval(xPos, item.yPos + (item.block.startHeight / 2) - (Block.PARAMETER_SIZE / 2) - blockMenuScroll, Block.PARAMETER_SIZE, Block.PARAMETER_SIZE);
-                xPos += Block.PARAMETER_SIZE;
+                gc.fillOval(xPos, item.yPos + (item.block.startHeight / 2) - (Parameter.PARAMETER_SIZE / 2) - blockMenuScroll, Parameter.PARAMETER_SIZE, Parameter.PARAMETER_SIZE);
+                gc.strokeOval(xPos, item.yPos + (item.block.startHeight / 2) - (Parameter.PARAMETER_SIZE / 2) - blockMenuScroll, Parameter.PARAMETER_SIZE, Parameter.PARAMETER_SIZE);
+                xPos += Parameter.PARAMETER_SIZE;
             }
             gc.fillText(stringParts[stringParts.length - 1], xPos, item.yPos + item.block.shape.labelOffset.y - blockMenuScroll);
         }
     }
 
+    /**
+     * Creates a list of all the category labels and blocks present in the block menu, along with their positions.
+     * @return a list of the labels and blocks in the block menu.
+     */
     private static Vector<MenuItem> createMenu() {
         Vector<MenuItem> menuItems = new Vector<MenuItem>();
         int yPos = 50;
@@ -155,6 +198,9 @@ public class Editor extends Canvas {
         return menuItems;
     }
 
+    /**
+     * Draws all the blocks on the editor and any sub-menus on the blocks.
+     */
     public void drawBlocks() {
         for(Block block : blocks) {
             block.drawBlock(gc);
@@ -403,7 +449,7 @@ public class Editor extends Canvas {
             if(block.parameters == null) { continue; }
             for(Parameter parameter : block.parameters) {
                 if(parameter.value.getClass() == Block.class) { continue; }
-                if(Math.pow(eventXPos - (Block.PARAMETER_SIZE / 2 + parameter.labelPosition.x), 2) + Math.pow(eventYPos - (Block.PARAMETER_SIZE / 2 + parameter.labelPosition.y), 2) <= Math.pow(Block.PARAMETER_SIZE / 2, 2)) {
+                if(Math.pow(eventXPos - (Parameter.PARAMETER_SIZE / 2 + parameter.labelPosition.x), 2) + Math.pow(eventYPos - (Parameter.PARAMETER_SIZE / 2 + parameter.labelPosition.y), 2) <= Math.pow(Parameter.PARAMETER_SIZE / 2, 2)) {
                     
                 }
             }

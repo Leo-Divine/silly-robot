@@ -1,23 +1,53 @@
 package silly.bot;
 
 import java.util.Arrays;
-
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
+/**
+ * <h3>BlockCategory</h3>
+ * <h4>The category of a block.</h4>
+ * <p>The blocks are seperated into categories based on what they make the robot actually do.</p>
+ */
 enum BlockCategory {
+    /**
+     * Contains blocks that execute a series of blocks.
+     */
     Start(Color.rgb(76, 151, 255), Color.rgb(51, 115, 204)),
+    /**
+     * Contains blocks that physically move the robot.
+     */
     Movement(Color.rgb(255, 102, 128), Color.rgb(255, 51, 85)),
+    /**
+     * Contains blocks that changes the appearance of the robot.
+     */
     Display(Color.rgb(89, 192, 89), Color.rgb(56, 148, 56)),
+    /**
+     * Contains blocks that produces sound.
+     */
     Sound(Color.rgb(255, 140, 26), Color.rgb(219, 110, 0)),
+    /**
+     * Contains blocks that return values from the robot's sensors.
+     */
     Sensors(Color.rgb(92, 177, 214), Color.rgb(46, 142, 184)),
+    /**
+     * Contains blocks that control the flow of code.
+     */
     Control(Color.rgb(153, 102, 255), Color.rgb(119, 77, 203)),
+    /**
+     * Contains blocks that take values and perform calculations.
+     */
     Operands(Color.rgb(255, 171, 25), Color.rgb(207, 139, 23));
 
+    /**
+     * The fill color of the blocks.
+     */
     public final Color fill;
+    /**
+     * The stroke color of the blocks.
+     */
     public final Color border;
 
     private BlockCategory(Color fill, Color border) {
@@ -117,7 +147,6 @@ enum BlockType {
 }
 
 public abstract class Block {
-    final static int PARAMETER_SIZE = 25;
     final static double BORDER_WIDTH = 1.15;
 
     static int nextBlockId = 1;
@@ -230,7 +259,7 @@ public abstract class Block {
             xPos += widthCheck.getLayoutBounds().getWidth();
 
             // Draw Parameter Circle
-            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - PARAMETER_SIZE / 2);
+            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - Parameter.PARAMETER_SIZE / 2);
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
@@ -405,6 +434,7 @@ class DoubleNestingBlock extends Block {
 }
 
 class Parameter<T> {
+    final static int PARAMETER_SIZE = 25;
     Position labelPosition;
     T value;
 
@@ -417,9 +447,9 @@ class Parameter<T> {
         if(value.getClass() == Integer.class) {
             Text widthCheck = new Text(value.toString());
             widthCheck.setFont(Editor.COOL_FONT);
-            return Math.max(Block.PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
+            return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
         }
-        return Block.PARAMETER_SIZE;
+        return PARAMETER_SIZE;
     }
 
     public Path getPath() {
@@ -428,22 +458,22 @@ class Parameter<T> {
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
 
-        int radius = Block.PARAMETER_SIZE / 2;
+        int radius = PARAMETER_SIZE / 2;
         double width = getWidth();
 
         path.getElements().add(new MoveTo(x + radius, y));
 
-        path.getElements().add(new LineTo(x + radius + width - Block.PARAMETER_SIZE, y));
-        x = x + radius + width - Block.PARAMETER_SIZE;
+        path.getElements().add(new LineTo(x + radius + width - PARAMETER_SIZE, y));
+        x = x + radius + width - PARAMETER_SIZE;
 
-        path.getElements().add(new ArcTo(radius, radius, 0, x, y + Block.PARAMETER_SIZE, false, true));
-        y += Block.PARAMETER_SIZE;
+        path.getElements().add(new ArcTo(radius, radius, 0, x, y + PARAMETER_SIZE, false, true));
+        y += PARAMETER_SIZE;
 
-        path.getElements().add(new LineTo(x - width + Block.PARAMETER_SIZE, y));
-        x = x - width + Block.PARAMETER_SIZE;
+        path.getElements().add(new LineTo(x - width + PARAMETER_SIZE, y));
+        x = x - width + PARAMETER_SIZE;
 
-        path.getElements().add(new ArcTo(radius, radius, 0, x, y - Block.PARAMETER_SIZE, false, true));
-        y -= Block.PARAMETER_SIZE;
+        path.getElements().add(new ArcTo(radius, radius, 0, x, y - PARAMETER_SIZE, false, true));
+        y -= PARAMETER_SIZE;
 
         return path;
     }
