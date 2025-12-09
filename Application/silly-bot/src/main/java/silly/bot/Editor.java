@@ -156,11 +156,21 @@ public class Editor extends Canvas {
                 widthCheck.setText(stringParts[i]);
                 xPos += widthCheck.getLayoutBounds().getWidth();
 
-                item.block.parameters[i].labelPosition = new Position(xPos, item.yPos + item.block.shape.labelOffset.y);
-                gc.fillOval(xPos, item.yPos + (item.block.startHeight / 2) - (Parameter.PARAMETER_SIZE / 2) - blockMenuScroll, Parameter.PARAMETER_SIZE, Parameter.PARAMETER_SIZE);
-                gc.strokeOval(xPos, item.yPos + (item.block.startHeight / 2) - (Parameter.PARAMETER_SIZE / 2) - blockMenuScroll, Parameter.PARAMETER_SIZE, Parameter.PARAMETER_SIZE);
-                xPos += Parameter.PARAMETER_SIZE;
+                item.block.parameters[i].labelPosition = new Position(xPos, item.yPos + (item.block.startHeight / 2) - (Parameter.PARAMETER_SIZE / 2) - blockMenuScroll);
+                
+                if(item.block.parameters[i].value == null) {
+                    gc.setFill(item.block.category.border);
+                    gc.setStroke(item.block.category.border);
+                }
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(item.block.parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+
+                xPos += item.block.parameters[i].getWidth();
             }
+            gc.setFill(Color.WHITE);
             gc.fillText(stringParts[stringParts.length - 1], xPos, item.yPos + item.block.shape.labelOffset.y - blockMenuScroll);
         }
     }
@@ -280,14 +290,17 @@ public class Editor extends Canvas {
         selectedParameter[0] = 0;
         isColorPickerShowing = false;
 
-        for(Block block : blocks) {
+        for(int blockId = blocks.size() - 1; blockId > 0; blockId--) {
+            Block block = blocks.get(blockId);
             if(block.blockType == BlockType.Start) { continue; }
             if(!block.isMouseOnBlock(new Position(eventXPos, eventYPos))) { continue; }
 
             if(block.parameters != null) {
                 for(int i = 0; i < block.parameters.length; i++) {
                     Parameter parameter = block.parameters[i];
-                    if(parameter.value.getClass() == String.class) { continue; }
+                    if(parameter.value == null) { continue; }
+                    if(Block.class.isAssignableFrom(parameter.value.getClass())) { continue; }
+
                     if(parameter.getPath().contains(eventXPos, eventYPos)) {
                         selectedParameter[0] = block.getId();
                         selectedParameter[1] = i;
@@ -352,11 +365,23 @@ public class Editor extends Canvas {
         block.mouseOffset = new Position(0, 0);
         currentDraggingBlock = 0;
 
-        //Remove Previous Connection
+        // Remove Previous Connection
         if(block.aboveBlock != 0) {
             Block aboveBlock = (Block) blocks.stream().filter(s -> s.getId() == block.aboveBlock).toArray()[0];
             aboveBlock.belowBlock = 0;
             block.aboveBlock = 0;
+        }
+
+        if(block.blockType.shape == BlockShape.Operand) {
+            if(((OperandBlock)block).parentBlock != 0) {
+                OperandBlock childBlock = (OperandBlock)block;
+                Block parentBlock = (Block) blocks.stream().filter(s -> s.getId() == childBlock.parentBlock).toArray()[0];
+                
+                parentBlock.parameters[0].value = null;
+                parentBlock.parameters[0].childBlock = 0;
+                childBlock.parentBlock = 0;
+                childBlock.parentParameter = -1;
+            }
         }
 
         // Check if Dragged to Block Menu
@@ -364,13 +389,42 @@ public class Editor extends Canvas {
             if(block.belowBlock != 0) {
                 deleteConnectedBlock(block.belowBlock);
             }
+            for(Parameter parameter : block.parameters) {
+                if(parameter.childBlock != 0) {
+                    deleteConnectedBlock(parameter.childBlock);
+                }
+            }
             blocks.remove(block);
+        }
+
+        if(block.blockType.shape == BlockShape.Operand) {
+            for(Block surroundingBlock : blocks) {
+                if(surroundingBlock.blockType.shape != BlockShape.Nesting 
+                    && surroundingBlock.blockType.shape != BlockShape.DoubleNesting) { continue; } // Non-Connecting Shape
+                    
+                if(surroundingBlock.parameters[0].value != null) { continue; } // Already has a Block
+
+                // Check if Block is Close Enough
+                if(Math.abs(surroundingBlock.parameters[0].labelPosition.x - 325 - (block.position.x + block.getWidth() / 2)) <= 50 &&
+                   Math.abs(surroundingBlock.parameters[0].labelPosition.y - block.position.y) <= 40)  {
+                    surroundingBlock.parameters[0].value = block;
+                    surroundingBlock.parameters[0].childBlock = block.getId();
+                    ((OperandBlock)block).parentBlock = surroundingBlock.getId();
+                    ((OperandBlock)block).parentParameter = 0;
+
+                    moveConnectedChildBlock(block.getId(), surroundingBlock.parameters[0].labelPosition);
+                    break;
+                }
+            }
+            return;
         }
 
         // Check if Block Can Connect to Another Block
         for(Block surroundingBlock : blocks) {
-            if(surroundingBlock.getId() == block.getId()) { continue; }
-            if(surroundingBlock.belowBlock != 0) { continue; }
+            if(surroundingBlock.getId() == block.getId()) { continue; } // Same Block
+            if(surroundingBlock.belowBlock != 0) { continue; } // Already has a Block
+            if(surroundingBlock.blockType.shape == BlockShape.Operand 
+                || surroundingBlock.blockType.shape == BlockShape.Value) { continue; } // Non-Connecting Shape
 
             // Check if Block is Close Enough
             if(Math.abs(surroundingBlock.position.x - block.position.x) <= 25 &&
@@ -382,9 +436,16 @@ public class Editor extends Canvas {
                     surroundingBlock.position.x,
                     surroundingBlock.position.y + surroundingBlock.getHeight() + Block.BORDER_WIDTH / 2
                 );
+                block.updateParameterPositions();
 
-                if(block.belowBlock == 0) { break; }
-                moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
+                if(block.belowBlock != 0) {
+                    moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
+                }
+                for(Parameter parameter : block.parameters) {
+                    if(parameter.childBlock != 0) {
+                        moveConnectedChildBlock(parameter.childBlock, parameter.labelPosition);
+                    }
+                }
                 break;
             }
         }
@@ -395,6 +456,11 @@ public class Editor extends Canvas {
 
         if(block.belowBlock != 0) {
             deleteConnectedBlock(block.belowBlock);
+        }
+        for(Parameter parameter : block.parameters) {
+            if(parameter.childBlock != 0) {
+                deleteConnectedBlock(parameter.childBlock);
+            }
         }
         blocks.remove(block);
     }
@@ -410,12 +476,30 @@ public class Editor extends Canvas {
         blocks.add(block);
 
         block.position = new Position(eventXPos - 325 - block.mouseOffset.x, eventYPos - block.mouseOffset.y);
+        block.updateParameterPositions();
 
-        if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
+        if(block.belowBlock != 0) {
+            moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
+        }
+        for(Parameter parameter : block.parameters) {
+            if(parameter.childBlock != 0) {
+                moveConnectedChildBlock(parameter.childBlock, parameter.labelPosition);
+            }
+        }
     }
 
-    private void moveConnectedBlock(int blockId, Position position, int aboveBlockHeight) {
+    private void moveConnectedChildBlock(int blockId, Position parameterPosition) {
+        // Get Block
+        Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
+
+        // Bring Block to Front
+        blocks.remove(block);
+        blocks.add(block);
+
+        block.position = new Position(parameterPosition.x - 325, parameterPosition.y);
+    }
+
+    private void moveConnectedBelowBlock(int blockId, Position position, int aboveBlockHeight) {
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
 
@@ -425,12 +509,23 @@ public class Editor extends Canvas {
 
         // Move Block
         block.position = new Position(position.x, position.y + aboveBlockHeight + Block.BORDER_WIDTH / 2);
+        block.updateParameterPositions();
 
-        if(block.belowBlock == 0) { return; }
-        moveConnectedBlock(block.belowBlock, block.position, block.getHeight());
+        if(block.belowBlock != 0) {
+            moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
+        }
+        
+        for(Parameter parameter : block.parameters) {
+            if(parameter.childBlock != 0) {
+                moveConnectedChildBlock(parameter.childBlock, parameter.labelPosition);
+            }
+        }
     }
 
-    @SuppressWarnings("rawtypes")
+    private void moveConnectedNestedBlock() {
+
+    }
+
     public void mouseClicked(double eventXPos, double eventYPos) {
         // Menu Buttons
         int yPos = 25;
@@ -442,17 +537,6 @@ public class Editor extends Canvas {
                 break;
             }
             yPos += 50;
-        }
-
-        // Parameters
-        for(Block block : blocks) {
-            if(block.parameters == null) { continue; }
-            for(Parameter parameter : block.parameters) {
-                if(parameter.value.getClass() == Block.class) { continue; }
-                if(Math.pow(eventXPos - (Parameter.PARAMETER_SIZE / 2 + parameter.labelPosition.x), 2) + Math.pow(eventYPos - (Parameter.PARAMETER_SIZE / 2 + parameter.labelPosition.y), 2) <= Math.pow(Parameter.PARAMETER_SIZE / 2, 2)) {
-                    
-                }
-            }
         }
     }
 

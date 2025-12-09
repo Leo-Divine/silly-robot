@@ -24,7 +24,12 @@
     - [ ] Give Blocks Parameters
         - [x] Display Parameters
         - [x] Parameter Size Changes Based on Value
-        - [ ] Different Parameter For Operands
+        - [x] Different Parameter For Operands
+            - [x] Disable Block Click of Operands
+            - [x] Set Parameter on Nesting to Operand Shape
+            - [x] Allow Operands to be Dragged onto
+            - [x] Delete, Drag, and Move When Attatched
+            - [x] Drag Operand off of Block
         - [x] Give Parameters Values
             - [x] Display Parameter Values
             - [x] Color Picker
@@ -33,7 +38,8 @@
 - [x] Display Parameters on Menu Blocks
 - [x] Select Blocks From Menu By Checking Paths
 - [ ] Make Menu Bigger to Fit All Blocks
+- [x] When checking for dragging, check blocks in from last to first in vector.
 
 
 ## Sphero
-- [ ] Create a 3D Model to Hold All Components
+- [x] Create a 3D Model to Hold All Components

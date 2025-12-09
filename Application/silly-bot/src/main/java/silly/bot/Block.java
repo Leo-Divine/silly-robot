@@ -113,7 +113,7 @@ enum BlockType {
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
     GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
     Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
-    If(BlockShape.Nesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    If(BlockShape.Nesting, BlockCategory.Control, 106, 47, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
     Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
@@ -140,7 +140,6 @@ enum BlockType {
         this.parameters = parameters;
     }
 
-    @SuppressWarnings("rawtypes")
     public Parameter[] getParameters() {
         return Arrays.copyOf(this.parameters, this.parameters.length);
     }
@@ -178,10 +177,10 @@ public abstract class Block {
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
                 break;
             case If:
-                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
                 break;
             case IfEl:
-                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
                 break;
             case Less:
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
@@ -259,7 +258,13 @@ public abstract class Block {
             xPos += widthCheck.getLayoutBounds().getWidth();
 
             // Draw Parameter Circle
-            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - Parameter.PARAMETER_SIZE / 2);
+            double yPos = position.y + height / 2 - Parameter.PARAMETER_SIZE / 2;
+            if(parameters[i].value == null) {
+                yPos -= 2;
+            } else if(Block.class.isAssignableFrom(parameters[i].value.getClass())) {
+                yPos -= 2;
+            }
+            parameters[i].labelPosition = new Position(xPos, yPos);
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
@@ -267,7 +272,16 @@ public abstract class Block {
             gc.stroke();
 
             // Draw Parameter Value
-            if(parameters[i].value.getClass() == Integer.class) {
+            if(parameters[i].value == null) {
+                gc.setFill(blockType.category.border);
+                gc.setStroke(blockType.category.border);
+
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+            } else if(parameters[i].value.getClass() == Integer.class) {
                 gc.setFill(Color.BLACK);
                 gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
             } else if(parameters[i].value.getClass() == Color.class) {
@@ -295,6 +309,22 @@ public abstract class Block {
         }
         
         return gc;
+    }
+
+    public void updateParameterPositions() {
+        if(blockType.label.indexOf("α") == -1) { return; }
+        Text widthCheck = new Text();
+        widthCheck.setFont(Editor.COOL_FONT);
+
+        String[] stringParts = blockType.label.split("α");
+        double xPos = position.x + 325 + blockType.shape.labelOffset.x;
+        for(int i = 0; i < stringParts.length - 1; i++) {
+            // Draw Block Text
+            widthCheck.setText(stringParts[i]);
+            xPos += widthCheck.getLayoutBounds().getWidth();
+            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - Parameter.PARAMETER_SIZE / 2);
+            xPos += parameters[i].getWidth();
+        }
     }
 }
 
@@ -337,6 +367,9 @@ class ValueBlock extends Block {
 }
 
 class OperandBlock extends Block {
+    int parentBlock = 0;
+    int parentParameter = -1;
+
     public OperandBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -403,18 +436,14 @@ class NestingBlock extends Block {
     }
 }
 
-class DoubleNestingBlock extends Block {
-    int firstNestedBlock;
+class DoubleNestingBlock extends NestingBlock {
     int secondNestedBlock;
 
     public DoubleNestingBlock(BlockType type, Position position) {
         super(type, position);
     }
 
-    public int getWidth() {
-        return width;
-    }
-
+    @Override
     public int getHeight() {
         return height + getFirstNestingBlockHeight() + getSecondNestingBlockHeight() + 24 + 24 + 16;
     }
@@ -437,6 +466,7 @@ class Parameter<T> {
     final static int PARAMETER_SIZE = 25;
     Position labelPosition;
     T value;
+    int childBlock = 0;
 
     public Parameter(Position labelPosition, T value) {
         this.labelPosition = labelPosition;
@@ -444,10 +474,14 @@ class Parameter<T> {
     }
     
     public double getWidth() {
-        if(value.getClass() == Integer.class) {
+        if(value == null) {
+            return PARAMETER_SIZE + 10;
+        } else if(value.getClass() == Integer.class) {
             Text widthCheck = new Text(value.toString());
             widthCheck.setFont(Editor.COOL_FONT);
             return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
+        } else if(Block.class.isAssignableFrom(value.getClass())) {
+            return ((Block)value).getWidth();
         }
         return PARAMETER_SIZE;
     }
@@ -460,6 +494,35 @@ class Parameter<T> {
 
         int radius = PARAMETER_SIZE / 2;
         double width = getWidth();
+        if(value == null) {
+            path.getElements().add(new MoveTo(x + radius, y));
+
+            path.getElements().add(new LineTo(x + radius + width - PARAMETER_SIZE, y));
+            x = x + radius + width - PARAMETER_SIZE;
+
+            path.getElements().add(new LineTo(x + radius, y + radius));
+            x += radius;
+            y += radius;
+
+            path.getElements().add(new LineTo(x - radius, y + radius));
+            x -= radius;
+            y += radius;
+
+            path.getElements().add(new LineTo(x - width + PARAMETER_SIZE, y));
+            x = x - width + PARAMETER_SIZE;
+
+            path.getElements().add(new LineTo(x - radius, y - radius));
+            x -= radius;
+            y -= radius;
+
+            path.getElements().add(new LineTo(x + radius, y - radius));
+            x += radius;
+            y -= radius;
+
+            return path;
+        } else if(Block.class.isAssignableFrom(value.getClass())) {
+            return path;
+        }
 
         path.getElements().add(new MoveTo(x + radius, y));
 
