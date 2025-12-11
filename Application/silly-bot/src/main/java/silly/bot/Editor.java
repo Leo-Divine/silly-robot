@@ -401,19 +401,20 @@ public class Editor extends Canvas {
             blocks.remove(block);
         }
 
+        // Check if a Value Block Can Connect to Another Block
         if(block.blockType.shape == BlockShape.Value) {
             for(Block surroundingBlock : blocks) {
                 if(surroundingBlock.getId() == block.getId()) { continue; } // Same Block
                 for(int i = 0; i < surroundingBlock.parameters.length; i++) {
                     if(surroundingBlock.parameters[i].value == null) { continue; } // Is an Operand Parameter
                     if(surroundingBlock.parameters[i].childBlock != null) { continue; } // Already has a Block
-                    if(Math.abs(surroundingBlock.parameters[i].labelPosition.x - eventXPos) > 30 ||
-                       Math.abs(surroundingBlock.parameters[i].labelPosition.y - eventYPos) > 30)  { continue; } // Block Isn't Close Enough
+                    if(!surroundingBlock.parameters[i].getPath().getBoundsInParent().intersects(block.getPath().getBoundsInParent())) { continue; } // Block Isn't Close Enough
 
                     surroundingBlock.parameters[i].childBlock = block;
                     ((ValueBlock)block).parentBlock = surroundingBlock.getId();
                     ((ValueBlock)block).parentParameter = i;
 
+                    surroundingBlock.updateParameterPositions();
                     try {
                         moveConnectedChildBlock(block.getId(), surroundingBlock.parameters[i].labelPosition);
                     } catch(ArrayIndexOutOfBoundsException e) {
@@ -431,14 +432,14 @@ public class Editor extends Canvas {
                 if(surroundingBlock.blockType.shape != BlockShape.Nesting 
                     && surroundingBlock.blockType.shape != BlockShape.DoubleNesting) { continue; } // Non-Connecting Shape
                 if(surroundingBlock.parameters[0].value != null) { continue; } // Already has a Block
-                if(Math.abs(surroundingBlock.parameters[0].labelPosition.x - MENU_WIDTH - (block.position.x + block.getWidth() / 2)) > 50
-                    || Math.abs(surroundingBlock.parameters[0].labelPosition.y - block.position.y) > 40)  { continue; } // Block Isn't Close Enough
+                if(!surroundingBlock.parameters[0].getPath().getBoundsInParent().intersects(block.getPath().getBoundsInParent())) { continue; } // Block Isn't Close Enough
                 
                 surroundingBlock.parameters[0].value = block;
                 surroundingBlock.parameters[0].childBlock = block;
                 ((OperandBlock)block).parentBlock = surroundingBlock.getId();
                 ((OperandBlock)block).parentParameter = 0;
 
+                surroundingBlock.updateParameterPositions();
                 try {
                     moveConnectedChildBlock(block.getId(), surroundingBlock.parameters[0].labelPosition);
                 } catch(ArrayIndexOutOfBoundsException e) {
@@ -463,10 +464,7 @@ public class Editor extends Canvas {
                 block.aboveBlock = surroundingBlock.getId();
                 surroundingBlock.belowBlock = block.getId();
 
-                block.position = new Position(
-                    surroundingBlock.position.x,
-                    surroundingBlock.position.y + surroundingBlock.getHeight() + Block.BORDER_WIDTH / 2
-                );
+                block.position.y = surroundingBlock.position.y + surroundingBlock.getHeight() + Block.BORDER_WIDTH / 2;
                 block.updateParameterPositions();
 
                 if(block.belowBlock != 0) {

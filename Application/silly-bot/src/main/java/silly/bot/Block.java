@@ -165,7 +165,7 @@ public abstract class Block {
         this.height = blockType.startHeight;
 
         switch(this.blockType) {
-            case Equal:
+            case Equal: 
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
                 break;
             case Greater:
