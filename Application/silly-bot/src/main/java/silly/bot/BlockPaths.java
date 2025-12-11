@@ -33,7 +33,7 @@ public class BlockPaths {
     }
 
     public static Path drawDefaultBlock(Position position, int width, int height) {
-        double x = position.x + 325;
+        double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
@@ -128,7 +128,7 @@ public class BlockPaths {
     }
 
     public static Path drawValueBlock(Position position, int width, int height) {
-        double x = position.x + 325;
+        double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
@@ -153,7 +153,7 @@ public class BlockPaths {
     }
 
     public static Path drawOperandBlock(Position position, int width, int height) {
-        double x = position.x + 325;
+        double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
@@ -188,7 +188,7 @@ public class BlockPaths {
     }
 
     public static Path drawNestingBlock(Position position, int width, int baseHeight, int nestedHeight) {
-        double x = position.x + 325;
+        double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
@@ -371,7 +371,7 @@ public class BlockPaths {
     }
 
     public static Path drawDoubleNestingBlock(Position position, int width, int baseHeight, int firstNestedHeight, int secondNestedHeight) {
-       double x = position.x + 325;
+       double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
@@ -642,7 +642,7 @@ public class BlockPaths {
     }
 
     public static Path drawStartBlock(Position position, int width, int height) {
-        double x = position.x + 325;
+        double x = position.x + Editor.MENU_WIDTH;
         double y = position.y;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);

@@ -1,6 +1,5 @@
 package silly.bot;
 
-import java.util.Arrays;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -104,17 +103,17 @@ enum BlockShape {
 }
 
 enum BlockType {
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 311, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 326, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
     RotateLeft(BlockShape.Default, BlockCategory.Movement, 98, 42, "Turn Left", null),
     RotateRight(BlockShape.Default, BlockCategory.Movement, 107, 42, "Turn Right", null),
     SetLeftColor(BlockShape.Default, BlockCategory.Display, 233, 42, "Set The Left Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
     SetRightColor(BlockShape.Default, BlockCategory.Display, 242, 42, "Set The Right Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
-    PlayNote(BlockShape.Default, BlockCategory.Sound, 221, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 236, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
     GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
     Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
-    If(BlockShape.Nesting, BlockCategory.Control, 106, 47, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    If(BlockShape.Nesting, BlockCategory.Control, 116, 47, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 116, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
     Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Less(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α < α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
@@ -139,10 +138,6 @@ enum BlockType {
         this.label = label;
         this.parameters = parameters;
     }
-
-    public Parameter[] getParameters() {
-        return Arrays.copyOf(this.parameters, this.parameters.length);
-    }
 }
 
 public abstract class Block {
@@ -165,7 +160,7 @@ public abstract class Block {
         nextBlockId++;
         this.blockType = type;
         this.position = position;
-        position.x -= 325;
+        position.x -= Editor.MENU_WIDTH;
         this.width = blockType.startWidth;
         this.height = blockType.startHeight;
 
@@ -244,12 +239,12 @@ public abstract class Block {
 
         // Display Only Text For no Parameters
         if(blockType.label.indexOf("α") == -1) {
-            gc.fillText(blockType.label, position.x + 325 + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
+            gc.fillText(blockType.label, position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
             return gc;
         }
 
         String[] stringParts = blockType.label.split("α");
-        double xPos = position.x + 325 + blockType.shape.labelOffset.x;
+        double xPos = position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x;
         for(int i = 0; i < stringParts.length - 1; i++) {
             // Draw Block Text
             gc.setFill(Color.WHITE);
@@ -258,13 +253,7 @@ public abstract class Block {
             xPos += widthCheck.getLayoutBounds().getWidth();
 
             // Draw Parameter Circle
-            double yPos = position.y + height / 2 - Parameter.PARAMETER_SIZE / 2;
-            if(parameters[i].value == null) {
-                yPos -= 2;
-            } else if(Block.class.isAssignableFrom(parameters[i].value.getClass())) {
-                yPos -= 2;
-            }
-            parameters[i].labelPosition = new Position(xPos, yPos);
+            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - Parameter.PARAMETER_SIZE / 2);
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
@@ -303,9 +292,9 @@ public abstract class Block {
         widthCheck.setText(stringParts[stringParts.length - 1]);
         xPos += widthCheck.getLayoutBounds().getWidth();
         if(blockType.shape == BlockShape.Operand) {
-            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 27);
+            width = (int) (xPos - (position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x) + 27);
         } else {
-            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 10);
+            width = (int) (xPos - (position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x) + 10);
         }
         
         return gc;
@@ -317,7 +306,7 @@ public abstract class Block {
         widthCheck.setFont(Editor.COOL_FONT);
 
         String[] stringParts = blockType.label.split("α");
-        double xPos = position.x + 325 + blockType.shape.labelOffset.x;
+        double xPos = position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x;
         for(int i = 0; i < stringParts.length - 1; i++) {
             // Draw Block Text
             widthCheck.setText(stringParts[i]);
@@ -348,6 +337,9 @@ class DefaultBlock extends Block {
 }
 
 class ValueBlock extends Block {
+    int parentBlock = 0;
+    int parentParameter = -1;
+
     public ValueBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -466,7 +458,7 @@ class Parameter<T> {
     final static int PARAMETER_SIZE = 25;
     Position labelPosition;
     T value;
-    int childBlock = 0;
+    Block childBlock = null;
 
     public Parameter(Position labelPosition, T value) {
         this.labelPosition = labelPosition;
@@ -476,12 +468,12 @@ class Parameter<T> {
     public double getWidth() {
         if(value == null) {
             return PARAMETER_SIZE + 10;
+        } else if(childBlock != null) {
+            return childBlock.getWidth();
         } else if(value.getClass() == Integer.class) {
             Text widthCheck = new Text(value.toString());
             widthCheck.setFont(Editor.COOL_FONT);
             return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
-        } else if(Block.class.isAssignableFrom(value.getClass())) {
-            return ((Block)value).getWidth();
         }
         return PARAMETER_SIZE;
     }
