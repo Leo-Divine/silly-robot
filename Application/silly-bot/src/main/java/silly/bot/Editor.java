@@ -216,7 +216,7 @@ public class Editor extends Canvas {
      */
     public void drawBlocks() {
         for(Block block : blocks) {
-            block.drawBlock(gc);
+            block.drawBlock(gc, selectedParameter);
         }
 
         // Color Picker
@@ -703,7 +703,7 @@ public class Editor extends Canvas {
 
     public void mouseScroll(double eventXPos, double scrollAmount) {
         if(eventXPos > 75 && eventXPos < MENU_WIDTH) {
-            blockMenuScroll = Math.max(0, blockMenuScroll - scrollAmount);
+            blockMenuScroll = Math.min(Math.max(0, blockMenuScroll - scrollAmount), menuItems.lastElement().yPos);
         }
     }
 }

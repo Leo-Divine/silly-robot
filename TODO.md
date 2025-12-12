@@ -52,7 +52,7 @@
     - [x] Do Everything Over Again With DoubleNesting
 - [ ] Recommendations
     - [ ] Else Text on Double Nesting
-    - [ ] Visible Parameter Selection
+    - [x] Visible Parameter Selection
     - [ ] Note Parameters
 - [ ] Run Code Based on Blocks
 - [ ] Copy-Pasting Blocks

@@ -223,7 +223,7 @@ public abstract class Block {
         return getPath().contains(mousePosition.x, mousePosition.y);
     }
 
-    public GraphicsContext drawBlock(GraphicsContext gc) {
+    public GraphicsContext drawBlock(GraphicsContext gc, int[] selectedParameter) {
         gc.setFont(Editor.COOL_FONT);
         gc.setStroke(blockType.category.border);
         gc.setLineWidth(BORDER_WIDTH);
@@ -235,11 +235,11 @@ public abstract class Block {
         gc.fill();
         gc.stroke();
         
-        drawBlockText(gc);
+        drawBlockText(gc, selectedParameter);
         return gc;
     }
 
-    private GraphicsContext drawBlockText(GraphicsContext gc) {
+    private GraphicsContext drawBlockText(GraphicsContext gc, int[] selectedParameter) {
         Text widthCheck = new Text();
         widthCheck.setFont(Editor.COOL_FONT);
         gc.setFill(Color.WHITE);
@@ -265,6 +265,9 @@ public abstract class Block {
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
+            if(id == selectedParameter[0] && i == selectedParameter[1]) {
+                gc.setFill(Color.rgb(57, 155, 247));
+            }
             gc.fill();
             gc.stroke();
 
@@ -279,7 +282,11 @@ public abstract class Block {
                 gc.fill();
                 gc.stroke();
             } else if(parameters[i].value.getClass() == Integer.class) {
-                gc.setFill(Color.BLACK);
+                if(id == selectedParameter[0] && i == selectedParameter[1]) {
+                    gc.setFill(Color.WHITE);
+                } else {
+                    gc.setFill(Color.BLACK);
+                }
                 gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
             } else if(parameters[i].value.getClass() == Color.class) {
                 gc.setFill((Color) parameters[i].value);
