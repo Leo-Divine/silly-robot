@@ -242,8 +242,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x - width + 64, y));
-        x = x - width + 64;
+        path.getElements().add(new LineTo(x - width + 68, y));
+        x = x - width + 68;
         
         path.getElements().add(new CubicCurveTo(x - 2, y, x - 3, y + 1, x - 4, y + 2));
         x -= 4;
@@ -272,8 +272,8 @@ public class BlockPaths {
         x -= 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x - 4, y));
-        x -= 4;
+        path.getElements().add(new LineTo(x - 12, y));
+        x -= 12;
 
         path.getElements().add(new CubicCurveTo(x - 4, y, x - 4, y, x - 4, y + 4));
         x -= 4;
@@ -286,8 +286,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
         
-        path.getElements().add(new LineTo(x + 4, y));
-        x += 4;
+        path.getElements().add(new LineTo(x + 12, y));
+        x += 12;
 
         path.getElements().add(new CubicCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2));
         x += 4;
@@ -316,8 +316,8 @@ public class BlockPaths {
         x += 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x + width - 64, y));
-        x += width - 64;
+        path.getElements().add(new LineTo(x + width - 68, y));
+        x += width - 68;
 
         path.getElements().add(new ArcTo(4, 4, 0, x + 4, y + 4, false, true));
         x += 4;
@@ -425,8 +425,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
 
-        path.getElements().add(new LineTo(x - width + 64, y));
-        x = x - width + 64;
+        path.getElements().add(new LineTo(x - width + 68, y));
+        x = x - width + 68;
         
         path.getElements().add(new CubicCurveTo(x - 2, y, x - 3, y + 1, x - 4, y + 2));
         x -= 4;
@@ -455,8 +455,8 @@ public class BlockPaths {
         x -= 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x - 4, y));
-        x -= 4;
+        path.getElements().add(new LineTo(x - 12, y));
+        x -= 12;
 
         path.getElements().add(new CubicCurveTo(x - 4, y, x - 4, y, x - 4, y + 4));
         x -= 4;
@@ -469,8 +469,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
         
-        path.getElements().add(new LineTo(x + 4, y));
-        x += 4;
+        path.getElements().add(new LineTo(x + 12, y));
+        x += 12;
 
         path.getElements().add(new CubicCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2));
         x += 4;
@@ -499,8 +499,8 @@ public class BlockPaths {
         x += 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x + width - 64, y));
-        x += width - 64;
+        path.getElements().add(new LineTo(x + width - 68, y));
+        x += width - 68;
 
         path.getElements().add(new ArcTo(4, 4, 0, x + 4, y + 4, false, true));
         x += 4;
@@ -513,8 +513,8 @@ public class BlockPaths {
         x -= 4;
         y += 4;
         
-        path.getElements().add(new LineTo(x - width + 64, y));
-        x = x - width + 64;
+        path.getElements().add(new LineTo(x - width + 68, y));
+        x = x - width + 68;
         
         path.getElements().add(new CubicCurveTo(x - 2, y, x - 3, y + 1, x - 4, y + 2));
         x -= 4;
@@ -543,8 +543,8 @@ public class BlockPaths {
         x -= 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x - 4, y));
-        x -= 4;
+        path.getElements().add(new LineTo(x - 12, y));
+        x -= 12;
 
         path.getElements().add(new CubicCurveTo(x - 4, y, x - 4, y, x - 4, y + 4));
         x -= 4;
@@ -557,8 +557,8 @@ public class BlockPaths {
         x += 4;
         y += 4;
         
-        path.getElements().add(new LineTo(x + 4, y));
-        x += 4;
+        path.getElements().add(new LineTo(x + 12, y));
+        x += 12;
 
         path.getElements().add(new CubicCurveTo(x + 2, y, x + 3, y + 1, x + 4, y + 2));
         x += 4;
@@ -587,8 +587,8 @@ public class BlockPaths {
         x += 4;
         y -= 2;
 
-        path.getElements().add(new LineTo(x + width - 64, y));
-        x += width - 64;
+        path.getElements().add(new LineTo(x + width - 68, y));
+        x += width - 68;
 
         path.getElements().add(new ArcTo(4, 4, 0, x + 4, y + 4, false, true));
         x += 4;

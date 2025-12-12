@@ -6,7 +6,7 @@
 - [ ] Create Code for Bottom Sensor
 
 ## Arduino Hardware
-- [x] Find a Good WifI Module
+- [x] Find a Good Wifi Module
 
 ## Application
 - [x] Create a Background
@@ -16,7 +16,6 @@
 - [x] Block Deletion
 - [x] Buttons Scrolling
 - [x] Add Wifi Stuffs
-- [ ] Turn Blocks into Code
 - [x] Replace Block Images with SVG's
     - [x] Drag Blocks From Menu
     - [x] Fix Block Snapping Position
@@ -40,12 +39,23 @@
         - [x] Drag Value off of Block
         - [x] Extend Width of Parent Block
 - [x] Move Blocks to the Back of BlockList When Dragged
-- [ ] Nesting Blocks
 - [x] Display Parameters on Menu Blocks
 - [x] Select Blocks From Menu By Checking Paths
 - [x] Make Menu Bigger to Fit All Blocks
 - [x] When checking for dragging, check blocks in from last to first in vector.
-
+- [x] Nesting Blocks
+    - [x] Set Above and Below Blocks to Have a Type of Block
+    - [x] Get Nesting Working
+    - [x] Move and Delete Nested Block
+    - [x] Remove Nested Block
+    - [x] Change Parent Block Height
+    - [x] Do Everything Over Again With DoubleNesting
+- [ ] Recommendations
+    - [ ] Else Text on Double Nesting
+    - [ ] Visible Parameter Selection
+    - [ ] Note Parameters
+- [ ] Run Code Based on Blocks
+- [ ] Copy-Pasting Blocks
 
 ## Sphero
-- [x] Create a 3D Model to Hold All Components
+- [ ] Create a 3D Model to Hold All Components

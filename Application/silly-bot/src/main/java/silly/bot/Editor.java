@@ -244,6 +244,7 @@ public class Editor extends Canvas {
      */
     public void keyPressed(KeyEvent event) {
         // TODO: Handle Hotkeys
+        // TODO Change Parameter Width on Keypress
 
         if(selectedParameter[0] == 0) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
@@ -349,6 +350,7 @@ public class Editor extends Canvas {
 
     public void mouseReleased(double eventXPos, double eventYPos) {
         if(currentDraggingBlock == 0) { return; }
+        NestingBlock parentBlock = null;
 
         // Get Block
         Block block = (Block) blocks.stream().filter(s -> s.getId() == currentDraggingBlock).toArray()[0];
@@ -357,48 +359,58 @@ public class Editor extends Canvas {
         currentDraggingBlock = 0;
 
         // Remove Previous Connection
-        if(block.aboveBlock != 0) {
-            Block aboveBlock = (Block) blocks.stream().filter(s -> s.getId() == block.aboveBlock).toArray()[0];
-            aboveBlock.belowBlock = 0;
-            block.aboveBlock = 0;
+        if(block.aboveBlock != null) {
+            block.aboveBlock.belowBlock = null;
+            block.aboveBlock = null;
         }
 
         // Remove Previous Value Connection
-        if(block.blockType.shape == BlockShape.Value) {
-            if(((ValueBlock)block).parentBlock != 0) {
-                ValueBlock childBlock = (ValueBlock)block;
-                Block parentBlock = (Block) blocks.stream().filter(s -> s.getId() == childBlock.parentBlock).toArray()[0];
-                
-                parentBlock.parameters[childBlock.parentParameter].childBlock = null;
-                childBlock.parentBlock = 0;
-                childBlock.parentParameter = -1;
-            }
+        if(block.blockType.shape == BlockShape.Value && block.parentBlock != null) {
+            ValueBlock childBlock = (ValueBlock)block;
+            
+            childBlock.parentBlock.parameters[childBlock.parentParameter].childBlock = null;
+            childBlock.parentBlock = null;
+            childBlock.parentParameter = -1;
         }
 
         // Remove Previous Operand Connection
-        if(block.blockType.shape == BlockShape.Operand) {
-            if(((OperandBlock)block).parentBlock != 0) {
-                OperandBlock childBlock = (OperandBlock)block;
-                Block parentBlock = (Block) blocks.stream().filter(s -> s.getId() == childBlock.parentBlock).toArray()[0];
-                
-                parentBlock.parameters[0].value = null;
-                parentBlock.parameters[0].childBlock = null;
-                childBlock.parentBlock = 0;
-                childBlock.parentParameter = -1;
-            }
+        if(block.blockType.shape == BlockShape.Operand && block.parentBlock != null) {
+            OperandBlock childBlock = (OperandBlock)block;
+            
+            childBlock.parentBlock.parameters[0].value = null;
+            childBlock.parentBlock.parameters[0].childBlock = null;
+            childBlock.parentBlock = null;
+            childBlock.parentParameter = -1;
         }
 
-        // Check if The Block was Dragged to The Block Menu
-        if(block.position.x < 0) {
-            if(block.belowBlock != 0) {
-                deleteConnectedBlock(block.belowBlock);
-            }
-            for(Parameter parameter : block.parameters) {
-                if(parameter.childBlock != null) {
-                    deleteConnectedBlock(parameter.childBlock.getId());
+        // Remove Previous Nesting Connection
+        if(block.parentBlock != null) {
+            if(block.parentBlock.blockType.shape == BlockShape.Nesting) {
+                parentBlock = (NestingBlock) block.parentBlock;
+                if(parentBlock.nestedBlock.getId() == block.getId()) {
+                    parentBlock.nestedBlock = null;
                 }
             }
-            blocks.remove(block);
+            if(block.parentBlock.blockType.shape == BlockShape.DoubleNesting) {
+                DoubleNestingBlock doubleParentBlock = (DoubleNestingBlock) block.parentBlock;
+                parentBlock = doubleParentBlock;
+                if(parentBlock.nestedBlock != null) {
+                    if(parentBlock.nestedBlock.getId() == block.getId()) {
+                        parentBlock.nestedBlock = null;
+                    }
+                }
+                if(doubleParentBlock.secondNestedBlock != null) {
+                    if(doubleParentBlock.secondNestedBlock.getId() == block.getId()) {
+                        doubleParentBlock.secondNestedBlock = null;
+                    }
+                }
+            }
+            removeParent(block);
+        }
+
+        // Delete Block if Dragged to Menu
+        if(block.position.x < 0) {
+            deleteConnectedBlock(block);
         }
 
         // Check if a Value Block Can Connect to Another Block
@@ -411,12 +423,12 @@ public class Editor extends Canvas {
                     if(!surroundingBlock.parameters[i].getPath().getBoundsInParent().intersects(block.getPath().getBoundsInParent())) { continue; } // Block Isn't Close Enough
 
                     surroundingBlock.parameters[i].childBlock = block;
-                    ((ValueBlock)block).parentBlock = surroundingBlock.getId();
+                    block.parentBlock = surroundingBlock;
                     ((ValueBlock)block).parentParameter = i;
 
                     surroundingBlock.updateParameterPositions();
                     try {
-                        moveConnectedChildBlock(block.getId(), surroundingBlock.parameters[i].labelPosition);
+                        moveConnectedChildBlock(block, surroundingBlock.parameters[i].labelPosition);
                     } catch(ArrayIndexOutOfBoundsException e) {
                         surroundingBlock.parameters[i].childBlock = null;
                     }
@@ -436,12 +448,12 @@ public class Editor extends Canvas {
                 
                 surroundingBlock.parameters[0].value = block;
                 surroundingBlock.parameters[0].childBlock = block;
-                ((OperandBlock)block).parentBlock = surroundingBlock.getId();
+                block.parentBlock = surroundingBlock;
                 ((OperandBlock)block).parentParameter = 0;
 
                 surroundingBlock.updateParameterPositions();
                 try {
-                    moveConnectedChildBlock(block.getId(), surroundingBlock.parameters[0].labelPosition);
+                    moveConnectedChildBlock(block, surroundingBlock.parameters[0].labelPosition);
                 } catch(ArrayIndexOutOfBoundsException e) {
                     surroundingBlock.parameters[0].value = null;
                     surroundingBlock.parameters[0].childBlock = null;
@@ -454,43 +466,141 @@ public class Editor extends Canvas {
         // Check if Block Can Connect to Another Block
         for(Block surroundingBlock : blocks) {
             if(surroundingBlock.getId() == block.getId()) { continue; } // Same Block
-            if(surroundingBlock.belowBlock != 0) { continue; } // Already has a Block
             if(surroundingBlock.blockType.shape == BlockShape.Operand 
                 || surroundingBlock.blockType.shape == BlockShape.Value) { continue; } // Non-Connecting Shape
+            
+            // Check if the Block can be Nested
+            if(surroundingBlock.blockType.shape == BlockShape.Nesting) {
+                NestingBlock nestingBlock = (NestingBlock) surroundingBlock;
+                if(nestingBlock.nestedBlock == null
+                    && block.position.x - nestingBlock.position.x < nestingBlock.getWidth()
+                    && block.position.x > nestingBlock.position.x 
+                    && nestingBlock.position.y + nestingBlock.height < block.position.y + block.height
+                    && nestingBlock.position.y + nestingBlock.height + 25 > block.position.y
+                ) {
+                    nestingBlock.nestedBlock = block;
+                    block.parentBlock = nestingBlock;
+
+                    // Move Connected Blocks
+                    Block childBlock = nestingBlock;
+                    while(childBlock.parentBlock != null) {
+                        childBlock = childBlock.parentBlock;
+                    }
+                    checkForConnectedBlocks(childBlock);
+                    return;
+                }
+            }
+
+            // Check if Block can be Nested on a DoubleNested Block
+            if(surroundingBlock.blockType.shape == BlockShape.DoubleNesting) {
+                DoubleNestingBlock nestingBlock = (DoubleNestingBlock) surroundingBlock;
+
+                // First Nesting Space
+                if(nestingBlock.nestedBlock == null
+                    && block.position.x - nestingBlock.position.x < nestingBlock.getWidth()
+                    && block.position.x > nestingBlock.position.x 
+                    && nestingBlock.position.y + nestingBlock.height < block.position.y + block.height
+                    && nestingBlock.position.y + nestingBlock.height + 25 > block.position.y
+                ) {
+                    nestingBlock.nestedBlock = block;
+                    block.parentBlock = nestingBlock;
+
+                    // Move Connected Blocks
+                    Block childBlock = nestingBlock;
+                    while(childBlock.parentBlock != null) {
+                        childBlock = childBlock.parentBlock;
+                    }
+                    checkForConnectedBlocks(childBlock);
+                    return;
+                }
+
+                // Second Nesting Space
+                if(nestingBlock.secondNestedBlock == null
+                    && block.position.x - nestingBlock.position.x < nestingBlock.getWidth()
+                    && block.position.x > nestingBlock.position.x 
+                    && nestingBlock.position.y + nestingBlock.height + nestingBlock.getFirstNestingBlockHeight() + 32 < block.position.y + block.height
+                    && nestingBlock.position.y + nestingBlock.height + nestingBlock.getFirstNestingBlockHeight() + 32 + 25 > block.position.y
+                ) {
+                    nestingBlock.secondNestedBlock = block;
+                    block.parentBlock = nestingBlock;
+
+                    // Move Connected Blocks
+                    Block childBlock = nestingBlock;
+                    while(childBlock.parentBlock != null) {
+                        childBlock = childBlock.parentBlock;
+                    }
+                    checkForConnectedBlocks(childBlock);
+                    return;
+                }
+            }
+
+            if(surroundingBlock.belowBlock != null) { continue; } // Already has a Block
 
             // Check if Block is Close Enough
             if(Math.abs(surroundingBlock.position.x - block.position.x) <= 25 &&
                Math.abs(surroundingBlock.position.y + surroundingBlock.getHeight() - block.position.y) <= 30)  {
-                block.aboveBlock = surroundingBlock.getId();
-                surroundingBlock.belowBlock = block.getId();
+                block.aboveBlock = surroundingBlock;
+                surroundingBlock.belowBlock = block;
 
-                block.position.y = surroundingBlock.position.y + surroundingBlock.getHeight() + Block.BORDER_WIDTH / 2;
+                if(surroundingBlock.parentBlock != null) {
+                    block.parentBlock = surroundingBlock.parentBlock;
+                }
+
+                block.position = new Position(
+                    surroundingBlock.position.x,
+                    surroundingBlock.position.y + surroundingBlock.getHeight() + Block.BORDER_WIDTH / 2
+                );
                 block.updateParameterPositions();
 
-                if(block.belowBlock != 0) {
-                    moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
+                // Move Connected Blocks
+                Block childBlock = block;
+                while(childBlock.parentBlock != null) {
+                    childBlock = childBlock.parentBlock;
                 }
-                for(Parameter parameter : block.parameters) {
-                    if(parameter.childBlock != null) {
-                        moveConnectedChildBlock(parameter.childBlock.getId(), parameter.labelPosition);
-                    }
-                }
+                checkForConnectedBlocks(childBlock);
                 break;
             }
         }
+        
+        // Change Nesting Blocks Width if a Block Was Removed
+        if(block.parentBlock == null && parentBlock != null) {
+            Block childBlock = parentBlock;
+            while(childBlock.parentBlock != null) {
+                childBlock = childBlock.parentBlock;
+            }
+            checkForConnectedBlocks(childBlock);
+        }
     }
 
-    private void deleteConnectedBlock(int blockId) {
-        Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
+    private void removeParent(Block block) {
+        block.parentBlock = null;
+        if(block.belowBlock != null) { removeParent(block.belowBlock); }
+    }
 
-        if(block.belowBlock != 0) {
+    private void deleteConnectedBlock(Block block) {
+        if(block.belowBlock != null) {
             deleteConnectedBlock(block.belowBlock);
         }
         for(Parameter parameter : block.parameters) {
             if(parameter.childBlock != null) {
-                deleteConnectedBlock(parameter.childBlock.getId());
+                deleteConnectedBlock(parameter.childBlock);
             }
         }
+        if(block.blockType.shape == BlockShape.Nesting) {
+            NestingBlock nestingBlock = (NestingBlock) block;
+            if(nestingBlock.nestedBlock != null) {
+                deleteConnectedBlock(nestingBlock.nestedBlock);
+            }
+        }
+        if(block.blockType.shape == BlockShape.DoubleNesting) {
+            DoubleNestingBlock doubleNestingBlock = (DoubleNestingBlock) block;
+            if(doubleNestingBlock.nestedBlock != null) {
+                deleteConnectedBlock(doubleNestingBlock.nestedBlock);
+            }
+            if(doubleNestingBlock.secondNestedBlock != null) {
+                deleteConnectedBlock(doubleNestingBlock.secondNestedBlock);
+            }
+        } 
         blocks.remove(block);
     }
 
@@ -507,38 +617,51 @@ public class Editor extends Canvas {
         block.position = new Position(eventXPos - MENU_WIDTH - block.mouseOffset.x, eventYPos - block.mouseOffset.y);
         block.updateParameterPositions();
 
-        if(block.belowBlock != 0) {
+        // Move Connected Blocks
+        checkForConnectedBlocks(block);
+    }
+
+    private void checkForConnectedBlocks(Block block) {
+        if(block.belowBlock != null) {
             moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
         }
         for(Parameter parameter : block.parameters) {
             if(parameter.childBlock != null) {
-                moveConnectedChildBlock(parameter.childBlock.getId(), parameter.labelPosition);
+                moveConnectedChildBlock(parameter.childBlock, parameter.labelPosition);
             }
         }
+        if(block.blockType.shape == BlockShape.Nesting || block.blockType.shape == BlockShape.DoubleNesting) {
+            NestingBlock nestingBlock = (NestingBlock) block;
+            if(nestingBlock.nestedBlock != null) {
+                moveConnectedNestedBlock(nestingBlock.nestedBlock, nestingBlock.position, nestingBlock.height);
+            }
+        }
+        if(block.blockType.shape == BlockShape.DoubleNesting) {
+            DoubleNestingBlock doubleNestingBlock = (DoubleNestingBlock) block;
+            if(doubleNestingBlock.secondNestedBlock != null) {
+                moveConnectedNestedBlock(doubleNestingBlock.secondNestedBlock, doubleNestingBlock.position, doubleNestingBlock.height + doubleNestingBlock.getFirstNestingBlockHeight() + 32);
+            }
+        } 
     }
 
-    private void moveConnectedChildBlock(int blockId, Position parameterPosition) {
-        // Get Block
-        Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
-
+    private void moveConnectedChildBlock(Block block, Position parameterPosition) {
         // Bring Block to Front
         blocks.remove(block);
         blocks.add(block);
 
+        // Update Position
         block.position = new Position(parameterPosition.x - MENU_WIDTH, parameterPosition.y);
         block.updateParameterPositions();
 
+        // Move Connected Blocks
         for(Parameter parameter : block.parameters) {
             if(parameter.childBlock != null) {
-                moveConnectedChildBlock(parameter.childBlock.getId(), parameter.labelPosition);
+                moveConnectedChildBlock(parameter.childBlock, parameter.labelPosition);
             }
         }
     }
 
-    private void moveConnectedBelowBlock(int blockId, Position position, int aboveBlockHeight) {
-        // Get Block
-        Block block = (Block) blocks.stream().filter(s -> s.getId() == blockId).toArray()[0];
-
+    private void moveConnectedBelowBlock(Block block, Position position, double aboveBlockHeight) {
         // Bring Block to Front
         blocks.remove(block);
         blocks.add(block);
@@ -547,19 +670,21 @@ public class Editor extends Canvas {
         block.position = new Position(position.x, position.y + aboveBlockHeight + Block.BORDER_WIDTH / 2);
         block.updateParameterPositions();
 
-        if(block.belowBlock != 0) {
-            moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
-        }
-        
-        for(Parameter parameter : block.parameters) {
-            if(parameter.childBlock != null) {
-                moveConnectedChildBlock(parameter.childBlock.getId(), parameter.labelPosition);
-            }
-        }
+        // Move Connected Blocks
+        checkForConnectedBlocks(block);
     }
 
-    private void moveConnectedNestedBlock() {
+    private void moveConnectedNestedBlock(Block block, Position position, double nestingBlockHeight) {
+        // Bring Block to Front
+        blocks.remove(block);
+        blocks.add(block);
 
+        // Move Block
+        block.position = new Position(position.x + 16 + Block.BORDER_WIDTH / 2, position.y + nestingBlockHeight + Block.BORDER_WIDTH / 2);
+        block.updateParameterPositions();
+
+        // Move Connected Blocks
+        checkForConnectedBlocks(block);
     }
 
     public void mouseClicked(double eventXPos, double eventYPos) {

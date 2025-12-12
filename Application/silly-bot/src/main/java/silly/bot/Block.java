@@ -112,9 +112,9 @@ enum BlockType {
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
     GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
     Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
-    If(BlockShape.Nesting, BlockCategory.Control, 116, 47, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 116, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
+    If(BlockShape.Nesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 161, 47, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
     Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Less(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α < α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Greater(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α > α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
@@ -146,8 +146,9 @@ public abstract class Block {
     static int nextBlockId = 1;
     private int id;
     BlockType blockType;
-    int aboveBlock = 0;
-    int belowBlock = 0;
+    Block aboveBlock = null;
+    Block belowBlock = null;
+    Block parentBlock = null;
     Position position = new Position(0, 0);
     boolean isDragging = false;
     Position mouseOffset = new Position(0, 0);
@@ -210,6 +211,13 @@ public abstract class Block {
     abstract int getWidth();
     abstract int getHeight();
     abstract Path getPath();
+
+    public int getConnectedBlockHeights() {
+        if(belowBlock == null) {
+            return getHeight();
+        }
+        return getHeight() + belowBlock.getConnectedBlockHeights();
+    }
 
     public boolean isMouseOnBlock(Position mousePosition) {
         return getPath().contains(mousePosition.x, mousePosition.y);
@@ -337,7 +345,6 @@ class DefaultBlock extends Block {
 }
 
 class ValueBlock extends Block {
-    int parentBlock = 0;
     int parentParameter = -1;
 
     public ValueBlock(BlockType type, Position position) {
@@ -359,7 +366,6 @@ class ValueBlock extends Block {
 }
 
 class OperandBlock extends Block {
-    int parentBlock = 0;
     int parentParameter = -1;
 
     public OperandBlock(BlockType type, Position position) {
@@ -404,7 +410,7 @@ class StartBlock extends Block {
 }
 
 class NestingBlock extends Block {
-    int nestedBlock;
+    Block nestedBlock;
 
     public NestingBlock(BlockType type, Position position) {
         super(type, position);
@@ -424,12 +430,13 @@ class NestingBlock extends Block {
     }
 
     private int getTotalNestingBlockHeight() {
-        return 25;
+        if(nestedBlock == null) { return 25; }
+        return nestedBlock.getConnectedBlockHeights();
     }
 }
 
 class DoubleNestingBlock extends NestingBlock {
-    int secondNestedBlock;
+    Block secondNestedBlock;
 
     public DoubleNestingBlock(BlockType type, Position position) {
         super(type, position);
@@ -445,12 +452,14 @@ class DoubleNestingBlock extends NestingBlock {
         return BlockPaths.drawDoubleNestingBlock(position, width, height, getFirstNestingBlockHeight(), getSecondNestingBlockHeight());
     }
 
-    private int getFirstNestingBlockHeight() {
-        return 25;
+    public int getFirstNestingBlockHeight() {
+        if(nestedBlock == null) { return 25; }
+        return nestedBlock.getConnectedBlockHeights();
     }
 
     private int getSecondNestingBlockHeight() {
-        return 25;
+        if(secondNestedBlock == null) { return 25; }
+        return secondNestedBlock.getConnectedBlockHeights();
     }
 }
 
