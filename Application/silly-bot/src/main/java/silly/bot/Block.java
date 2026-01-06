@@ -108,7 +108,7 @@ enum BlockType {
     RotateRight(BlockShape.Default, BlockCategory.Movement, 107, 42, "Turn Right", null),
     SetLeftColor(BlockShape.Default, BlockCategory.Display, 233, 42, "Set The Left Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
     SetRightColor(BlockShape.Default, BlockCategory.Display, 242, 42, "Set The Right Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
-    PlayNote(BlockShape.Default, BlockCategory.Sound, 236, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 236, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)}),
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
     GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
     Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
@@ -188,7 +188,7 @@ public abstract class Block {
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
                 break;
             case PlayNote:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
+                this.parameters = new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)};
                 break;
             case SetLeftColor:
                 this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)};
@@ -265,6 +265,8 @@ public abstract class Block {
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
+
+            // Give The Parameter a Selected Color if Selected
             if(id == selectedParameter[0] && i == selectedParameter[1]) {
                 gc.setFill(Color.rgb(57, 155, 247));
             }
@@ -297,6 +299,20 @@ public abstract class Block {
                 gc.closePath();
                 gc.fill();
                 gc.stroke();
+            } else if(parameters[i].value.getClass() == Notes.class) {
+                // Redraw Circle
+                gc.setFill(blockType.category.border);
+                gc.setStroke(blockType.category.border);
+
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+
+                // Draw Text
+                gc.setFill(Color.WHITE);
+                gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
             }
             xPos += parameters[i].getWidth();
         }
@@ -486,7 +502,7 @@ class Parameter<T> {
             return PARAMETER_SIZE + 10;
         } else if(childBlock != null) {
             return childBlock.getWidth();
-        } else if(value.getClass() == Integer.class) {
+        } else if(value.getClass() == Integer.class || value.getClass() == Notes.class) {
             Text widthCheck = new Text(value.toString());
             widthCheck.setFont(Editor.COOL_FONT);
             return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);

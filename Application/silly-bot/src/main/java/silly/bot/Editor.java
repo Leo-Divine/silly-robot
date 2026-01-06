@@ -59,10 +59,17 @@ public class Editor extends Canvas {
      * Determines if the color picker sub-menu is displayed.
      */
     private boolean isColorPickerShowing = false;
+    /**
+     * Determines if the note picker sub-menu is displayed.
+     */
+    private boolean isNotePickerShowing = false;
+
+    private NotePicker notePickerMenu;
 
     public Editor(int i, int j) {
         super(i, j);
         blocks.add(new StartBlock(BlockType.Start, new Position(MENU_WIDTH + 100, 40)));
+        notePickerMenu = new NotePicker(new Position(0, 0));
     }
 
     /**
@@ -219,23 +226,34 @@ public class Editor extends Canvas {
             block.drawBlock(gc, selectedParameter);
         }
 
-        // Color Picker
-        if(!isColorPickerShowing) { return; }
-        Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
-        Parameter parameter = block.parameters[selectedParameter[1]];
+        // Draw Color Picker
+        if(isColorPickerShowing) {
+            Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
+            Parameter parameter = block.parameters[selectedParameter[1]];
 
-        for (int x = (int) parameter.labelPosition.x - 33; x < parameter.labelPosition.x + 217; x++) {
-            double hue = Math.floor((x - parameter.labelPosition.x + 33) / 0.694);
-            for (int y = (int)parameter.labelPosition.y + 40; y < parameter.labelPosition.y + 190; y++) {
-                double saturation = Math.max(Math.min((y - parameter.labelPosition.y - 40) / 0.75, 100),0) / 100;
-                double brightness = Math.max(Math.min((parameter.labelPosition.y + 190 - y) / 0.75, 100),0) / 100;
-                Color color = Color.hsb(hue, saturation, brightness);
-                gc.setFill(color);
-                gc.fillRect(x, y, 1, 1);
+            for (int x = (int) parameter.labelPosition.x - 33; x < parameter.labelPosition.x + 217; x++) {
+                double hue = Math.floor((x - parameter.labelPosition.x + 33) / 0.694);
+                for (int y = (int)parameter.labelPosition.y + 40; y < parameter.labelPosition.y + 190; y++) {
+                    double saturation = Math.max(Math.min((y - parameter.labelPosition.y - 40) / 0.75, 100),0) / 100;
+                    double brightness = Math.max(Math.min((parameter.labelPosition.y + 190 - y) / 0.75, 100),0) / 100;
+                    Color color = Color.hsb(hue, saturation, brightness);
+                    gc.setFill(color);
+                    gc.fillRect(x, y, 1, 1);
+                }
             }
+            gc.setStroke(block.blockType.category.border);
+            gc.strokeRect(parameter.labelPosition.x - 33, parameter.labelPosition.y + 40, 250, 150);
         }
-        gc.setStroke(block.blockType.category.border);
-        gc.strokeRect(parameter.labelPosition.x - 33, parameter.labelPosition.y + 40, 250, 150);
+        
+        // Draw Note Picker
+        if(isNotePickerShowing) { 
+            Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
+            Parameter parameter = block.parameters[selectedParameter[1]];
+
+            // Draw Menu
+            notePickerMenu.position = new Position(parameter.labelPosition.x - 50, parameter.labelPosition.y + 50);
+            notePickerMenu.drawMenu(gc, block.blockType.category);
+        }
     }
 
     /**
@@ -244,7 +262,6 @@ public class Editor extends Canvas {
      */
     public void keyPressed(KeyEvent event) {
         // TODO: Handle Hotkeys
-        // TODO Change Parameter Width on Keypress
 
         if(selectedParameter[0] == 0) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
@@ -285,13 +302,32 @@ public class Editor extends Canvas {
                 double bri = Math.min((parameter.labelPosition.y + 190 - eventYPos) / 0.75, 100) / 100;
                 parameter.value = Color.hsb(hue, sat, bri);
 
-                selectedParameter[0] = 0;
-                isColorPickerShowing = false;
                 return;
             }
         }
+
+        // Select a Note From the Note Picker if it's Open
+        if(isNotePickerShowing) {
+            Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
+            Parameter parameter = block.parameters[selectedParameter[1]];
+            if(parameter.labelPosition.x - 50 <= eventXPos
+                && parameter.labelPosition.x + (NotePicker.WIDTH - 50) >= eventXPos
+                && parameter.labelPosition.y + 50 <= eventYPos
+                && parameter.labelPosition.y + (NotePicker.HEIGHT + 50) >= eventYPos
+            ) {
+                Notes note = notePickerMenu.isMouseOnNote(eventXPos, eventYPos);
+                if(note != null) {
+                    parameter.value = note;
+                }
+
+                return;
+            }
+        }
+
+        // Remove Selected Parameter
         selectedParameter[0] = 0;
         isColorPickerShowing = false;
+        isNotePickerShowing = false;
 
         // Check all Blocks for Dragging
         for(int blockId = blocks.size() - 1; blockId > 0; blockId--) {
@@ -302,13 +338,14 @@ public class Editor extends Canvas {
             if(block.parameters != null) {
                 for(int i = 0; i < block.parameters.length; i++) {
                     Parameter parameter = block.parameters[i];
-                    if(parameter.value == null) { continue; }
-                    if(Block.class.isAssignableFrom(parameter.value.getClass())) { continue; }
-                    if(!parameter.getPath().contains(eventXPos, eventYPos)) { continue; }
+                    if(parameter.value == null) { continue; } // Isn't a Block Parameter
+                    if(Block.class.isAssignableFrom(parameter.value.getClass())) { continue; } // Isn't a Block Parameter
+                    if(!parameter.getPath().contains(eventXPos, eventYPos)) { continue; } 
                     
                     selectedParameter[0] = block.getId();
                     selectedParameter[1] = i;
                     if(parameter.value.getClass() == Color.class) { isColorPickerShowing = true; }
+                    if(parameter.value.getClass() == Notes.class) { isNotePickerShowing = true; }
                     return;
                 }
             }

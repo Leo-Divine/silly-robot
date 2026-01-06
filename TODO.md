@@ -54,6 +54,12 @@
     - [ ] Else Text on Double Nesting
     - [x] Visible Parameter Selection
     - [ ] Note Parameters
+        - [x] Change Look of Parameter
+        - [x] Get a popup working
+        - [x] Note Selection
+        - [ ] Octave Selection
+        - [x] Show selected note
+        - [ ] Label C Note
 - [ ] Run Code Based on Blocks
 - [ ] Copy-Pasting Blocks
 
