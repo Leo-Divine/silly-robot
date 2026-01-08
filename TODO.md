@@ -53,14 +53,16 @@
 - [ ] Recommendations
     - [ ] Else Text on Double Nesting
     - [x] Visible Parameter Selection
-    - [ ] Note Parameters
+    - [x] Note Parameters
         - [x] Change Look of Parameter
         - [x] Get a popup working
         - [x] Note Selection
-        - [ ] Octave Selection
+        - [x] Octave Selection
         - [x] Show selected note
-        - [ ] Label C Note
+        - [x] Octave Arrows
 - [ ] Run Code Based on Blocks
+    - [ ] List All Blocks in Console
+    - [ ]
 - [ ] Copy-Pasting Blocks
 
 ## Sphero

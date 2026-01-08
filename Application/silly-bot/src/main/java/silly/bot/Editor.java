@@ -315,10 +315,8 @@ public class Editor extends Canvas {
                 && parameter.labelPosition.y + 50 <= eventYPos
                 && parameter.labelPosition.y + (NotePicker.HEIGHT + 50) >= eventYPos
             ) {
-                Notes note = notePickerMenu.isMouseOnNote(eventXPos, eventYPos);
-                if(note != null) {
-                    parameter.value = note;
-                }
+                notePickerMenu.handleMouseClick(eventXPos, eventYPos);
+                parameter.value = notePickerMenu.getCurrentNote();
 
                 return;
             }
