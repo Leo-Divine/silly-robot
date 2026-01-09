@@ -26,6 +26,7 @@ public class App extends Application {
                 canvas.drawBackground();
                 canvas.drawMenus();
                 canvas.drawBlocks();
+                canvas.drawStartButton(stage.getScene().getWidth());
 
                 // Handle Server Connection and Messages
                 /* 
@@ -64,6 +65,10 @@ public class App extends Application {
         });
         stage.getScene().setOnMouseClicked(event -> {
             canvas.mouseClicked(event.getSceneX(), event.getSceneY());
+
+            if(canvas.hasProgramStarted(event.getSceneX(), event.getSceneY(), stage.getScene().getWidth())) {
+                //StartBlock startBlock = canvas.getStartBlock();
+            }
         });
         root.setOnScroll(event -> {
             canvas.mouseScroll(event.getSceneX(), event.getDeltaY());

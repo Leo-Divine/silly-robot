@@ -63,13 +63,21 @@ public class Editor extends Canvas {
      * Determines if the note picker sub-menu is displayed.
      */
     private boolean isNotePickerShowing = false;
-
+    /**
+     * The note picker sub-menu.
+     */
     private NotePicker notePickerMenu;
+
+    private boolean isProgramRunning = false;
 
     public Editor(int i, int j) {
         super(i, j);
         blocks.add(new StartBlock(BlockType.Start, new Position(MENU_WIDTH + 100, 40)));
         notePickerMenu = new NotePicker(new Position(0, 0));
+    }
+
+    public boolean getIsProgramRunning() {
+        return isProgramRunning;
     }
 
     /**
@@ -256,8 +264,34 @@ public class Editor extends Canvas {
         }
     }
 
-    public Block getStartBlock() {
-        return blocks.get(0);
+    public void drawStartButton(double screenWidth) {
+        // Draw Button
+        if(isProgramRunning) { gc.setFill(BlockCategory.Movement.fill); gc.setStroke(BlockCategory.Movement.border); }
+        else { gc.setFill(BlockCategory.Display.fill); gc.setStroke(BlockCategory.Display.border); }
+        gc.fillOval(screenWidth - 100, 25, 50, 50);
+        gc.strokeOval(screenWidth - 100, 25, 50, 50);
+
+        // Draw Symbol
+        gc.setFill(Color.WHITE);
+        if(isProgramRunning) {
+            gc.fillRect(screenWidth - 87, 38, 25, 25);
+        } else {
+            gc.beginPath();
+            gc.moveTo(screenWidth - 82, 38);
+            gc.lineTo(screenWidth - 64, 50.5);
+            gc.lineTo(screenWidth - 82, 63);
+            gc.closePath();
+            gc.fill();
+        }
+    }
+
+    public StartBlock getStartBlock() {
+        try {
+            return (StartBlock)((StartBlock)blocks.get(0)).clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -751,6 +785,10 @@ public class Editor extends Canvas {
             }
             yPos += 50;
         }
+    }
+
+    public boolean hasProgramStarted(double eventXPos, double eventYPos, double screenWidth) {
+        return Math.pow(eventXPos - (50 / 2 + (screenWidth - 100)), 2) + Math.pow(eventYPos - (50 / 2 + 25), 2) <= Math.pow(50 / 2, 2);
     }
 
     public void mouseScroll(double eventXPos, double scrollAmount) {

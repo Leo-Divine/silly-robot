@@ -416,7 +416,7 @@ class OperandBlock extends Block {
     }
 }
 
-class StartBlock extends Block {
+class StartBlock extends Block implements Cloneable {
     public StartBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -432,6 +432,11 @@ class StartBlock extends Block {
     @Override
     public Path getPath() {
         return BlockPaths.drawStartBlock(position, width, height);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
 
