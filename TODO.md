@@ -64,6 +64,8 @@
     - [ ] List All Blocks in Console
     - [ ]
 - [ ] Copy-Pasting Blocks
+- [x] Set the note when you open NotePicker
+- [x] Set value block position on operand blocks when adding and removing value blocks
 
 ## Sphero
 - [ ] Create a 3D Model to Hold All Components

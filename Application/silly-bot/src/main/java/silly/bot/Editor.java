@@ -252,8 +252,12 @@ public class Editor extends Canvas {
 
             // Draw Menu
             notePickerMenu.position = new Position(parameter.labelPosition.x - 50, parameter.labelPosition.y + 50);
-            notePickerMenu.drawMenu(gc, block.blockType.category);
+            gc = notePickerMenu.drawMenu(gc, block.blockType.category);
         }
+    }
+
+    public Block getStartBlock() {
+        return blocks.get(0);
     }
 
     /**
@@ -262,6 +266,9 @@ public class Editor extends Canvas {
      */
     public void keyPressed(KeyEvent event) {
         // TODO: Handle Hotkeys
+        if(event.getCode() == KeyCode.ENTER) {
+            
+        }
 
         if(selectedParameter[0] == 0) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
@@ -343,7 +350,10 @@ public class Editor extends Canvas {
                     selectedParameter[0] = block.getId();
                     selectedParameter[1] = i;
                     if(parameter.value.getClass() == Color.class) { isColorPickerShowing = true; }
-                    if(parameter.value.getClass() == Notes.class) { isNotePickerShowing = true; }
+                    if(parameter.value.getClass() == Notes.class) { 
+                        isNotePickerShowing = true;
+                        notePickerMenu.setNote((Notes)parameter.value);
+                    }
                     return;
                 }
             }
@@ -404,6 +414,11 @@ public class Editor extends Canvas {
             ValueBlock childBlock = (ValueBlock)block;
             
             childBlock.parentBlock.parameters[childBlock.parentParameter].childBlock = null;
+
+            // Update Parameter Positions on Parent
+            childBlock.parentBlock.updateParameterPositions();
+            checkForConnectedBlocks(childBlock.parentBlock);
+
             childBlock.parentBlock = null;
             childBlock.parentParameter = -1;
         }
@@ -462,6 +477,8 @@ public class Editor extends Canvas {
                     ((ValueBlock)block).parentParameter = i;
 
                     surroundingBlock.updateParameterPositions();
+                    checkForConnectedBlocks(surroundingBlock);
+
                     try {
                         moveConnectedChildBlock(block, surroundingBlock.parameters[i].labelPosition);
                     } catch(ArrayIndexOutOfBoundsException e) {

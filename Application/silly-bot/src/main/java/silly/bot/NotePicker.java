@@ -3,6 +3,7 @@ package silly.bot;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 
 enum NoteColor {
     WHITE,
@@ -22,7 +23,40 @@ public class NotePicker {
         this.position = position;
     }
 
-    public void drawMenu(GraphicsContext gc, BlockCategory category) {
+    public void setNote(Notes note) {
+        String noteName = note.name().substring(5);
+
+        // Set The Color
+        if(noteName.length() == 3) {
+            selectedColor = NoteColor.BLACK;
+        } else {
+            selectedColor = NoteColor.WHITE;
+        }
+
+        // Set The Key
+        switch(noteName.substring(0, 1)) {
+            case "C": selectedKey = 0; break;
+            case "D": selectedKey = 1; break;
+            case "E": selectedKey = 2; break;
+            case "F": selectedKey = 3; break;
+            case "G": selectedKey = 4; break;
+            case "A": selectedKey = 5; break;
+            case "B": selectedKey = 6; break;
+        }
+
+        // Set The Octave
+        switch(noteName.substring(1)) {
+            case "1": selectedOctave = 1; break;
+            case "2": selectedOctave = 2; break;
+            case "3": selectedOctave = 3; break;
+            case "4": selectedOctave = 4; break;
+            case "5": selectedOctave = 5; break;
+            case "6": selectedOctave = 6; break;
+            case "7": selectedOctave = 7; break;
+        }
+    }
+
+    public GraphicsContext drawMenu(GraphicsContext gc, BlockCategory category) {
         gc.setFill(category.fill);
         gc.setStroke(category.border);
         gc.fillRect(position.x, position.y, NotePicker.WIDTH, NotePicker.HEIGHT);
@@ -77,7 +111,13 @@ public class NotePicker {
         gc.beginPath();
         gc.appendSVGPath(BlockPaths.pathToString(getLeftArrowPath(position)));
         gc.closePath();
-        gc.fill();        
+        gc.fill();
+
+        // Draw Octave Text
+        Text octaveText = new Text("Ocvate: " + selectedOctave);
+        gc.fillText("Ocvate: " + selectedOctave, position.x + WIDTH / 2 - octaveText.getLayoutBounds().getWidth(), position.y + 20);
+
+        return gc;
     }
 
     private double getNoteWidth(NoteColor color) {

@@ -346,6 +346,13 @@ public abstract class Block {
             xPos += parameters[i].getWidth();
         }
     }
+
+    protected void checkForConnectedBlocks() {
+        if(belowBlock != null) {
+            System.out.println(belowBlock.blockType.name());
+            belowBlock.checkForConnectedBlocks();
+        }
+    }
 }
 
 class DefaultBlock extends Block {
@@ -420,10 +427,6 @@ class StartBlock extends Block {
 
     public int getHeight() {
         return height;
-    }
-
-    public String getCode() {
-        return "";
     }
 
     @Override
