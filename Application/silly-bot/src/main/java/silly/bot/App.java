@@ -4,12 +4,16 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.*;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.IOException;
 
 public class App extends Application {
     private Server server;
     private boolean isConnected = false;
+
+    private Color leftColor = Color.RED;
+    private Color rightColor = Color.RED;
 
     private Pane root = new Pane();
     private Editor canvas = new Editor(2000,2000);
@@ -67,7 +71,7 @@ public class App extends Application {
             canvas.mouseClicked(event.getSceneX(), event.getSceneY());
 
             if(canvas.hasProgramStarted(event.getSceneX(), event.getSceneY(), stage.getScene().getWidth())) {
-                //StartBlock startBlock = canvas.getStartBlock();
+                runBlockCode(canvas.getStartBlock());
             }
         });
         root.setOnScroll(event -> {
@@ -101,6 +105,83 @@ public class App extends Application {
           isConnected = true;
         }
       }
+    }
+
+    private String runBlockCode(Block block) {
+        if(block.blockType == BlockType.Start && block.belowBlock != null) {
+            runBlockCode(block.belowBlock);
+            return "";
+        }
+
+        // Handle Parameters
+        String[] parameters = new String[3];
+        for(int i = 0; i < block.parameters.length; i++) {
+            Parameter param = block.parameters[i];
+
+            // If There's a Value Block Use It's Value, Otherwise Get The Normal Value
+            if(param.childBlock != null) {
+                parameters[i] = runBlockCode(param.childBlock);
+            } else if(param.value == null) {
+                parameters[i] = "0";
+            } else if(param.value.getClass() == Integer.class) {
+                parameters[i] = String.format("%03d", param.value);
+            } else if(param.value.getClass() == Color.class) {
+                parameters[i] = colorToString((Color)param.value);
+            } else if(param.value.getClass() == Notes.class) {
+                parameters[i] = String.format("%04d", ((Notes)param.value).frequency);
+            }
+        }
+
+        try {
+            switch(block.blockType) {
+                case MoveForward: System.out.println("MoveForward"); break;
+                case RotateLeft: System.out.println("RotateLeft"); break;
+                case RotateRight: System.out.println("RotateRight"); break;
+                case Wait: System.out.println("Wait"); break;
+                case PlayNote: System.out.println("PlayNote"); break;
+                case StopPlaying: System.out.println("StopPlaying"); break;
+                case SetLeftColor: leftColor = (Color)block.parameters[0].value; System.out.println("SetColor (Left)"); break;
+                case SetRightColor: rightColor = (Color)block.parameters[0].value; System.out.println("SetColor (Right)"); break;
+                case GetSensorValue: return "040";
+                case Equal: return Integer.parseInt(parameters[0]) == Integer.parseInt(parameters[1]) ? "1" : "0";
+                case Greater: return Integer.parseInt(parameters[0]) > Integer.parseInt(parameters[1]) ? "1" : "0";
+                case Less: return Integer.parseInt(parameters[0]) < Integer.parseInt(parameters[1]) ? "1" : "0";
+                case If:
+                    if(parameters[0] == "1" && ((NestingBlock)(block)).nestedBlock != null) {
+                        runBlockCode(((NestingBlock)(block)).nestedBlock);
+                    }
+                    break;
+                case IfEl: 
+                    if(parameters[0] == "1" && ((DoubleNestingBlock)(block)).nestedBlock != null) {
+                        runBlockCode(((DoubleNestingBlock)(block)).nestedBlock);
+                    } else if(((DoubleNestingBlock)(block)).secondNestedBlock != null) {
+                        runBlockCode(((DoubleNestingBlock)(block)).secondNestedBlock);
+                    }
+                    break;
+                case Loop:
+                    for(int i = 0; i < Integer.parseInt(parameters[0]); i++) {
+                        if(((NestingBlock)(block)).nestedBlock == null) { break; }
+                        runBlockCode(((NestingBlock)(block)).nestedBlock);
+                    }
+                    break;
+                default: break;
+            }
+        } catch (Exception e) {
+            
+        }
+
+        if(block.belowBlock != null) {
+            runBlockCode(block.belowBlock);
+        }
+
+        return "";
+    }
+
+    private String colorToString(Color color) {
+        int red = (int)(color.getRed() * 255);
+        int green = (int)(color.getGreen() * 255);
+        int blue = (int)(color.getBlue() * 255);
+        return String.format("%03d", red) + String.format("%03d", green) + String.format("%03d", blue);
     }
 
     public static void main(String[] args) {

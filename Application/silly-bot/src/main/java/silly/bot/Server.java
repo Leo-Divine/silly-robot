@@ -44,7 +44,7 @@ public class Server {
     clientSocket.close();
   }
 
-  public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
+  public void sendCommand(RobotCommand command, String parameters[]) throws IOException {
     switch (command) {
       case MOVE_FORWARD:
         serverOutput.println("R_000" + String.format("%03d", parameters[0]) + String.format("%03d", parameters[1]));
