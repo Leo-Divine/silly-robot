@@ -33,10 +33,10 @@ public class App extends Application {
                 canvas.drawStartButton(stage.getScene().getWidth());
 
                 // Handle Server Connection and Messages
-                /* 
+                
                 try { handleServerConnection(); }
                 catch (IOException e) { System.out.println("SERVER ERROR: " + e.getMessage()); }
-                */
+                
             }
         };
         timer.start();
@@ -134,14 +134,14 @@ public class App extends Application {
 
         try {
             switch(block.blockType) {
-                case MoveForward: System.out.println("MoveForward"); break;
-                case RotateLeft: System.out.println("RotateLeft"); break;
-                case RotateRight: System.out.println("RotateRight"); break;
-                case Wait: System.out.println("Wait"); break;
-                case PlayNote: System.out.println("PlayNote"); break;
-                case StopPlaying: System.out.println("StopPlaying"); break;
-                case SetLeftColor: leftColor = (Color)block.parameters[0].value; System.out.println("SetColor (Left)"); break;
-                case SetRightColor: rightColor = (Color)block.parameters[0].value; System.out.println("SetColor (Right)"); break;
+                case MoveForward: server.sendCommand(RobotCommand.MOVE_FORWARD, parameters); server.getMessage(); break;
+                case RotateLeft: server.sendCommand(RobotCommand.ROTATE_LEFT, parameters); server.getMessage(); break;
+                case RotateRight: server.sendCommand(RobotCommand.ROTATE_RIGHT, parameters); server.getMessage(); break;
+                case Wait: server.sendCommand(RobotCommand.WAIT, parameters); server.getMessage(); break;
+                case PlayNote: server.sendCommand(RobotCommand.PLAY_NOTE, parameters); server.getMessage(); break;
+                case StopPlaying: server.sendCommand(RobotCommand.STOP_PLAYING, parameters); server.getMessage(); break;
+                case SetLeftColor: leftColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
+                case SetRightColor: rightColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
                 case GetSensorValue: return "040";
                 case Equal: return Integer.parseInt(parameters[0]) == Integer.parseInt(parameters[1]) ? "1" : "0";
                 case Greater: return Integer.parseInt(parameters[0]) > Integer.parseInt(parameters[1]) ? "1" : "0";
@@ -166,7 +166,7 @@ public class App extends Application {
                     break;
                 default: break;
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             
         }
 

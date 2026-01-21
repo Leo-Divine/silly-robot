@@ -3,7 +3,6 @@
 - [x] If Time Permits, get Buddy Holly on the Arduino
 - [x] Get WiFi Working
 - [x] Create Code for Sensor
-- [ ] Create Code for Bottom Sensor
 
 ## Arduino Hardware
 - [x] Find a Good Wifi Module
@@ -50,8 +49,7 @@
     - [x] Remove Nested Block
     - [x] Change Parent Block Height
     - [x] Do Everything Over Again With DoubleNesting
-- [ ] Recommendations
-    - [ ] Else Text on Double Nesting
+- [x] Recommendations
     - [x] Visible Parameter Selection
     - [x] Note Parameters
         - [x] Change Look of Parameter
@@ -60,12 +58,15 @@
         - [x] Octave Selection
         - [x] Show selected note
         - [x] Octave Arrows
-- [ ] Run Code Based on Blocks
-    - [ ] List All Blocks in Console
-    - [ ]
-- [ ] Copy-Pasting Blocks
+- [x] Run Code Based on Blocks
 - [x] Set the note when you open NotePicker
 - [x] Set value block position on operand blocks when adding and removing value blocks
+- [ ] Else Text on Double Nesting
+- [ ] Variables
+- [ ] On Screen Information About Robot Status
+- [ ] Robot Discoverability
+- [ ] GetSensorValue
+- [ ] Make Move Speed More Clear
 
 ## Sphero
 - [ ] Create a 3D Model to Hold All Components
