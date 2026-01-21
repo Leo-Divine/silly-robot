@@ -7,7 +7,7 @@ import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
 /**
- * <h3>BlockCategory</h3>
+ * <h2>BlockCategory</h2>
  * <h4>The category of a block.</h4>
  * <p>The blocks are seperated into categories based on what they make the robot actually do.</p>
  */
@@ -56,37 +56,59 @@ enum BlockCategory {
     }
 }
 
+/**
+ * <h2>BlockShape</h2>
+ * <h4>The shape of the block.</h4>
+ */
 enum BlockShape {
+    /**
+     * Contains blocks with the normal block shape.
+     */
     Default(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawDefaultBlock(position, width, height);
         }
     },
+    /**
+     * Contains blocks used for calculations in code such as if statements.
+     */
     Operand(new Position(15, 25)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawOperandBlock(position, width, height);
         }
     },
+    /**
+     * Contains blocks that return values and can be used in parameters.
+     */
     Value(new Position(5, 22)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawValueBlock(position, width, height);
         }
     },
+    /**
+     * Contains blocks that can contain blocks inside it.
+     */
     Nesting(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawNestingBlock(position, width, height, 25);
         }
     },
+    /**
+     * Contains blocks that can contain two sets of blocks inside it.
+     */
     DoubleNesting(new Position(5, 30)) {
         @Override
         public Path getPath(Position position, int width, int height) {
             return BlockPaths.drawDoubleNestingBlock(position, width, height, 25, 25);
         }
     },
+    /**
+     * Contains blocks that execute code under it.
+     */
     Start(new Position(5, 27)) {
         @Override
         public Path getPath(Position position, int width, int height) {
@@ -94,6 +116,9 @@ enum BlockShape {
         }
     };
 
+    /**
+     * How offset the blocks text is from the blocks position.
+     */
     public final Position labelOffset;
 
     private BlockShape(Position labelOffset) {
@@ -103,16 +128,69 @@ enum BlockShape {
     abstract Path getPath(Position position, int width, int height);
 }
 
+/**
+ * <h2>BlockType</h2>
+ * <h4>The type of block.</h4>
+ */
 enum BlockType {
+    /**
+     * <h2>MoveForward</h2>
+     * <p>This block moves the robot forward at a set speed for a set amount of time.</p>
+     * @param Speed :  The speed the robot moves at.
+     * @param Duration :  How many seconds to move for.
+     */
     MoveForward(BlockShape.Default, BlockCategory.Movement, 311, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    /**
+     * <h2>RotateLeft</h2>
+     * <p>This block rotates the robot left 90°.</p>
+     */
     RotateLeft(BlockShape.Default, BlockCategory.Movement, 98, 42, "Turn Left", null),
+    /**
+     * <h2>RotateRight</h2>
+     * <p>This block rotates the robot right 90°.</p>
+     */
     RotateRight(BlockShape.Default, BlockCategory.Movement, 107, 42, "Turn Right", null),
+    /**
+     * <h2>SetLeftColor</h2>
+     * <p>This block changes the robot's front left light to a specified color.</p>
+     * @param Color :  The new color for the left light.
+     */
     SetLeftColor(BlockShape.Default, BlockCategory.Display, 233, 42, "Set The Left Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
+    /**
+     * <h2>SetRightColor</h2>
+     * <p>This block changes the robot's front right light to a specified color.</p>
+     * @param Color :  The new color for the right light.
+     */
     SetRightColor(BlockShape.Default, BlockCategory.Display, 242, 42, "Set The Right Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
+    /**
+     * <h2>PlayNote</h2>
+     * <p>This block makes the robot play a musical note for a set amount of time.</p>
+     * @param Note :  The specified note to play.
+     * @param Duration :  How many seconds to play for.
+     */
     PlayNote(BlockShape.Default, BlockCategory.Sound, 221, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    /**
+     * <h2>StopPlaying</h2>
+     * <p>If a note is currently being played, it stops it.</p>
+     */
     StopPlaying(BlockShape.Default, BlockCategory.Sound, 173, 42, "Stop Playing Note", null),
-    GetSensorValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
+    /**
+     * <h2>GetDistanceValue</h2>
+     * <p>This block finds how far awaw the robot is from the object in front of it.</p>
+     * @return The distance of the object in front of it.
+     */
+    GetDistanceValue(BlockShape.Value, BlockCategory.Sensors, 179, 30, "Get Front Distance", null),
+    /**
+     * <h2>Wait</h2>
+     * <p>This block pauses the program for a set duration.</p>
+     * @param Duration :  How many seconds to stop for.
+     */
     Wait(BlockShape.Default, BlockCategory.Control, 161, 42, "Wait α Seconds", new Parameter[]{new Parameter<Integer>(null, 1)}),
+    /**
+     * <h2>If</h2>
+     * <p>This block takes an operand block and if true runs the code inside the block.</p>
+     * @param Operand :  The boolean statement that determines if the code inside should run.
+     */
     If(BlockShape.Nesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),

@@ -13,6 +13,10 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+/**
+ * <h2>Editor</h2>
+ * <h4>The code editor that manages the interface and runs the code.</h4>
+ */
 public class Editor extends Canvas {
     /**
      * The size of the navagation buttons in the menu.
