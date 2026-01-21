@@ -346,6 +346,13 @@ public abstract class Block {
             xPos += parameters[i].getWidth();
         }
     }
+
+    protected void checkForConnectedBlocks() {
+        if(belowBlock != null) {
+            System.out.println(belowBlock.blockType.name());
+            belowBlock.checkForConnectedBlocks();
+        }
+    }
 }
 
 class DefaultBlock extends Block {
@@ -409,7 +416,7 @@ class OperandBlock extends Block {
     }
 }
 
-class StartBlock extends Block {
+class StartBlock extends Block implements Cloneable {
     public StartBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -422,13 +429,14 @@ class StartBlock extends Block {
         return height;
     }
 
-    public String getCode() {
-        return "";
-    }
-
     @Override
     public Path getPath() {
         return BlockPaths.drawStartBlock(position, width, height);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
 

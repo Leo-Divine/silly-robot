@@ -63,13 +63,21 @@ public class Editor extends Canvas {
      * Determines if the note picker sub-menu is displayed.
      */
     private boolean isNotePickerShowing = false;
-
+    /**
+     * The note picker sub-menu.
+     */
     private NotePicker notePickerMenu;
+
+    private boolean isProgramRunning = false;
 
     public Editor(int i, int j) {
         super(i, j);
         blocks.add(new StartBlock(BlockType.Start, new Position(MENU_WIDTH + 100, 40)));
         notePickerMenu = new NotePicker(new Position(0, 0));
+    }
+
+    public boolean getIsProgramRunning() {
+        return isProgramRunning;
     }
 
     /**
@@ -252,7 +260,37 @@ public class Editor extends Canvas {
 
             // Draw Menu
             notePickerMenu.position = new Position(parameter.labelPosition.x - 50, parameter.labelPosition.y + 50);
-            notePickerMenu.drawMenu(gc, block.blockType.category);
+            gc = notePickerMenu.drawMenu(gc, block.blockType.category);
+        }
+    }
+
+    public void drawStartButton(double screenWidth) {
+        // Draw Button
+        if(isProgramRunning) { gc.setFill(BlockCategory.Movement.fill); gc.setStroke(BlockCategory.Movement.border); }
+        else { gc.setFill(BlockCategory.Display.fill); gc.setStroke(BlockCategory.Display.border); }
+        gc.fillOval(screenWidth - 100, 25, 50, 50);
+        gc.strokeOval(screenWidth - 100, 25, 50, 50);
+
+        // Draw Symbol
+        gc.setFill(Color.WHITE);
+        if(isProgramRunning) {
+            gc.fillRect(screenWidth - 87, 38, 25, 25);
+        } else {
+            gc.beginPath();
+            gc.moveTo(screenWidth - 82, 38);
+            gc.lineTo(screenWidth - 64, 50.5);
+            gc.lineTo(screenWidth - 82, 63);
+            gc.closePath();
+            gc.fill();
+        }
+    }
+
+    public StartBlock getStartBlock() {
+        try {
+            return (StartBlock)((StartBlock)blocks.get(0)).clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -262,6 +300,9 @@ public class Editor extends Canvas {
      */
     public void keyPressed(KeyEvent event) {
         // TODO: Handle Hotkeys
+        if(event.getCode() == KeyCode.ENTER) {
+            
+        }
 
         if(selectedParameter[0] == 0) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
@@ -315,10 +356,8 @@ public class Editor extends Canvas {
                 && parameter.labelPosition.y + 50 <= eventYPos
                 && parameter.labelPosition.y + (NotePicker.HEIGHT + 50) >= eventYPos
             ) {
-                Notes note = notePickerMenu.isMouseOnNote(eventXPos, eventYPos);
-                if(note != null) {
-                    parameter.value = note;
-                }
+                notePickerMenu.handleMouseClick(eventXPos, eventYPos);
+                parameter.value = notePickerMenu.getCurrentNote();
 
                 return;
             }
@@ -345,7 +384,10 @@ public class Editor extends Canvas {
                     selectedParameter[0] = block.getId();
                     selectedParameter[1] = i;
                     if(parameter.value.getClass() == Color.class) { isColorPickerShowing = true; }
-                    if(parameter.value.getClass() == Notes.class) { isNotePickerShowing = true; }
+                    if(parameter.value.getClass() == Notes.class) { 
+                        isNotePickerShowing = true;
+                        notePickerMenu.setNote((Notes)parameter.value);
+                    }
                     return;
                 }
             }
@@ -406,6 +448,11 @@ public class Editor extends Canvas {
             ValueBlock childBlock = (ValueBlock)block;
             
             childBlock.parentBlock.parameters[childBlock.parentParameter].childBlock = null;
+
+            // Update Parameter Positions on Parent
+            childBlock.parentBlock.updateParameterPositions();
+            checkForConnectedBlocks(childBlock.parentBlock);
+
             childBlock.parentBlock = null;
             childBlock.parentParameter = -1;
         }
@@ -464,6 +511,8 @@ public class Editor extends Canvas {
                     ((ValueBlock)block).parentParameter = i;
 
                     surroundingBlock.updateParameterPositions();
+                    checkForConnectedBlocks(surroundingBlock);
+
                     try {
                         moveConnectedChildBlock(block, surroundingBlock.parameters[i].labelPosition);
                     } catch(ArrayIndexOutOfBoundsException e) {
@@ -736,6 +785,10 @@ public class Editor extends Canvas {
             }
             yPos += 50;
         }
+    }
+
+    public boolean hasProgramStarted(double eventXPos, double eventYPos, double screenWidth) {
+        return Math.pow(eventXPos - (50 / 2 + (screenWidth - 100)), 2) + Math.pow(eventYPos - (50 / 2 + 25), 2) <= Math.pow(50 / 2, 2);
     }
 
     public void mouseScroll(double eventXPos, double scrollAmount) {

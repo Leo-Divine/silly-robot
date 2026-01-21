@@ -3,6 +3,7 @@ package silly.bot;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 
 enum NoteColor {
     WHITE,
@@ -22,7 +23,40 @@ public class NotePicker {
         this.position = position;
     }
 
-    public void drawMenu(GraphicsContext gc, BlockCategory category) {
+    public void setNote(Notes note) {
+        String noteName = note.name().substring(5);
+
+        // Set The Color
+        if(noteName.length() == 3) {
+            selectedColor = NoteColor.BLACK;
+        } else {
+            selectedColor = NoteColor.WHITE;
+        }
+
+        // Set The Key
+        switch(noteName.substring(0, 1)) {
+            case "C": selectedKey = 0; break;
+            case "D": selectedKey = 1; break;
+            case "E": selectedKey = 2; break;
+            case "F": selectedKey = 3; break;
+            case "G": selectedKey = 4; break;
+            case "A": selectedKey = 5; break;
+            case "B": selectedKey = 6; break;
+        }
+
+        // Set The Octave
+        switch(noteName.substring(1)) {
+            case "1": selectedOctave = 1; break;
+            case "2": selectedOctave = 2; break;
+            case "3": selectedOctave = 3; break;
+            case "4": selectedOctave = 4; break;
+            case "5": selectedOctave = 5; break;
+            case "6": selectedOctave = 6; break;
+            case "7": selectedOctave = 7; break;
+        }
+    }
+
+    public GraphicsContext drawMenu(GraphicsContext gc, BlockCategory category) {
         gc.setFill(category.fill);
         gc.setStroke(category.border);
         gc.fillRect(position.x, position.y, NotePicker.WIDTH, NotePicker.HEIGHT);
@@ -46,8 +80,6 @@ public class NotePicker {
             gc.setFill(Color.WHITE);
             xPos += getNoteWidth(NoteColor.WHITE) + Block.BORDER_WIDTH;
         }
-
-        // TODO Note Text
         
         // Draw Black Piano Keys
         gc.setFill(Color.BLACK);
@@ -70,12 +102,22 @@ public class NotePicker {
         }
 
         // Draw Octave Arrows
-        gc.setFill(Color.BLACK);
+        gc.setFill(Color.WHITE);
         gc.beginPath();
         gc.appendSVGPath(BlockPaths.pathToString(getRightArrowPath(position)));
         gc.closePath();
         gc.fill();
-        
+
+        gc.beginPath();
+        gc.appendSVGPath(BlockPaths.pathToString(getLeftArrowPath(position)));
+        gc.closePath();
+        gc.fill();
+
+        // Draw Octave Text
+        Text octaveText = new Text("Ocvate: " + selectedOctave);
+        gc.fillText("Ocvate: " + selectedOctave, position.x + WIDTH / 2 - octaveText.getLayoutBounds().getWidth(), position.y + 20);
+
+        return gc;
     }
 
     private double getNoteWidth(NoteColor color) {
@@ -126,32 +168,139 @@ public class NotePicker {
     }
 
     private Path getLeftArrowPath(Position position) {
-        double x = position.x;
-        double y = position.y;
+        double x = position.x + 5;
+        double y = position.y + 14;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
+
+        path.getElements().add(new MoveTo(x, y));
+
+        path.getElements().add(new CubicCurveTo(x, y + 0.6, x + 0.3, y + 1.35, x + 0.75, y + 1.8));
+        x += 0.75;
+        y += 1.8;
+
+        path.getElements().add(new LineTo(x + 6.45, y + 6.45));
+        x += 6.45;
+        y += 6.45;
+
+        path.getElements().add(new CubicCurveTo(x + 0.75, y + 0.75, x + 1.8, y + 0.9, x + 2.7, y + 0.45));
+        x += 2.7;
+        y += 0.45;
+
+        path.getElements().add(new CubicCurveTo(x + 0.9, y - 0.45, x + 1.5, y - 1.35, x + 1.5, y - 2.25));
+        x += 1.5;
+        y -= 2.25;
+
+        path.getElements().add(new LineTo(x, y - 1.65));
+        y -= 1.65;
+
+        path.getElements().add(new LineTo(x + 8.4, y - 1.2));
+        x += 8.4;
+        y -= 1.2;
+
+        path.getElements().add(new ArcTo(3.75, 3.75, 0, x + 3.15, y - 3.6, false, false));
+        x += 3.15;
+        y -= 3.6;
+
+        path.getElements().add(new LineTo(x, y - 0.45));
+        y -= 0.45;
+
+        path.getElements().add(new CubicCurveTo(x - 0.3, y - 1.65, x - 1.5, y - 2.85, x - 3, y - 3));
+        x -= 3;
+        y -= 3;
+
+        path.getElements().add(new LineTo(x - 8.4, y - 1.2));
+        x -= 8.4;
+        y -= 1.2;
+
+        path.getElements().add(new LineTo(x, y - 1.65));
+        y -= 1.65;
+
+        path.getElements().add(new CubicCurveTo(x, y - 1.05, x - 0.6, y - 1.95, x - 1.5, y - 2.4));
+        x -= 1.5;
+        y -= 2.4;
+
+        path.getElements().add(new CubicCurveTo(x - 0.9, y - 0.45, x - 1.95, y - 0.15, x - 2.7, y + 0.6));
+        x -= 2.7;
+        y += 0.6;
+
+        path.getElements().add(new LineTo(x - 6.45, y + 6.45));
+        x -= 6.45;
+        y += 6.45;
+
+        path.getElements().add(new CubicCurveTo(x - 0.45, y + 0.45, x - 0.75, y + 1.05, x - 0.75, y + 1.8));
+        x -= 0.75;
+        y += 1.8;
 
         return path;
     }
 
     private Path getRightArrowPath(Position position) {
-        double x = position.x + 16.2;
+        double x = position.x + WIDTH - 16.2;
         double y = position.y + 19;
         Path path = new Path();
         path.setFill(Color.TRANSPARENT);
 
         path.getElements().add(new MoveTo(x, y));
 
-        path.getElements().add(new LineTo(x - 5.6, y - 0.8));
-        x -= 5.6;
-        y -= 0.8;
+        path.getElements().add(new LineTo(x - 8.4, y - 1.2));
+        x -= 8.4;
+        y -= 1.2;
 
-        path.getElements().add(new ArcTo(2.5, 2.5, 0, x - 2.1, y - 2.4, false, true));
+        path.getElements().add(new ArcTo(3.75, 3.75, 0, x - 3.15, y - 3.6, false, true));
+        x -= 3.15;
+        y -= 3.6;
+
+        path.getElements().add(new LineTo(x, y - 0.45));
+        y -= 0.45;
+
+        path.getElements().add(new CubicCurveTo(x + 0.3, y - 1.65, x + 1.5, y - 2.85, x + 3, y - 3));
+        x += 3;
+        y -= 3;
+
+        path.getElements().add(new LineTo(x + 8.4, y - 1.2));
+        x += 8.4;
+        y -= 1.2;
+
+        path.getElements().add(new LineTo(x, y - 1.65));
+        y -= 1.65;
+
+        path.getElements().add(new CubicCurveTo(x, y - 1.05, x + 0.6, y - 1.95, x + 1.5, y - 2.4));
+        x += 1.5;
+        y -= 2.4;
+
+        path.getElements().add(new CubicCurveTo(x + 0.9, y - 0.45, x + 1.95, y - 0.15, x + 2.7, y + 0.6));
+        x += 2.7;
+        y += 0.6;
+
+        path.getElements().add(new LineTo(x + 6.45, y + 6.45));
+        x += 6.45;
+        y += 6.45;
+
+        path.getElements().add(new CubicCurveTo(x + 0.45, y + 0.45, x + 0.75, y + 1.05, x + 0.75, y + 1.8));
+        x += 0.75;
+        y += 1.8;
+
+        path.getElements().add(new CubicCurveTo(x, y + 0.6, x - 0.3, y + 1.35, x - 0.75, y + 1.8));
+        x -= 0.75;
+        y += 1.8;
+
+        path.getElements().add(new LineTo(x - 6.45, y + 6.45));
+        x -= 6.45;
+        y += 6.45;
+
+        path.getElements().add(new CubicCurveTo(x - 0.75, y + 0.75, x - 1.8, y + 0.9, x - 2.7, y + 0.45));
+        x -= 2.7;
+        y += 0.45;
+
+        path.getElements().add(new CubicCurveTo(x - 0.9, y - 0.45, x - 1.5, y - 1.35, x - 1.5, y - 2.25));
+        x -= 1.5;
+        y -= 2.25;
 
         return path;
     }
 
-    public Notes isMouseOnNote(double mouseX, double mouseY) {
+    public void handleMouseClick(double mouseX, double mouseY) {
         // Check All Black Notes
         double xPos = 5 + getNoteWidth(NoteColor.WHITE) + Block.BORDER_WIDTH - (getNoteWidth(NoteColor.BLACK) / 2);
         for(int i = 0; i < 6; i++) {
@@ -159,7 +308,7 @@ public class NotePicker {
             if(getNotePath(new Position(position.x + xPos, position.y + 30), NoteColor.BLACK).contains(mouseX, mouseY)) {
                 selectedKey = i;
                 selectedColor = NoteColor.BLACK;
-                return getNoteFromKeys(NoteColor.BLACK, i);
+                return;
             }
             xPos += getNoteWidth(NoteColor.WHITE) + Block.BORDER_WIDTH;
         }
@@ -170,17 +319,22 @@ public class NotePicker {
             if(getNotePath(new Position(position.x + xPos, position.y + 30), NoteColor.WHITE).contains(mouseX, mouseY)) {
                 selectedKey = i;
                 selectedColor = NoteColor.WHITE;
-                return getNoteFromKeys(NoteColor.WHITE, i);
+                return;
             }
             xPos += getNoteWidth(NoteColor.WHITE) + Block.BORDER_WIDTH;
         }
 
-        return null;
+        // Check Arrows
+        if(getRightArrowPath(position).contains(mouseX, mouseY)) {
+            selectedOctave = Math.min(selectedOctave + 1, 7);
+        } else if(getLeftArrowPath(position).contains(mouseX, mouseY)) {
+            selectedOctave = Math.max(selectedOctave - 1, 1);
+        }
     }
 
-    private Notes getNoteFromKeys(NoteColor color, int key) {
-        if(color == NoteColor.BLACK) {
-            switch(key) {
+    public Notes getCurrentNote() {
+        if(selectedColor == NoteColor.BLACK) {
+            switch(selectedKey) {
                 case 0: switch(selectedOctave) {
                     case 1: return Notes.NOTE_CS1;
                     case 2: return Notes.NOTE_CS2;
@@ -235,7 +389,7 @@ public class NotePicker {
             }
         }
 
-        switch(key) {
+        switch(selectedKey) {
             case 0: switch(selectedOctave) {
                 case 1: return Notes.NOTE_C1;
                 case 2: return Notes.NOTE_C2;
@@ -308,7 +462,6 @@ public class NotePicker {
             }
             default: return Notes.NOTE_C4;
         }
-        
     }
 }
 
