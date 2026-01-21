@@ -11,6 +11,8 @@ void Sphero::initialize() {
 
   rvr.configUART(&Serial);
   rvr.resetYaw();
+
+  setColor(255, 0, 0, 255, 0, 0);
 }
 
 void Sphero::moveForward(uint8_t speed, uint8_t length) {

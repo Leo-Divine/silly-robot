@@ -1,6 +1,5 @@
 package silly.bot;
 
-import java.util.Arrays;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
@@ -139,7 +138,7 @@ enum BlockType {
      * @param Speed :  The speed the robot moves at.
      * @param Duration :  How many seconds to move for.
      */
-    MoveForward(BlockShape.Default, BlockCategory.Movement, 311, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    MoveForward(BlockShape.Default, BlockCategory.Movement, 326, 42, "Move At α Speed For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
     /**
      * <h2>RotateLeft</h2>
      * <p>This block rotates the robot left 90°.</p>
@@ -168,7 +167,7 @@ enum BlockType {
      * @param Note :  The specified note to play.
      * @param Duration :  How many seconds to play for.
      */
-    PlayNote(BlockShape.Default, BlockCategory.Sound, 221, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}),
+    PlayNote(BlockShape.Default, BlockCategory.Sound, 236, 42, "Play α For α Seconds", new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)}),
     /**
      * <h2>StopPlaying</h2>
      * <p>If a note is currently being played, it stops it.</p>
@@ -191,9 +190,9 @@ enum BlockType {
      * <p>This block takes an operand block and if true runs the code inside the block.</p>
      * @param Operand :  The boolean statement that determines if the code inside should run.
      */
-    If(BlockShape.Nesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
-    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 106, 42, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
-    Loop(BlockShape.Nesting, BlockCategory.Control, 161, 42, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
+    If(BlockShape.Nesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
+    Loop(BlockShape.Nesting, BlockCategory.Control, 161, 47, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
     Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Less(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α < α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Greater(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α > α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
@@ -217,11 +216,6 @@ enum BlockType {
         this.label = label;
         this.parameters = parameters;
     }
-
-    @SuppressWarnings("rawtypes")
-    public Parameter[] getParameters() {
-        return Arrays.copyOf(this.parameters, this.parameters.length);
-    }
 }
 
 public abstract class Block {
@@ -230,8 +224,9 @@ public abstract class Block {
     static int nextBlockId = 1;
     private int id;
     BlockType blockType;
-    int aboveBlock = 0;
-    int belowBlock = 0;
+    Block aboveBlock = null;
+    Block belowBlock = null;
+    Block parentBlock = null;
     Position position = new Position(0, 0);
     boolean isDragging = false;
     Position mouseOffset = new Position(0, 0);
@@ -244,22 +239,22 @@ public abstract class Block {
         nextBlockId++;
         this.blockType = type;
         this.position = position;
-        position.x -= 325;
+        position.x -= Editor.MENU_WIDTH;
         this.width = blockType.startWidth;
         this.height = blockType.startHeight;
 
         switch(this.blockType) {
-            case Equal:
+            case Equal: 
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
                 break;
             case Greater:
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
                 break;
             case If:
-                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
                 break;
             case IfEl:
-                this.parameters = new Parameter[]{new Parameter<String>(null, "Temp")};
+                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
                 break;
             case Less:
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
@@ -271,7 +266,7 @@ public abstract class Block {
                 this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
                 break;
             case PlayNote:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
+                this.parameters = new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)};
                 break;
             case SetLeftColor:
                 this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)};
@@ -295,11 +290,18 @@ public abstract class Block {
     abstract int getHeight();
     abstract Path getPath();
 
+    public int getConnectedBlockHeights() {
+        if(belowBlock == null) {
+            return getHeight();
+        }
+        return getHeight() + belowBlock.getConnectedBlockHeights();
+    }
+
     public boolean isMouseOnBlock(Position mousePosition) {
         return getPath().contains(mousePosition.x, mousePosition.y);
     }
 
-    public GraphicsContext drawBlock(GraphicsContext gc) {
+    public GraphicsContext drawBlock(GraphicsContext gc, int[] selectedParameter) {
         gc.setFont(Editor.COOL_FONT);
         gc.setStroke(blockType.category.border);
         gc.setLineWidth(BORDER_WIDTH);
@@ -311,11 +313,11 @@ public abstract class Block {
         gc.fill();
         gc.stroke();
         
-        drawBlockText(gc);
+        drawBlockText(gc, selectedParameter);
         return gc;
     }
 
-    private GraphicsContext drawBlockText(GraphicsContext gc) {
+    private GraphicsContext drawBlockText(GraphicsContext gc, int[] selectedParameter) {
         Text widthCheck = new Text();
         widthCheck.setFont(Editor.COOL_FONT);
         gc.setFill(Color.WHITE);
@@ -323,12 +325,12 @@ public abstract class Block {
 
         // Display Only Text For no Parameters
         if(blockType.label.indexOf("α") == -1) {
-            gc.fillText(blockType.label, position.x + 325 + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
+            gc.fillText(blockType.label, position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x, position.y + blockType.shape.labelOffset.y);
             return gc;
         }
 
         String[] stringParts = blockType.label.split("α");
-        double xPos = position.x + 325 + blockType.shape.labelOffset.x;
+        double xPos = position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x;
         for(int i = 0; i < stringParts.length - 1; i++) {
             // Draw Block Text
             gc.setFill(Color.WHITE);
@@ -341,12 +343,30 @@ public abstract class Block {
             gc.beginPath();
             gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
             gc.closePath();
+
+            // Give The Parameter a Selected Color if Selected
+            if(id == selectedParameter[0] && i == selectedParameter[1]) {
+                gc.setFill(Color.rgb(57, 155, 247));
+            }
             gc.fill();
             gc.stroke();
 
             // Draw Parameter Value
-            if(parameters[i].value.getClass() == Integer.class) {
-                gc.setFill(Color.BLACK);
+            if(parameters[i].value == null) {
+                gc.setFill(blockType.category.border);
+                gc.setStroke(blockType.category.border);
+
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+            } else if(parameters[i].value.getClass() == Integer.class) {
+                if(id == selectedParameter[0] && i == selectedParameter[1]) {
+                    gc.setFill(Color.WHITE);
+                } else {
+                    gc.setFill(Color.BLACK);
+                }
                 gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
             } else if(parameters[i].value.getClass() == Color.class) {
                 gc.setFill((Color) parameters[i].value);
@@ -357,6 +377,20 @@ public abstract class Block {
                 gc.closePath();
                 gc.fill();
                 gc.stroke();
+            } else if(parameters[i].value.getClass() == Notes.class) {
+                // Redraw Circle
+                gc.setFill(blockType.category.border);
+                gc.setStroke(blockType.category.border);
+
+                gc.beginPath();
+                gc.appendSVGPath(BlockPaths.pathToString(parameters[i].getPath()));
+                gc.closePath();
+                gc.fill();
+                gc.stroke();
+
+                // Draw Text
+                gc.setFill(Color.WHITE);
+                gc.fillText(parameters[i].value.toString(), xPos + 5, position.y + blockType.shape.labelOffset.y);
             }
             xPos += parameters[i].getWidth();
         }
@@ -367,12 +401,35 @@ public abstract class Block {
         widthCheck.setText(stringParts[stringParts.length - 1]);
         xPos += widthCheck.getLayoutBounds().getWidth();
         if(blockType.shape == BlockShape.Operand) {
-            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 27);
+            width = (int) (xPos - (position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x) + 27);
         } else {
-            width = (int) (xPos - (position.x + 325 + blockType.shape.labelOffset.x) + 10);
+            width = (int) (xPos - (position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x) + 10);
         }
         
         return gc;
+    }
+
+    public void updateParameterPositions() {
+        if(blockType.label.indexOf("α") == -1) { return; }
+        Text widthCheck = new Text();
+        widthCheck.setFont(Editor.COOL_FONT);
+
+        String[] stringParts = blockType.label.split("α");
+        double xPos = position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x;
+        for(int i = 0; i < stringParts.length - 1; i++) {
+            // Draw Block Text
+            widthCheck.setText(stringParts[i]);
+            xPos += widthCheck.getLayoutBounds().getWidth();
+            parameters[i].labelPosition = new Position(xPos, position.y + height / 2 - Parameter.PARAMETER_SIZE / 2);
+            xPos += parameters[i].getWidth();
+        }
+    }
+
+    protected void checkForConnectedBlocks() {
+        if(belowBlock != null) {
+            System.out.println(belowBlock.blockType.name());
+            belowBlock.checkForConnectedBlocks();
+        }
     }
 }
 
@@ -396,6 +453,8 @@ class DefaultBlock extends Block {
 }
 
 class ValueBlock extends Block {
+    int parentParameter = -1;
+
     public ValueBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -415,6 +474,8 @@ class ValueBlock extends Block {
 }
 
 class OperandBlock extends Block {
+    int parentParameter = -1;
+
     public OperandBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -433,7 +494,7 @@ class OperandBlock extends Block {
     }
 }
 
-class StartBlock extends Block {
+class StartBlock extends Block implements Cloneable {
     public StartBlock(BlockType type, Position position) {
         super(type, position);
     }
@@ -446,18 +507,19 @@ class StartBlock extends Block {
         return height;
     }
 
-    public String getCode() {
-        return "";
-    }
-
     @Override
     public Path getPath() {
         return BlockPaths.drawStartBlock(position, width, height);
     }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }
 
 class NestingBlock extends Block {
-    int nestedBlock;
+    Block nestedBlock;
 
     public NestingBlock(BlockType type, Position position) {
         super(type, position);
@@ -477,22 +539,19 @@ class NestingBlock extends Block {
     }
 
     private int getTotalNestingBlockHeight() {
-        return 25;
+        if(nestedBlock == null) { return 25; }
+        return nestedBlock.getConnectedBlockHeights();
     }
 }
 
-class DoubleNestingBlock extends Block {
-    int firstNestedBlock;
-    int secondNestedBlock;
+class DoubleNestingBlock extends NestingBlock {
+    Block secondNestedBlock;
 
     public DoubleNestingBlock(BlockType type, Position position) {
         super(type, position);
     }
 
-    public int getWidth() {
-        return width;
-    }
-
+    @Override
     public int getHeight() {
         return height + getFirstNestingBlockHeight() + getSecondNestingBlockHeight() + 24 + 24 + 16;
     }
@@ -502,12 +561,14 @@ class DoubleNestingBlock extends Block {
         return BlockPaths.drawDoubleNestingBlock(position, width, height, getFirstNestingBlockHeight(), getSecondNestingBlockHeight());
     }
 
-    private int getFirstNestingBlockHeight() {
-        return 25;
+    public int getFirstNestingBlockHeight() {
+        if(nestedBlock == null) { return 25; }
+        return nestedBlock.getConnectedBlockHeights();
     }
 
     private int getSecondNestingBlockHeight() {
-        return 25;
+        if(secondNestedBlock == null) { return 25; }
+        return secondNestedBlock.getConnectedBlockHeights();
     }
 }
 
@@ -515,6 +576,7 @@ class Parameter<T> {
     final static int PARAMETER_SIZE = 25;
     Position labelPosition;
     T value;
+    Block childBlock = null;
 
     public Parameter(Position labelPosition, T value) {
         this.labelPosition = labelPosition;
@@ -522,7 +584,11 @@ class Parameter<T> {
     }
     
     public double getWidth() {
-        if(value.getClass() == Integer.class) {
+        if(value == null) {
+            return PARAMETER_SIZE + 10;
+        } else if(childBlock != null) {
+            return childBlock.getWidth();
+        } else if(value.getClass() == Integer.class || value.getClass() == Notes.class) {
             Text widthCheck = new Text(value.toString());
             widthCheck.setFont(Editor.COOL_FONT);
             return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
@@ -538,6 +604,35 @@ class Parameter<T> {
 
         int radius = PARAMETER_SIZE / 2;
         double width = getWidth();
+        if(value == null) {
+            path.getElements().add(new MoveTo(x + radius, y));
+
+            path.getElements().add(new LineTo(x + radius + width - PARAMETER_SIZE, y));
+            x = x + radius + width - PARAMETER_SIZE;
+
+            path.getElements().add(new LineTo(x + radius, y + radius));
+            x += radius;
+            y += radius;
+
+            path.getElements().add(new LineTo(x - radius, y + radius));
+            x -= radius;
+            y += radius;
+
+            path.getElements().add(new LineTo(x - width + PARAMETER_SIZE, y));
+            x = x - width + PARAMETER_SIZE;
+
+            path.getElements().add(new LineTo(x - radius, y - radius));
+            x -= radius;
+            y -= radius;
+
+            path.getElements().add(new LineTo(x + radius, y - radius));
+            x += radius;
+            y -= radius;
+
+            return path;
+        } else if(Block.class.isAssignableFrom(value.getClass())) {
+            return path;
+        }
 
         path.getElements().add(new MoveTo(x + radius, y));
 

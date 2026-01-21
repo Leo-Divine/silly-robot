@@ -13,7 +13,10 @@ enum RobotCommand {
   ROTATE_RIGHT,
   ROTATE_LEFT,
   SET_COLOR,
-  GET_SENSOR_DATA;
+  GET_SENSOR_DATA,
+  PLAY_NOTE,
+  STOP_PLAYING,
+  WAIT;
 }
 
 public class Server {
@@ -44,31 +47,16 @@ public class Server {
     clientSocket.close();
   }
 
-  public void sendCommand(RobotCommand command, int parameters[]) throws IOException {
+  public void sendCommand(RobotCommand command, String parameters[]) throws IOException {
     switch (command) {
-      case MOVE_FORWARD:
-        serverOutput.println("R_000" + String.format("%03d", parameters[0]) + String.format("%03d", parameters[1]));
-        break;
-      case ROTATE_LEFT:
-        serverOutput.println("R_001");
-        break;
-      case ROTATE_RIGHT:
-        serverOutput.println("R_002");
-        break;
-      case SET_COLOR:
-        serverOutput.println(
-          "R_003" +
-          String.format("%03d", parameters[0]) +
-          String.format("%03d", parameters[1]) +
-          String.format("%03d", parameters[2]) +
-          String.format("%03d", parameters[3]) +
-          String.format("%03d", parameters[4]) +
-          String.format("%03d", parameters[5])
-        );
-        break;
-      case GET_SENSOR_DATA:
-        serverOutput.println("R_004");
-        break;
+      case MOVE_FORWARD: serverOutput.println("R_000" + parameters[0] + parameters[1]); break;
+      case ROTATE_LEFT: serverOutput.println("R_001"); break;
+      case ROTATE_RIGHT: serverOutput.println("R_002"); break;
+      case SET_COLOR: serverOutput.println("R_003" + parameters[0] + parameters[1]); break;
+      case GET_SENSOR_DATA: serverOutput.println("R_004"); break;
+      case PLAY_NOTE: serverOutput.println("R_005" + parameters[0] + parameters[1]); break;
+      case STOP_PLAYING: serverOutput.println("R_006"); break;
+      case WAIT: serverOutput.println("R_007" + parameters[0]); break;
     }
   }
 
