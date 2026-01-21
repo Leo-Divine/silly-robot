@@ -11,6 +11,8 @@ import java.io.IOException;
 public class App extends Application {
     private Server server;
     private boolean isConnected = false;
+    private boolean findingClient = false;
+    private Thread findClient;
 
     private Color leftColor = Color.RED;
     private Color rightColor = Color.RED;
@@ -33,10 +35,8 @@ public class App extends Application {
                 canvas.drawStartButton(stage.getScene().getWidth());
 
                 // Handle Server Connection and Messages
-                
                 try { handleServerConnection(); }
                 catch (IOException e) { System.out.println("SERVER ERROR: " + e.getMessage()); }
-                
             }
         };
         timer.start();
@@ -81,24 +81,25 @@ public class App extends Application {
 
     private void handleServerConnection() throws IOException {
       // Connect if not Already
-      if(!isConnected) {
-        server.findClient();
-        isConnected = true;
+      if(!isConnected && !findingClient) {
+        findClient = new Thread(new FindClientTask(server), "Find-Client");
+        findClient.start();
+        findingClient = true;
+        return;
+      } else if (findingClient) {
+        System.out.println("Finding Client");
+        if(!findClient.isAlive()) {
+            findingClient = false;
+            isConnected = true;
+        }
+        return;
       }
 
       // Check if a Message has Been Recieved
       if(server.isMessageAvailable()) {
-        // Restart Connection if NULL Messages are Being Recieved
-        if (server.getMessage() == null) {
-          server.disconnectClient();
-          isConnected = false;
-          server.findClient();
-          isConnected = true;
-          return;
-        } 
-
-        // Restart Connection if Client Disconnects
-        if(server.readMessage() == ResponseCode.DISCONNECT) {
+        // Restart Connection if NULL Messages are Being Recieved or if Client Disconnects
+        String message = server.getMessage();
+        if (message == null || message.equals("FCKOFF")) {
           server.disconnectClient();
           isConnected = false;
           server.findClient();
@@ -197,4 +198,21 @@ class Position {
         this.x = x;
         this.y = y;
     }
+}
+
+class FindClientTask implements Runnable {
+  private Server server;
+
+  public FindClientTask(Server server) {
+    this.server = server;
+  }
+
+  @Override
+  public void run() {
+    try {
+      server.findClient();
+    } catch (IOException e) {
+      System.out.println("Couldn't find client");
+    }
+  }
 }
