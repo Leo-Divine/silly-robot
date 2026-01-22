@@ -84,6 +84,10 @@ public class Editor extends Canvas {
         return isProgramRunning;
     }
 
+    public void setIsProgramRunning(boolean isProgramRunning) {
+        this.isProgramRunning = isProgramRunning;
+    }
+
     /**
      * Gets the Coco Chamel font.
      * @return the Coco font, or the Arial font if an error occurs.
@@ -289,11 +293,31 @@ public class Editor extends Canvas {
         }
     }
 
+    public void drawPopup(PopupType type) {
+        gc.setStroke(Color.rgb(255, 51, 85));
+        gc.setLineWidth(2);
+        gc.setFill(Color.rgb(255, 102, 128));
+
+        switch(type) {
+            case FINDING_CLIENT:
+                gc.fillRect(25, 25, 205, 40);
+                gc.strokeRect(25, 25, 205, 40);
+                gc.setFill(Color.WHITE);
+                gc.fillText("Searching for Robot...", 30, 50);
+                break;
+            case PROGRAM_RUNNING:
+                gc.fillRect(25, 25, 155, 40);
+                gc.strokeRect(25, 25, 155, 40);
+                gc.setFill(Color.WHITE);
+                gc.fillText("Running Code...", 30, 50);
+                break;
+        }
+    }
+
     public StartBlock getStartBlock() {
         try {
             return (StartBlock)((StartBlock)blocks.get(0)).clone();
         } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
             return null;
         }
     }

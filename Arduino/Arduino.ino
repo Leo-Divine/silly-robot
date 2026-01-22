@@ -11,7 +11,7 @@ char pass[] = "B0n_J0v!";
 int status = WL_IDLE_STATUS;
 char server[] = "192.168.40.12";
 unsigned long lastConnectionTime = 0;
-const unsigned long postingInterval = 60000L; // 1 Min
+const unsigned long postingInterval = 15000L; // 1 Min
 
 WiFiEspClient client;
 Sphero sphero;

@@ -3,11 +3,6 @@ package silly.bot;
 import java.io.*;
 import java.net.*;
 
-enum ResponseCode {
-  OK,
-  DISCONNECT;
-}
-
 enum RobotCommand {
   MOVE_FORWARD,
   ROTATE_RIGHT,
@@ -67,14 +62,6 @@ public class Server {
   public String getMessage() throws IOException {
     inputLine = serverInput.readLine();
     return inputLine;
-  }
-
-  public ResponseCode readMessage() throws IOException {
-    if ("FCKOFF".equals(inputLine)) {
-      return ResponseCode.DISCONNECT;
-    }
-    System.out.println(inputLine);
-    return ResponseCode.OK;
   }
 
   public void stopServer() throws IOException {
