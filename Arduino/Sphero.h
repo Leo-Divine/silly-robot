@@ -13,7 +13,7 @@ class Sphero {
     void rotateRight();
     void rotateLeft();
     void setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint8_t redRight, uint8_t greenRight, uint8_t blueRight);
-    float getSensorData();
+    int getSensorData();
     void playTone(int frequency, int duration);
     void stopTone();
 };

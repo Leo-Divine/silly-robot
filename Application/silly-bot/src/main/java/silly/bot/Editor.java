@@ -240,6 +240,7 @@ public class Editor extends Canvas {
     public void drawBlocks() {
         for(Block block : blocks) {
             block.drawBlock(gc, selectedParameter);
+            //System.out.println(block.getWidth());
         }
 
         // Draw Color Picker
@@ -555,8 +556,7 @@ public class Editor extends Canvas {
         // Check if an Operand Block Can Connect to Another Block
         if(block.blockType.shape == BlockShape.Operand) {
             for(Block surroundingBlock : blocks) {
-                if(surroundingBlock.blockType.shape != BlockShape.Nesting 
-                    && surroundingBlock.blockType.shape != BlockShape.DoubleNesting) { continue; } // Non-Connecting Shape
+                if(surroundingBlock.parameters.length <= 0) { continue; } // Has no Parameters
                 if(surroundingBlock.parameters[0].value != null) { continue; } // Already has a Block
                 if(!surroundingBlock.parameters[0].getPath().getBoundsInParent().intersects(block.getPath().getBoundsInParent())) { continue; } // Block Isn't Close Enough
                 

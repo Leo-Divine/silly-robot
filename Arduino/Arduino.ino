@@ -6,12 +6,12 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "IT-Shop";
-char pass[] = "B0n_J0v!";
+char ssid[] = "IT-Shop"; // WiFi Name
+char pass[] = "B0n_J0v!"; // WiFi Password
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.40.12";
+char server[] = "192.168.40.12"; // IP Address of Computer Running The Application
 unsigned long lastConnectionTime = 0;
-const unsigned long postingInterval = 15000L; // 1 Min
+const unsigned long postingInterval = 15000L; // How Long The Robot Waits to Recieve a Command Before it Reconnects 
 
 WiFiEspClient client;
 Sphero sphero;
@@ -73,6 +73,9 @@ void loop()
         c.substring(20, 23).toInt());
     } else if(c.substring(0, 5) == "R_004") {
       client.println(sphero.getSensorData());
+      lastConnectionTime = millis();
+      c = "";
+      return;
     } else if(c.substring(0, 5) == "R_005") {
       sphero.playTone(c.substring(5, 9).toInt(), c.substring(9, 13).toInt());
     } else if(c.substring(0, 5) == "R_006") {

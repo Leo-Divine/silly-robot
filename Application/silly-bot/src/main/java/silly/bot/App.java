@@ -160,21 +160,26 @@ public class App extends Application {
                 case Wait: server.sendCommand(RobotCommand.WAIT, parameters); server.getMessage(); break;
                 case PlayNote: server.sendCommand(RobotCommand.PLAY_NOTE, parameters); server.getMessage(); break;
                 case StopPlaying: server.sendCommand(RobotCommand.STOP_PLAYING, parameters); server.getMessage(); break;
+                case SetColor: 
+                leftColor = (Color)block.parameters[0].value; rightColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
                 case SetLeftColor: leftColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
                 case SetRightColor: rightColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
-                case GetDistanceValue: return "040";
+                case GetDistanceValue: server.sendCommand(RobotCommand.GET_SENSOR_DATA, parameters); String test = server.getMessage(); System.out.println(test); return test;
                 case Equal: return Integer.parseInt(parameters[0]) == Integer.parseInt(parameters[1]) ? "1" : "0";
                 case Greater: return Integer.parseInt(parameters[0]) > Integer.parseInt(parameters[1]) ? "1" : "0";
                 case Less: return Integer.parseInt(parameters[0]) < Integer.parseInt(parameters[1]) ? "1" : "0";
                 case If:
                     if(parameters[0] == "1" && ((NestingBlock)(block)).nestedBlock != null) {
+                        Thread.sleep(500);
                         runBlockCode(((NestingBlock)(block)).nestedBlock);
                     }
                     break;
                 case IfEl: 
                     if(parameters[0] == "1" && ((DoubleNestingBlock)(block)).nestedBlock != null) {
+                        Thread.sleep(500);
                         runBlockCode(((DoubleNestingBlock)(block)).nestedBlock);
                     } else if(((DoubleNestingBlock)(block)).secondNestedBlock != null) {
+                        Thread.sleep(500);
                         runBlockCode(((DoubleNestingBlock)(block)).secondNestedBlock);
                     }
                     break;
@@ -184,14 +189,18 @@ public class App extends Application {
                         runBlockCode(((NestingBlock)(block)).nestedBlock);
                     }
                     break;
+                case WaitUntil: break;
                 default: break;
             }
-        } catch (IOException e) {
-            
-        }
+        } catch (IOException e) {}
+          catch (InterruptedException e) {}
 
         if(block.belowBlock != null) {
-            runBlockCode(block.belowBlock);
+            if(block.blockType == BlockType.WaitUntil && parameters[0] == "0") {
+                runBlockCode(block);
+            } else {
+                runBlockCode(block.belowBlock);
+            }
         }
 
         return "";

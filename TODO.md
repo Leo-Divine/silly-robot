@@ -65,7 +65,7 @@
 - [ ] Variables
 - [x] On Screen Information About Robot Status
 - [ ] Robot Discoverability
-- [ ] GetSensorValue
+- [x] GetSensorValue
 - [ ] Make Move Speed More Clear
 
 ## Sphero

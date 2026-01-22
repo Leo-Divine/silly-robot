@@ -150,6 +150,12 @@ enum BlockType {
      */
     RotateRight(BlockShape.Default, BlockCategory.Movement, 107, 42, "Turn Right", null),
     /**
+     * <h2>SetColor</h2>
+     * <p>This block changes the robot's front lights to a specified color.</p>
+     * @param Color :  The new color for the lights.
+     */
+    SetColor(BlockShape.Default, BlockCategory.Display, 188, 42, "Set The Color To α ", new Parameter[]{new Parameter<Color>(null, Color.RED)}),
+    /**
      * <h2>SetLeftColor</h2>
      * <p>This block changes the robot's front left light to a specified color.</p>
      * @param Color :  The new color for the left light.
@@ -193,6 +199,12 @@ enum BlockType {
     If(BlockShape.Nesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     IfEl(BlockShape.DoubleNesting, BlockCategory.Control, 116, 52, "If α Then", new Parameter[]{new Parameter<Block>(null, null)}),
     Loop(BlockShape.Nesting, BlockCategory.Control, 161, 47, "Repeat α Times", new Parameter[]{new Parameter<Integer>(null, 10)}),
+    /**
+     * <h2>WaitUntil</h2>
+     * <p>The block waits to run the code below it until the opeand block returns true.</p>
+     * @param Operand :  The boolean statement that determines when the code below should run.
+     */
+    WaitUntil(BlockShape.Default, BlockCategory.Control, 146, 52, "Wait Until α ", new Parameter[]{new Parameter<Block>(null, null)}),
     Equal(BlockShape.Operand, BlockCategory.Operands, 98, 35, "α = α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Less(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α < α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
     Greater(BlockShape.Operand, BlockCategory.Operands, 96, 35, "α > α ", new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}),
@@ -244,41 +256,20 @@ public abstract class Block {
         this.height = blockType.startHeight;
 
         switch(this.blockType) {
-            case Equal: 
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
-                break;
-            case Greater:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
-                break;
-            case If:
-                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
-                break;
-            case IfEl:
-                this.parameters = new Parameter[]{new Parameter<Block>(null, null)};
-                break;
-            case Less:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)};
-                break;
-            case Loop:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 10)};
-                break;
-            case MoveForward:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)};
-                break;
-            case PlayNote:
-                this.parameters = new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)};
-                break;
-            case SetLeftColor:
-                this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)};
-                break;
-            case SetRightColor:
-                this.parameters = new Parameter[]{new Parameter<Color>(null, Color.BLUE)};
-                break;
-            case Wait:
-                this.parameters = new Parameter[]{new Parameter<Integer>(null, 1)};
-                break;
-            default:
-                break;
+            case Equal: this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}; break;
+            case Greater: this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}; break;
+            case If: this.parameters = new Parameter[]{new Parameter<Block>(null, null)}; break;
+            case IfEl: this.parameters = new Parameter[]{new Parameter<Block>(null, null)}; break;
+            case Less: this.parameters = new Parameter[]{new Parameter<Integer>(null, 0), new Parameter<Integer>(null, 0)}; break;
+            case Loop: this.parameters = new Parameter[]{new Parameter<Integer>(null, 10)}; break;
+            case MoveForward: this.parameters = new Parameter[]{new Parameter<Integer>(null, 128), new Parameter<Integer>(null, 1)}; break;
+            case PlayNote: this.parameters = new Parameter[]{new Parameter<Notes>(null, Notes.NOTE_C4), new Parameter<Integer>(null, 1)}; break;
+            case SetColor: this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)}; break;
+            case SetLeftColor: this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)}; break;
+            case SetRightColor: this.parameters = new Parameter[]{new Parameter<Color>(null, Color.RED)}; break;
+            case Wait: this.parameters = new Parameter[]{new Parameter<Integer>(null, 1)}; break;
+            case WaitUntil: this.parameters = new Parameter[]{new Parameter<Block>(null, null)}; break;
+            default: break;
         }
     }
 

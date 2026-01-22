@@ -44,14 +44,14 @@ void Sphero::setColor(uint8_t redLeft, uint8_t greenLeft, uint8_t blueLeft, uint
   rvr.setAllLeds(63, leds, 6);
 }
 
-float Sphero::getSensorData() {
+int Sphero::getSensorData() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  return (pulseIn(echoPin, HIGH) * 0.0343) / 2;
+  return (int)((pulseIn(echoPin, HIGH) * 0.0343) / 2);
 }
 
 void Sphero::playTone(int frequency, int duration) {
