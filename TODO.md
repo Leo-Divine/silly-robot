@@ -63,7 +63,7 @@
 - [x] Set value block position on operand blocks when adding and removing value blocks
 - [ ] Else Text on Double Nesting
 - [ ] Variables
-- [ ] On Screen Information About Robot Status
+- [x] On Screen Information About Robot Status
 - [ ] Robot Discoverability
 - [ ] GetSensorValue
 - [ ] Make Move Speed More Clear

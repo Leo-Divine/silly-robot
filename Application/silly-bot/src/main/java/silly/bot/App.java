@@ -8,17 +8,23 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+enum PopupType {
+    FINDING_CLIENT,
+    PROGRAM_RUNNING;
+}
+
 public class App extends Application {
     private Server server;
     private boolean isConnected = false;
-    private boolean findingClient = false;
+    private boolean isFindingClient = false;
     private Thread findClient;
+    private Thread runCode;
 
     private Color leftColor = Color.RED;
     private Color rightColor = Color.RED;
 
     private Pane root = new Pane();
-    private Editor canvas = new Editor(2000,2000);
+    public Editor canvas = new Editor(2000,2000);
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -33,6 +39,9 @@ public class App extends Application {
                 canvas.drawMenus();
                 canvas.drawBlocks();
                 canvas.drawStartButton(stage.getScene().getWidth());
+
+                if(isFindingClient) { canvas.drawPopup(PopupType.FINDING_CLIENT); }
+                if(canvas.getIsProgramRunning()) { canvas.drawPopup(PopupType.PROGRAM_RUNNING); }
 
                 // Handle Server Connection and Messages
                 try { handleServerConnection(); }
@@ -71,7 +80,10 @@ public class App extends Application {
             canvas.mouseClicked(event.getSceneX(), event.getSceneY());
 
             if(canvas.hasProgramStarted(event.getSceneX(), event.getSceneY(), stage.getScene().getWidth())) {
-                runBlockCode(canvas.getStartBlock());
+                if(canvas.getIsProgramRunning() || !isConnected) { return; }
+                canvas.setIsProgramRunning(true);
+                runCode = new Thread(new RunCodeTask(this), "Run-Code");
+                runCode.start();
             }
         });
         root.setOnScroll(event -> {
@@ -80,35 +92,42 @@ public class App extends Application {
     }
 
     private void handleServerConnection() throws IOException {
-      // Connect if not Already
-      if(!isConnected && !findingClient) {
-        findClient = new Thread(new FindClientTask(server), "Find-Client");
-        findClient.start();
-        findingClient = true;
-        return;
-      } else if (findingClient) {
-        System.out.println("Finding Client");
-        if(!findClient.isAlive()) {
-            findingClient = false;
-            isConnected = true;
+        if(!findClient()) {
+            return;
         }
-        return;
-      }
 
-      // Check if a Message has Been Recieved
-      if(server.isMessageAvailable()) {
-        // Restart Connection if NULL Messages are Being Recieved or if Client Disconnects
-        String message = server.getMessage();
-        if (message == null || message.equals("FCKOFF")) {
-          server.disconnectClient();
-          isConnected = false;
-          server.findClient();
-          isConnected = true;
+        // Check if a Message has Been Recieved
+        if(server.isMessageAvailable()) {
+            // Restart Connection if NULL Messages are Being Recieved or if Client Disconnects
+            String message = server.getMessage();
+            if (message == null || message.equals("FCKOFF")) {
+              server.disconnectClient();
+              isConnected = false;
+              findClient();
+            }
         }
-      }
+
+        if(canvas.getIsProgramRunning() && !runCode.isAlive()) { canvas.setIsProgramRunning(false); }
     }
 
-    private String runBlockCode(Block block) {
+    private boolean findClient() throws IOException {
+        if(!isConnected && !isFindingClient) {
+            findClient = new Thread(new FindClientTask(server), "Find-Client");
+            findClient.start();
+            isFindingClient = true;
+            return false;
+        } else if (isFindingClient) {
+            if(!findClient.isAlive()) {
+                isFindingClient = false;
+                isConnected = true;
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public String runBlockCode(Block block) {
         if(block.blockType == BlockType.Start && block.belowBlock != null) {
             runBlockCode(block.belowBlock);
             return "";
@@ -214,5 +233,18 @@ class FindClientTask implements Runnable {
     } catch (IOException e) {
       System.out.println("Couldn't find client");
     }
+  }
+}
+
+class RunCodeTask implements Runnable {
+  private App app;
+
+  public RunCodeTask(App app) {
+    this.app = app;
+  }
+
+  @Override
+  public void run() {
+    app.runBlockCode(app.canvas.getStartBlock());
   }
 }
