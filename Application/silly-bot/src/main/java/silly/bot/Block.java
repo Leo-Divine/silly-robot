@@ -219,7 +219,7 @@ enum BlockType {
 
     private BlockType(BlockShape shape, BlockCategory category, int startWidth, int startHeight, String label, Parameter[] parameters) {
         Text labelWidthCheck = new Text(label);
-        labelWidthCheck.setFont(Editor.COOL_FONT);
+        labelWidthCheck.setFont(Editor.MAIN_FONT);
         
         this.shape = shape;
         this.category = category;
@@ -293,7 +293,7 @@ public abstract class Block {
     }
 
     public GraphicsContext drawBlock(GraphicsContext gc, int[] selectedParameter) {
-        gc.setFont(Editor.COOL_FONT);
+        gc.setFont(Editor.MAIN_FONT);
         gc.setStroke(blockType.category.border);
         gc.setLineWidth(BORDER_WIDTH);
         gc.setFill(blockType.category.fill);
@@ -310,7 +310,7 @@ public abstract class Block {
 
     private GraphicsContext drawBlockText(GraphicsContext gc, int[] selectedParameter) {
         Text widthCheck = new Text();
-        widthCheck.setFont(Editor.COOL_FONT);
+        widthCheck.setFont(Editor.MAIN_FONT);
         gc.setFill(Color.WHITE);
         gc.setStroke(blockType.category.border);
 
@@ -403,7 +403,7 @@ public abstract class Block {
     public void updateParameterPositions() {
         if(blockType.label.indexOf("α") == -1) { return; }
         Text widthCheck = new Text();
-        widthCheck.setFont(Editor.COOL_FONT);
+        widthCheck.setFont(Editor.MAIN_FONT);
 
         String[] stringParts = blockType.label.split("α");
         double xPos = position.x + Editor.MENU_WIDTH + blockType.shape.labelOffset.x;
@@ -581,7 +581,7 @@ class Parameter<T> {
             return childBlock.getWidth();
         } else if(value.getClass() == Integer.class || value.getClass() == Notes.class) {
             Text widthCheck = new Text(value.toString());
-            widthCheck.setFont(Editor.COOL_FONT);
+            widthCheck.setFont(Editor.MAIN_FONT);
             return Math.max(PARAMETER_SIZE, widthCheck.getLayoutBounds().getWidth() + 10);
         }
         return PARAMETER_SIZE;

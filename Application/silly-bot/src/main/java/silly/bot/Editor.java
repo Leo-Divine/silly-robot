@@ -15,7 +15,7 @@ import javafx.scene.text.Text;
 
 /**
  * <h2>Editor</h2>
- * <h4>The code editor that manages the interface and runs the code.</h4>
+ * <h4>The object that displays and keeps track of the users code.</h4>
  */
 public class Editor extends Canvas {
     /**
@@ -29,7 +29,7 @@ public class Editor extends Canvas {
     /**
      * The main font used on the blocks.
      */
-    final static public Font COOL_FONT = getCocoFont();
+    final public static Font MAIN_FONT = getCocoFont();
 
     /**
      * The graphics context of the editor.
@@ -72,6 +72,9 @@ public class Editor extends Canvas {
      */
     private NotePicker notePickerMenu;
 
+    /**
+     * Keeps track of if the code in the editor is currently being run.
+     */
     private boolean isProgramRunning = false;
 
     public Editor(int i, int j) {
@@ -80,10 +83,18 @@ public class Editor extends Canvas {
         notePickerMenu = new NotePicker(new Position(0, 0));
     }
 
+    /**
+     * Get whether the code is currently running.
+     * @return Whether the code is running.
+     */
     public boolean getIsProgramRunning() {
         return isProgramRunning;
     }
 
+    /**
+     * Sets whether the code is running.
+     * @param isProgramRunning :  The setter parameter.
+     */
     public void setIsProgramRunning(boolean isProgramRunning) {
         this.isProgramRunning = isProgramRunning;
     }
@@ -107,7 +118,7 @@ public class Editor extends Canvas {
     }
 
     /**
-     * Clears the editor.
+     * Clears the editor of everything.
      */
     public void clearCanvas() {
         gc.clearRect(0, 0, 2000, 2000);
@@ -147,7 +158,7 @@ public class Editor extends Canvas {
                 gc.fillText(item.text, 100, item.yPos - blockMenuScroll);
                 continue;
             }
-            gc.setFont(COOL_FONT);
+            gc.setFont(MAIN_FONT);
             Path blockPath = item.block.shape.getPath(
                 new Position((MENU_WIDTH * -1) + 100, item.yPos - blockMenuScroll),
                 item.block.startWidth,
@@ -165,7 +176,7 @@ public class Editor extends Canvas {
             gc.stroke();
             
             Text widthCheck = new Text();
-            widthCheck.setFont(Editor.COOL_FONT);
+            widthCheck.setFont(Editor.MAIN_FONT);
 
             gc.setFill(Color.WHITE);
             gc.setStroke(item.block.category.border);
@@ -273,6 +284,10 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Draws the start button in the top right corner of the editor.
+     * @param screenWidth :  The width of the window.
+     */
     public void drawStartButton(double screenWidth) {
         // Draw Button
         if(isProgramRunning) { gc.setFill(BlockCategory.Movement.fill); gc.setStroke(BlockCategory.Movement.border); }
@@ -294,6 +309,10 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Draws a popup at the top left of the screen. The popup drawn is dependent on the PopupType.
+     * @param type :  The type of popup to display.
+     */
     public void drawPopup(PopupType type) {
         gc.setStroke(Color.rgb(255, 51, 85));
         gc.setLineWidth(2);
@@ -315,6 +334,10 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Gets the start block, and with it all the code that has been created by the user.
+     * @return The start block and all code.
+     */
     public StartBlock getStartBlock() {
         try {
             return (StartBlock)((StartBlock)blocks.get(0)).clone();
@@ -328,11 +351,6 @@ public class Editor extends Canvas {
      * @param event The event of the keypress.
      */
     public void keyPressed(KeyEvent event) {
-        // TODO: Handle Hotkeys
-        if(event.getCode() == KeyCode.ENTER) {
-            
-        }
-
         if(selectedParameter[0] == 0) { return; }
         Block block = (Block) blocks.stream().filter(s -> s.getId() == selectedParameter[0]).toArray()[0];
         Parameter parameter = block.parameters[selectedParameter[1]];
@@ -357,6 +375,11 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Handles when the mouse is pressed down. It handles the color and note picker interaction, as well as the dragging of blocks.
+     * @param eventXPos :  The x position of the mouse.
+     * @param eventYPos :  The y position of the mouse.
+     */
     public void mousePressed(double eventXPos, double eventYPos) {
         // Select a Color From the Color Picker if it's Open
         if(isColorPickerShowing) {
@@ -456,6 +479,11 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Handles when the mouse is released. It handles how the blocks interact with each other.
+     * @param eventXPos :  The x position of the mouse.
+     * @param eventYPos :  The y position of the mouse.
+     */
     public void mouseReleased(double eventXPos, double eventYPos) {
         if(currentDraggingBlock == 0) { return; }
         NestingBlock parentBlock = null;
@@ -686,11 +714,19 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Helper function to remove the parent in all blocks that are nested.
+     * @param block :  The block to turn into an orphan ;)
+     */
     private void removeParent(Block block) {
         block.parentBlock = null;
         if(block.belowBlock != null) { removeParent(block.belowBlock); }
     }
 
+    /**
+     * Helper function that deletes all blocks connected to a block.
+     * @param block :  The block to delete.
+     */
     private void deleteConnectedBlock(Block block) {
         if(block.belowBlock != null) {
             deleteConnectedBlock(block.belowBlock);
@@ -718,6 +754,11 @@ public class Editor extends Canvas {
         blocks.remove(block);
     }
 
+    /**
+     * Handles when the mouse moves. It handles the dragging of blocks.
+     * @param eventXPos :  The x position of the mouse.
+     * @param eventYPos :  The y position of the mouse.
+     */
     public void mouseMoved(double eventXPos, double eventYPos) {
         if(currentDraggingBlock == 0) { return; }
 
@@ -735,6 +776,10 @@ public class Editor extends Canvas {
         checkForConnectedBlocks(block);
     }
 
+    /**
+     * Helper function that moves all blocks connected to a block.
+     * @param block :  The block to move.
+     */
     private void checkForConnectedBlocks(Block block) {
         if(block.belowBlock != null) {
             moveConnectedBelowBlock(block.belowBlock, block.position, block.getHeight());
@@ -758,6 +803,11 @@ public class Editor extends Canvas {
         } 
     }
 
+    /**
+     * Helper function that moves all blocks connected to a child block.
+     * @param block :  The block to move.
+     * @param parameterPosition :  The position of the parameter on the parent block.
+     */
     private void moveConnectedChildBlock(Block block, Position parameterPosition) {
         // Bring Block to Front
         blocks.remove(block);
@@ -775,6 +825,12 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Helper function that moves all blocks connected to a block below another.
+     * @param block :  The block to move.
+     * @param position :  The position of the above block.
+     * @param aboveBlockHeight :  The height of the above block.
+     */
     private void moveConnectedBelowBlock(Block block, Position position, double aboveBlockHeight) {
         // Bring Block to Front
         blocks.remove(block);
@@ -788,6 +844,12 @@ public class Editor extends Canvas {
         checkForConnectedBlocks(block);
     }
 
+    /**
+     * Helper function that moves all blocks connected to a nested block.
+     * @param block :  The block to move.
+     * @param position :  The position of the parent block.
+     * @param nestingBlockHeight :  The height of the parent block.
+     */
     private void moveConnectedNestedBlock(Block block, Position position, double nestingBlockHeight) {
         // Bring Block to Front
         blocks.remove(block);
@@ -801,6 +863,11 @@ public class Editor extends Canvas {
         checkForConnectedBlocks(block);
     }
 
+    /**
+     * Handles when the mouse is clicked. It handles the menu buttons and scrolling the menu on said click.
+     * @param eventXPos :  The x position of the mouse.
+     * @param eventYPos :  The y position of the mouse.
+     */
     public void mouseClicked(double eventXPos, double eventYPos) {
         // Menu Buttons
         int yPos = 25;
@@ -815,10 +882,22 @@ public class Editor extends Canvas {
         }
     }
 
+    /**
+     * Checks if the start button was pressed, and returns whether the program should start.
+     * @param eventXPos :  The x position of the mouse.
+     * @param eventYPos :  The y position of the mouse.
+     * @param screenWidth :  The width of the window.
+     * @return Whether the start button was pressed.
+     */
     public boolean hasProgramStarted(double eventXPos, double eventYPos, double screenWidth) {
         return Math.pow(eventXPos - (50 / 2 + (screenWidth - 100)), 2) + Math.pow(eventYPos - (50 / 2 + 25), 2) <= Math.pow(50 / 2, 2);
     }
 
+    /**
+     * Handles when the mouse scrolls. It handles the menu and its scrolling.
+     * @param eventXPos :  The x position of the mouse. 
+     * @param scrollAmount :  How much was scrolled.
+     */
     public void mouseScroll(double eventXPos, double scrollAmount) {
         if(eventXPos > 75 && eventXPos < MENU_WIDTH) {
             blockMenuScroll = Math.min(Math.max(0, blockMenuScroll - scrollAmount), menuItems.lastElement().yPos);

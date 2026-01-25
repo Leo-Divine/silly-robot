@@ -6,12 +6,16 @@
 SoftwareSerial Serial1(2, 3); // RX, TX
 #endif
 
-char ssid[] = "IT-Shop"; // WiFi Name
-char pass[] = "B0n_J0v!"; // WiFi Password
+char ssid[] = "Rossini Family"; // WiFi Name
+char pass[] = "Ajgabmas171"; // WiFi Password
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.40.12"; // IP Address of Computer Running The Application
+char server[] = "192.168.68.60"; // IP Address of Computer Running The Application
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 15000L; // How Long The Robot Waits to Recieve a Command Before it Reconnects 
+
+static void getColorCallback(ColorDetectionNotifyReturn_t *colorReturn);
+
+uint8_t red = 0;
 
 WiFiEspClient client;
 Sphero sphero;
@@ -47,6 +51,7 @@ void setup()
 
 void loop()
 {
+  rvr.poll();
   String c = "";
   while (client.available()) {
     c += static_cast<char>(client.read());
@@ -60,7 +65,8 @@ void loop()
     if(c.substring(0, 5) == "R_000") {
       sphero.moveForward(c.substring(5, 8).toInt(), c.substring(8, 11).toInt());
     } else if(c.substring(0, 5) == "R_001") {
-      sphero.rotateLeft();
+      //sphero.rotateLeft();
+      client.println(red);
     } else if(c.substring(0, 5) == "R_002") {
       sphero.rotateRight();
     } else if(c.substring(0, 5) == "R_003") {
@@ -130,4 +136,8 @@ void printWifiStatus()
   Serial.print("Signal strength (RSSI):");
   Serial.print(rssi);
   Serial.println(" dBm");
+}
+
+static void getColorCallback(ColorDetectionNotifyReturn_t *colorReturn) {
+  red = colorReturn->red;
 }

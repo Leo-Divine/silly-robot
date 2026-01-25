@@ -67,6 +67,7 @@
 - [ ] Robot Discoverability
 - [x] GetSensorValue
 - [ ] Make Move Speed More Clear
+- [ ] Documentation
 
 ## Sphero
 - [ ] Create a 3D Model to Hold All Components

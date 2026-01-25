@@ -39,7 +39,6 @@ public class App extends Application {
                 canvas.drawMenus();
                 canvas.drawBlocks();
                 canvas.drawStartButton(stage.getScene().getWidth());
-
                 if(isFindingClient) { canvas.drawPopup(PopupType.FINDING_CLIENT); }
                 if(canvas.getIsProgramRunning()) { canvas.drawPopup(PopupType.PROGRAM_RUNNING); }
 
@@ -164,7 +163,7 @@ public class App extends Application {
                 leftColor = (Color)block.parameters[0].value; rightColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
                 case SetLeftColor: leftColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
                 case SetRightColor: rightColor = (Color)block.parameters[0].value; server.sendCommand(RobotCommand.SET_COLOR, new String[]{colorToString(leftColor), colorToString(rightColor)}); server.getMessage(); break;
-                case GetDistanceValue: server.sendCommand(RobotCommand.GET_SENSOR_DATA, parameters); String test = server.getMessage(); System.out.println(test); return test;
+                case GetDistanceValue: server.sendCommand(RobotCommand.GET_SENSOR_DATA, parameters); return server.getMessage();
                 case Equal: return Integer.parseInt(parameters[0]) == Integer.parseInt(parameters[1]) ? "1" : "0";
                 case Greater: return Integer.parseInt(parameters[0]) > Integer.parseInt(parameters[1]) ? "1" : "0";
                 case Less: return Integer.parseInt(parameters[0]) < Integer.parseInt(parameters[1]) ? "1" : "0";
