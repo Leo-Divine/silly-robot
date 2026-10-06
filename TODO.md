@@ -61,7 +61,7 @@
 - [x] Run Code Based on Blocks
 - [x] Set the note when you open NotePicker
 - [x] Set value block position on operand blocks when adding and removing value blocks
-- [ ] Else Text on Double Nesting
+- [ ] Else Text on Double Nesting 
 - [ ] Variables
 - [x] On Screen Information About Robot Status
 - [ ] Robot Discoverability
