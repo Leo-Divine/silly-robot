@@ -1,0 +1,25 @@
+name: Mirror main to GitLab
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # lets you trigger it manually from the Actions tab
+
+concurrency:
+  group: gitlab-mirror      # prevents two pushes from racing each other
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0    # full history; a shallow clone will fail to push
+
+      - name: Push to GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@gitlab.com/keefe-programming-project-base/silly-robot.git"
+          git push gitlab HEAD:refs/heads/main
