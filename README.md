@@ -323,9 +323,53 @@ App notices, disconnects, shows “Searching for Robot...” again
 
 ## Setup Instructions
 
+### Application Setup
+#### 0th Step
+Before anything you'll need to have the Java SDK installed. There are plenty of guides online, and Mr. Hamperton should also know.
+Install the Java SDK, and make sure you add the JAVA_HOME Environment Variable.
+
+Then you need to also install Maven. This will work with java to let you run the app.
+
+#### 1st Step
+Go into command prompt and naviagte into the project directory:
+```
+C:\Path\ToThe\Repository\silly-bot\Application\silly-bot\
+```
+
+#### 2nd Step
+To actually run the project, you can use this command:
+
+Windows:
+```
+mvn exec:java -D"exec.mainClass"="silly.bot.App"
+```
+
+Linux:
+```
+mvn exec:java -Dexec.mainClass="silly.bot.App"
+```
+
+### Arduino Setup
+The Arduino is made up of two components. An Arduino UNO R3, and a ESP8266 WiFi Shield Module. You attatch the wifi shield on top of the arduino to power it up.
+
+Arduino:
+[ Picture of Arduino ]
+
+Wifi Shield:
+[ Picture of WiFi Shield ]
+
+#### 0th Step
+Make sure you have the Arduino IDE installed.
+
+#### 1st Step
+You'll need to set up a few things in the Arduino and code. I'm hoping this is the same arduino as before, because otherwise there's probably more setup that I don't remember.
+
+
+
+
 > *This section will be filled in later.*
 >
-> Planned topics may include: installing Java / Maven, running the Application, flashing the Arduino, setting Wi‑Fi and IP address, wiring the sensor and buzzer, and connecting the Sphero RVR.
+> Planned topics may include: flashing the Arduino, setting Wi‑Fi and IP address, wiring the sensor and buzzer, and connecting the Sphero RVR.
 
 ---
 
