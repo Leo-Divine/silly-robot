@@ -9,7 +9,7 @@ SoftwareSerial Serial1(2, 3); // RX, TX
 char ssid[] = "Rossini Family"; // WiFi Name
 char pass[] = "Ajgabmas171"; // WiFi Password
 int status = WL_IDLE_STATUS;
-char server[] = "192.168.68.60"; // IP Address of Computer Running The Application
+char server[] = "192.168.68.64"; // IP Address of Computer Running The Application
 unsigned long lastConnectionTime = 0;
 const unsigned long postingInterval = 15000L; // How Long The Robot Waits to Recieve a Command Before it Reconnects 
 

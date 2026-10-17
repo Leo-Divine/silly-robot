@@ -333,7 +333,7 @@ Then you need to also install Maven. This will work with java to let you run the
 #### 1st Step
 Go into command prompt and naviagte into the project directory:
 ```
-C:\Path\ToThe\Repository\silly-bot\Application\silly-bot\
+C:\Path\ToThe\Repository\silly-robot\Application\silly-bot\
 ```
 
 #### 2nd Step
@@ -364,7 +364,22 @@ Make sure you have the Arduino IDE installed.
 #### 1st Step
 You'll need to set up a few things in the Arduino and code. I'm hoping this is the same arduino as before, because otherwise there's probably more setup that I don't remember.
 
+Go into the main arduino file in the IDE: `C:\Path\ToThe\Repository\silly-robot\Arduino\Arduino.ino`.
 
+#### 2nd Step
+You'll need to enter the WiFi name and password you plan to use. You'll need to use the same WiFi the computer running the application is using.
+
+Speaking of the computer, you'll also need to get the IP Address of the computer running the app. I think you can run the `ipconfig` command on windows to find it. If not, check your internet settings or google it.
+
+[ Picture of variables to set ]
+
+#### 3rd Step
+You'll need to configure the IDE to use the libraries. Go to File -> Preferences. A menu will pop up, and at the top should be a setting called "Sketchbook location". You're going to want to set it to `C:\Path\ToThe\Repository\silly-robot\`. Once you do that and save, close and reopen the Arduino IDE. Make sure to reopen the project.
+
+I already installed the libraries in `silly-robot\libraries` so you don't have to go through the pain of getting libraries to work. A backup zip of the Sphero Library is in the folder as well.
+
+#### 4th Step
+Plug in the arduino to the computer and you should be able to upload the code. You might need to configure which port you're using, but that I don't remember how to do.
 
 
 > *This section will be filled in later.*

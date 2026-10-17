@@ -81,6 +81,7 @@ public class App extends Application {
             if(canvas.hasProgramStarted(event.getSceneX(), event.getSceneY(), stage.getScene().getWidth())) {
                 if(canvas.getIsProgramRunning() || !isConnected) { return; }
                 canvas.setIsProgramRunning(true);
+                System.out.println("WHAT THE FUCK 2");
                 runCode = new Thread(new RunCodeTask(this), "Run-Code");
                 runCode.start();
             }
@@ -253,6 +254,7 @@ class RunCodeTask implements Runnable {
 
   @Override
   public void run() {
+    System.out.println("WHAT THE FUCK");
     app.runBlockCode(app.canvas.getStartBlock());
   }
 }

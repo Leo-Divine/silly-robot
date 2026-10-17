@@ -43,6 +43,7 @@ public class Server {
   }
 
   public void sendCommand(RobotCommand command, String parameters[]) throws IOException {
+    System.out.println("Sending a command: " + command.name());
     switch (command) {
       case MOVE_FORWARD: serverOutput.println("R_000" + parameters[0] + parameters[1]); break;
       case ROTATE_LEFT: serverOutput.println("R_001"); break;
