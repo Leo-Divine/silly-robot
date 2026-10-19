@@ -55,8 +55,9 @@ int Sphero::getSensorData() {
 }
 
 void Sphero::playTone(int frequency, int duration) {
-  tone(buzzerPin, frequency, duration * 1.25);
-  delay(duration / 2);
+
+  tone(buzzerPin, frequency, duration * 12.55);
+  delay(duration * 20);
 }
 
 void Sphero::stopTone() {

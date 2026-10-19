@@ -341,12 +341,12 @@ To actually run the project, you can use this command:
 
 Windows:
 ```
-mvn exec:java -D"exec.mainClass"="silly.bot.App"
+mvn compile exec:java -D"exec.mainClass"="silly.bot.App"
 ```
 
 Linux:
 ```
-mvn exec:java -Dexec.mainClass="silly.bot.App"
+mvn compile exec:java -Dexec.mainClass="silly.bot.App"
 ```
 
 ### Arduino Setup
@@ -376,15 +376,52 @@ Speaking of the computer, you'll also need to get the IP Address of the computer
 #### 3rd Step
 You'll need to configure the IDE to use the libraries. Go to File -> Preferences. A menu will pop up, and at the top should be a setting called "Sketchbook location". You're going to want to set it to `C:\Path\ToThe\Repository\silly-robot\`. Once you do that and save, close and reopen the Arduino IDE. Make sure to reopen the project.
 
-I already installed the libraries in `silly-robot\libraries` so you don't have to go through the pain of getting libraries to work. A backup zip of the Sphero Library is in the folder as well.
+> I already installed the libraries in `silly-robot\libraries` so you don't have to go through the pain of getting libraries to work. A backup zip of the Sphero Library is in the folder as well.
 
 #### 4th Step
 Plug in the arduino to the computer and you should be able to upload the code. You might need to configure which port you're using, but that I don't remember how to do.
 
+### Arduino Extra Setup
+All of the following info is extra setup that is not 100% required to run the project, but could be important for a number of reasons.
 
-> *This section will be filled in later.*
->
-> Planned topics may include: flashing the Arduino, setting Wi‑Fi and IP address, wiring the sensor and buzzer, and connecting the Sphero RVR.
+#### Debugging the Arduino
+If you ever need to debug the arduino and see it's logs, you can do so from the application.
+
+At the top of the IDE, go to Tools -> Serial Monitor. This brings up a console log of sorts.
+
+You'll then need to set the Baud Rate of the monitor. Around the top right of the serial monitor, there's a dropdown to select the Baud Rate. Set it to 115200, or whatever rate the sphero listens too(you should be able to set see what it is at the top of the setup function).
+
+> Remeber this concept, I know it's important to the WiFi chip somewhere. The Baud Rate is(to my best knowledge) a frequency of radio wave. I do know that different rates capture different signals.
+
+#### What TX / RX means
+I have no clue, I think it's something to do with electricity. I know it has something to do with input / output.
+
+If you ever need to mess with the WiFi shield ( please don't D: ), you might need to fix these. If you look at the code to setup the WiFi, you'll see you need to set the TX/RX.
+
+![Image of TX/RX in the Code](./Documentation%20Images/TX-RX_image.png "Image of TX/RX")
+
+You'll know what these set to by looking at the WiFi shield. There are little pieces that connect pins together, and you can see in the example they are set to 2 and 3.
+
+[Image of WiFi Shield]
+
+#### Using the breadboard to attatch multiple parts
+The funny white piece with a bunch of square holes is the breadboard.
+
+[ Picture of Breadboard ]
+
+If you're a programmer, learning to wire this fucker is like learning a new linguistic language. It's quite difficult, and if you mess it up, it can cause some pretty dangerous fuck-ups.
+
+For any of the wiring, you need to be careful. You should absolutely test any wiring you do first online. I looked up "Arduino online lab with wires" and found this website: [Cirkit Designer](https://app.cirkitdesigner.com/project).
+
+> To get an VERY basic(and most likely wrong) understanding of how electricity works: Power flows from the 5V and goes in a loop to the ground(GND). The electricity will flow through different parts (lightbulbs, speakers, etc) and can provide power as the electricity flows through.
+
+I set up the breadboard to use a parallel circuit so all the parts can also work with the other pins.
+
+
+
+#### Adding the US camera to the robot.
+
+[ Picture of US Camera ]
 
 ---
 
@@ -415,3 +452,8 @@ Good luck with this one, it's a big one.
 ### Idea 2) Robot Discoverability
 
 Right now, the arduino needs the IP address of the computer hosting the app to connect. What you could do is have the app scan the wifi for the arduino and ask it to connect/send it a request to connect to the computers IP.
+
+### Idea 3) Reseting the Applications Connection if the Arduni Disconnects Suddently
+Probably the easiest and one I should absolutly do. Normally the Arduino will send "FCKYOU" to the application, and that tells the app to reset the connection. However, the application doesn't know to reset if it never recieves a "FCKYOU".
+
+I would either have a timer that checks every minute for an active connection from the robot, and disconnects if not. You could also have a button to disconnect the robot on the application itself. Or you could do both!
