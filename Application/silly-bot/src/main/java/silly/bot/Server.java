@@ -45,7 +45,7 @@ public class Server {
   public void sendCommand(RobotCommand command, String parameters[]) throws IOException {
     System.out.println("Sending a command: " + command.name());
     switch (command) {
-      case MOVE_FORWARD: serverOutput.println("R_000" + parameters[0] + parameters[1]); break;
+      case MOVE_FORWARD: parameters[0] = Integer.parseInt(parameters[0]) >= 129 ? "128" : parameters[0]; serverOutput.println("R_000" + parameters[0] + parameters[1]); break; //Made it so max speed is 128 for safety
       case ROTATE_LEFT: serverOutput.println("R_001"); break;
       case ROTATE_RIGHT: serverOutput.println("R_002"); break;
       case SET_COLOR: serverOutput.println("R_003" + parameters[0] + parameters[1]); break;

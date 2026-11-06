@@ -1,6 +1,6 @@
 #include "Sphero.h"
 
-const int buzzerPin = 8;
+const int buzzerPin = 7;
 const int trigPin = 9;
 const int echoPin = 10;
 
@@ -16,8 +16,10 @@ void Sphero::initialize() {
 }
 
 void Sphero::moveForward(uint8_t speed, uint8_t length) {
-  rvr.rawMotors(RawMotorModes::forward, speed, RawMotorModes::forward, speed);
-  delay(1000 * length);
+  long endTime = millis() + (length * 1000);
+  while(millis() <= endTime) {
+    rvr.rawMotors(RawMotorModes::forward, speed, RawMotorModes::forward, speed);
+  }
   rvr.rawMotors(RawMotorModes::forward, 0, RawMotorModes::forward, 0);
 }
 
@@ -55,9 +57,8 @@ int Sphero::getSensorData() {
 }
 
 void Sphero::playTone(int frequency, int duration) {
-
-  tone(buzzerPin, frequency, duration * 12.55);
-  delay(duration * 20);
+  tone(buzzerPin, frequency, duration * 125.5);
+  delay(duration * 125.5);
 }
 
 void Sphero::stopTone() {

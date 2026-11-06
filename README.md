@@ -457,3 +457,7 @@ Right now, the arduino needs the IP address of the computer hosting the app to c
 Probably the easiest and one I should absolutly do. Normally the Arduino will send "FCKYOU" to the application, and that tells the app to reset the connection. However, the application doesn't know to reset if it never recieves a "FCKYOU".
 
 I would either have a timer that checks every minute for an active connection from the robot, and disconnects if not. You could also have a button to disconnect the robot on the application itself. Or you could do both!
+
+### Idea 4) Proper Music Blocks
+I was thinking of creating the music system to be based off of BPM instead of Seconds.
+For example, one block would set the BPM of the notes that are played, and then you could play a note for # beats rather than # seconds.
